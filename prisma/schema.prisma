@@ -1,0 +1,52 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Lead {
+  id                String   @id @default(cuid())
+  createdAt         DateTime @default(now())
+  name              String
+  email             String
+  company           String?
+  phone             String?
+  service           String
+  budget            String?
+  description       String
+  privacyConsent    Boolean
+  notificationSent  Boolean  @default(false)
+
+  @@index([createdAt])
+}
+
+model AnalyticsEvent {
+  id               String   @id @default(cuid())
+  eventId          String   @unique
+  createdAt        DateTime @default(now())
+  type             String
+  path             String
+  visitorKey       String
+  sessionKey       String
+  referrerCategory String?
+  deviceCategory   String?
+  consent          Boolean
+
+  @@index([createdAt, type])
+  @@index([visitorKey, createdAt])
+  @@index([sessionKey, createdAt])
+  @@index([path, createdAt])
+}
+
+model AbuseAttempt {
+  id        String   @id @default(cuid())
+  key       String
+  kind      String
+  createdAt DateTime @default(now())
+
+  @@index([key, kind, createdAt])
+  @@index([createdAt])
+}
