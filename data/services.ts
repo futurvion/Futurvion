@@ -1,0 +1,23 @@
+export interface Service {
+  slug: string;
+  number: string;
+  title: string;
+  short: string;
+  intro: string;
+  outcome: string;
+  capabilities: string[];
+  icon: "spark" | "globe" | "code" | "app" | "flow" | "chart" | "layers" | "orbit";
+}
+
+export const services: Service[] = [
+  { slug: "branding", number: "01", title: "Branding & identity", short: "Become the business people recognize and remember.", intro: "A strong brand gives every customer interaction a clear point of view. We connect your positioning, visual identity, and practical brand tools into one coherent system.", outcome: "A distinctive, consistent foundation for how your business shows up.", capabilities: ["Brand strategy and positioning", "Logo and visual identity", "Typography and color systems", "Brand guidelines", "Marketing collateral", "Brand refresh"], icon: "spark" },
+  { slug: "web-development", number: "02", title: "Websites & digital experiences", short: "Make a stronger first impression and a clearer path to action.", intro: "Your website should explain your value quickly, work beautifully on every device, and make it easy for the right people to take the next step.", outcome: "A fast, accessible digital presence built around real business goals.", capabilities: ["Business and corporate websites", "Landing pages", "E-commerce experiences", "Conversion-focused UI/UX", "Technical SEO foundations", "Maintenance planning"], icon: "globe" },
+  { slug: "custom-software", number: "03", title: "Custom software", short: "Build the tools your operations actually need.", intro: "When off-the-shelf tools create workarounds, custom software can bring your data and teams into a workflow designed for how your business runs.", outcome: "Useful, maintainable systems that remove friction from daily work.", capabilities: ["Business management systems", "CRM and internal dashboards", "Booking and scheduling", "Inventory workflows", "APIs and integrations", "Database design"], icon: "code" },
+  { slug: "mobile-app-development", number: "04", title: "Mobile & web applications", short: "Create a product people can depend on.", intro: "We shape the product journey from planning and interface design through engineering, launch, and iteration.", outcome: "An application with a clear purpose and room to evolve.", capabilities: ["Product planning", "UX and interface design", "Frontend and backend engineering", "Authentication and roles", "Deployment", "Ongoing improvements"], icon: "app" },
+  { slug: "ai-automation", number: "05", title: "Automation & AI", short: "Give your team more time for valuable work.", intro: "We identify repetitive steps, connect the right systems, and apply AI only where it offers a practical, reviewable benefit.", outcome: "More reliable workflows with appropriate human oversight.", capabilities: ["Workflow mapping", "Process automation", "AI assistants where appropriate", "Document and data processing", "Third-party integrations", "Operational reporting"], icon: "flow" },
+  { slug: "digital-marketing", number: "06", title: "Digital marketing & growth", short: "Turn attention into meaningful opportunities.", intro: "Growth starts with understanding who you need to reach, what they need to hear, and where the experience can improve.", outcome: "A measurable path from discovery to enquiry.", capabilities: ["Search engine optimization", "Content strategy", "Landing page optimization", "Analytics setup", "Lead-generation improvements", "Performance reporting"], icon: "chart" },
+  { slug: "technology-consulting", number: "07", title: "Technology consulting", short: "Make confident decisions about what to build next.", intro: "We help define priorities, select fit-for-purpose tools, and plan technical change around your people and your operations.", outcome: "A practical roadmap for technology investment and implementation.", capabilities: ["Technology selection", "Digital roadmaps", "Architecture advice", "Cloud deployment", "Security and performance review", "Implementation planning"], icon: "layers" },
+  { slug: "end-to-end-solutions", number: "08", title: "End-to-end solutions", short: "Bring the moving pieces together with one connected plan.", intro: "A brand, website, internal system, and growth program work better when they are designed to support the same business goal.", outcome: "One coordinated approach across strategy, experience, and technology.", capabilities: ["Business discovery", "Brand and website alignment", "Custom systems", "Automation", "Technical support", "Iterative improvement"], icon: "orbit" },
+];
+
+export const serviceBySlug = (slug: string) => services.find((service) => service.slug === slug);
