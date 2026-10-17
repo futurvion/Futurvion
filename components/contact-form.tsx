@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { ArrowUpRight } from "lucide-react";
 import { services } from "@/data/services";
 import { site } from "@/config/site";
@@ -8,8 +8,11 @@ import { site } from "@/config/site";
 export function ContactForm() {
   const [state, setState] = useState<"idle" | "sending" | "success" | "error" | "unavailable">("idle");
   const [message, setMessage] = useState("");
-  const [initialService, setInitialService] = useState("");
-  useEffect(() => { const value = new URLSearchParams(window.location.search).get("service"); if (value && services.some(s => s.slug === value)) setInitialService(value); }, []);
+  const [initialService, setInitialService] = useState(() => {
+    if (typeof window === "undefined") return "";
+    const value = new URLSearchParams(window.location.search).get("service");
+    return value && services.some(s => s.slug === value) ? value : "";
+  });
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = event.currentTarget;
@@ -26,7 +29,7 @@ export function ContactForm() {
   return <form className="contact-form" onSubmit={submit} noValidate>
     <div className="form-row"><label>Full name <span>*</span><input name="name" autoComplete="name" required minLength={2} maxLength={100} placeholder="Your name" /></label><label>Work email <span>*</span><input name="email" type="email" autoComplete="email" required placeholder="you@company.com" /></label></div>
     <div className="form-row"><label>Company <small>Optional</small><input name="company" autoComplete="organization" maxLength={120} placeholder="Company name" /></label><label>Phone <small>Optional</small><input name="phone" type="tel" autoComplete="tel" maxLength={30} placeholder="Phone number" /></label></div>
-    <div className="form-row"><label>I'm interested in <span>*</span><select name="service" required value={initialService} onChange={e => setInitialService(e.target.value)}><option value="" disabled>Select a service</option>{services.map(s => <option key={s.slug} value={s.slug}>{s.title}</option>)}<option value="not-sure">Not sure yet</option></select></label><label>Estimated budget <small>Optional</small><select name="budget" defaultValue=""><option value="">Prefer to discuss</option><option value="under-5k">Under $5,000</option><option value="5k-15k">$5,000–$15,000</option><option value="15k-50k">$15,000–$50,000</option><option value="50k-plus">$50,000+</option></select></label></div>
+    <div className="form-row"><label>I&apos;m interested in <span>*</span><select name="service" required value={initialService} onChange={e => setInitialService(e.target.value)}><option value="" disabled>Select a service</option>{services.map(s => <option key={s.slug} value={s.slug}>{s.title}</option>)}<option value="not-sure">Not sure yet</option></select></label><label>Estimated budget <small>Optional</small><select name="budget" defaultValue=""><option value="">Prefer to discuss</option><option value="under-5k">Under $5,000</option><option value="5k-15k">$5,000–$15,000</option><option value="15k-50k">$15,000–$50,000</option><option value="50k-plus">$50,000+</option></select></label></div>
     <label>Tell us about your project <span>*</span><textarea name="description" required minLength={20} maxLength={5000} rows={5} placeholder="What are you building or trying to improve?" /></label>
     <label className="consent-line"><input name="consent" type="checkbox" value="yes" required /><span>I agree to be contacted about my enquiry and have read the <a href="/privacy-policy">privacy policy</a>.</span></label>
     <div className="honeypot" aria-hidden="true"><label>Leave this field empty<input name="website" tabIndex={-1} autoComplete="off" /></label></div>

@@ -30,11 +30,11 @@ function send(type: "page_view" | "service_cta" | "contact_conversion", path: st
 export function AnalyticsConsent({ enabled }: { enabled: boolean }) {
   const path = usePathname();
   const [choice, setChoice] = useState<"allow" | "deny" | null>(null);
-  useEffect(() => { setChoice(localStorage.getItem(consentKey) as "allow" | "deny" | null); }, []);
+  useEffect(() => { const stored = localStorage.getItem(consentKey) as "allow" | "deny" | null; if (stored) queueMicrotask(() => setChoice(stored)); }, []);
   useEffect(() => { if (!enabled || choice !== "allow") return; if (lastPage === path && Date.now() - lastPageAt < 1500) return; lastPage = path; lastPageAt = Date.now(); send("page_view", path); }, [enabled, choice, path]);
   useEffect(() => {
     if (!enabled) return;
-    const click = (event: MouseEvent) => { const anchor = (event.target as Element).closest("a"); if (anchor && (anchor.pathname.startsWith("/services/") || anchor.searchParams?.has?.("service"))) send("service_cta", location.pathname); };
+    const click = (event: MouseEvent) => { const anchor = (event.target as Element).closest("a"); if (anchor && (anchor.pathname.startsWith("/services/") || new URL(anchor.href).searchParams.has("service"))) send("service_cta", location.pathname); };
     const conversion = () => send("contact_conversion", location.pathname);
     document.addEventListener("click", click);
     window.addEventListener("futurvion:conversion", conversion);
