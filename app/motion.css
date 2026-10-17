@@ -174,3 +174,52 @@ section[id]{scroll-margin-top:76px}
 @media(max-width:900px){.story-layout{grid-template-columns:1fr;gap:20px}.story-pin{align-items:flex-start;padding-top:28px}.story-stack{height:260px;order:-1}.story-copy p{min-height:7em}.story-layer{left:2%;right:2%}}
 .story-layer strong{transition:opacity .3s}.story-layer[data-back="true"] strong{opacity:0}
 .story-count span{white-space:nowrap}.story-dots button{width:30px}
+
+/* ---- mobile & touch refinements ---- */
+.story-dots button{height:28px;background:linear-gradient(rgba(174,72,41,.18),rgba(174,72,41,.18)) center/100% 6px no-repeat;border-radius:0}
+.story-dots button:hover{background:linear-gradient(rgba(174,72,41,.4),rgba(174,72,41,.4)) center/100% 6px no-repeat}
+.story-dots button[aria-current="true"]{background:linear-gradient(90deg,#e0673c,#e9b44c) center/100% 6px no-repeat}
+.principles-layout h2{margin-bottom:22px}
+@media(max-width:780px){
+  .eco-node{font-size:12px;min-height:38px;padding:6px 12px}
+  .ecosystem-graphic{height:360px}
+  .service-card{min-height:0;gap:2px}
+  .service-card-visual{height:56px}
+  .outcome-card{min-height:0;padding:26px 24px 30px}
+  .outcome-index{margin-bottom:16px}.outcome-card svg{margin-bottom:18px}
+  .solution-tiles a{min-height:210px}.solution-tiles h3{margin-top:48px}
+  .hero{min-height:0}.hero-copy{padding-bottom:16px}
+  .hero-bottom{display:none}
+  .marquee li{padding-block:15px;font-size:11px}
+  .final-cta h2{font-size:clamp(2.8rem,13vw,4rem)}
+  .button,.filter-row button,.text-link,.faq button{min-height:44px}
+  .story-pin{padding-top:20px}
+  .page-enter{animation-duration:.45s}
+}
+@media(max-width:540px){
+  .hero-orbit-label{display:none}
+  .hero-visual{margin-top:-10px}
+}
+@media(hover:none){
+  .service-card:hover,.work-card:hover,.solution-tiles a:hover{transform:none}
+  .button:hover:before{transform:translateX(-120%)}
+  .eco-node{animation:none}
+}
+@media(max-width:780px){
+  .service-card-links a,.work-card a,.footer-top>div>a:not(.button),.footer-bottom a{display:inline-flex;align-items:center;min-height:44px}
+  .brand{min-height:44px}
+}
+
+/* scroll story: same stacked layout on every screen size (cards on top, copy below, centered) */
+.story-pin{align-items:center}
+.story-layout{grid-template-columns:1fr;gap:clamp(8px,2.5vh,28px);justify-items:center;text-align:center}
+.story-stack{order:-1;width:min(100%,680px);height:clamp(190px,34vh,320px)}
+.story-layer{top:34%;height:52%}
+.story-copy{max-width:640px}
+.story-copy h2{font-size:clamp(2.8rem,6vw,5.5rem);margin:10px 0 12px;min-height:0}
+.story-copy p{margin-inline:auto;min-height:5.2em;font-size:clamp(15px,1.5vw,17px)}
+.story-copy .text-link{display:inline-flex}
+.story-count{justify-content:center}
+@media(max-width:900px){.story-copy p{min-height:7em}.story-stack{height:clamp(190px,30vh,260px)}}
+@media(min-width:901px){.story-copy p{min-height:3.7em;margin-bottom:14px}}
+@media(max-height:720px) and (min-width:901px){.story-stack{height:140px;margin-top:18px}.story-copy h2{font-size:clamp(2.4rem,5vw,4rem)}}
