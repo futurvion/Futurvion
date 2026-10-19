@@ -8,7 +8,7 @@ const nodes = [
   { title: "Website", text: "Create a useful digital front door for your audience." },
   { title: "Software", text: "Build tools around the work your team actually does." },
   { title: "Automation", text: "Connect steps and reduce repetitive manual work." },
-  { title: "Analytics", text: "Learn what is working with meaningful, privacy-aware measurement." },
+  { title: "Insights", text: "See what is working, with simple, privacy-friendly numbers." },
   { title: "Growth", text: "Use what you learn to decide what to improve next." },
 ];
 export function Ecosystem() {

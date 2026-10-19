@@ -25,7 +25,7 @@ export function HeroCopy() {
         <em>{accent.map((w, i) => <span key={w}><span className="word"><motion.span variants={word}>{w}</motion.span></span>{i < accent.length - 1 && " "}</span>)}<span className="period">.</span></em>
       </span>
     </h1>
-    <motion.p variants={rise}>From the first brand idea to the software behind it, Futurvion builds websites, systems and workflows that fit businesses of every size and every industry.</motion.p>
+    <motion.p variants={rise}>From the first brand idea to the software behind it, Futurvion builds websites, tools and everyday processes that fit businesses of every size and every industry.</motion.p>
     <motion.div variants={rise} className="hero-actions">
       <Link className="button button-primary" href="/contact">Let’s build your future <ArrowUpRight size={18} /></Link>
       <Link className="button button-ghost" href="/#services">Explore our services <ArrowRight size={18} /></Link>

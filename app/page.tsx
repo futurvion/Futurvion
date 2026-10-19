@@ -15,25 +15,25 @@ const outcomes = [
   { icon: Sparkles, title: "A brand worth remembering", text: "Show up with a clear story and a consistent identity wherever customers find you." },
   { icon: Globe2, title: "A stronger digital presence", text: "Turn your website and digital touchpoints into useful, welcoming experiences." },
   { icon: Workflow, title: "Less repetitive work", text: "Connect processes and tools so your people can focus on work that matters." },
-  { icon: Blocks, title: "Room to grow", text: "Build maintainable technology around the business you are becoming." },
+  { icon: Blocks, title: "Room to grow", text: "Build simple, dependable tools that grow with your business." },
 ];
 const recipe = [
   { icon: PenTool, tool: "Brand", job: "draws", text: "Identity, story and visual language: the shape people recognise before they read a word." },
-  { icon: Cpu, tool: "Technology", job: "builds", text: "Websites, apps and automations engineered to fit how your business really runs." },
+  { icon: Cpu, tool: "Technology", job: "builds", text: "Websites, apps and automations built to fit how your business really runs." },
   { icon: LineChart, tool: "Growth", job: "listens", text: "Measurement and iteration, so every release teaches you what to improve next." },
 ];
 const steps = [
   ["01", "Discover", "Understand your business, customers, goals, and constraints."],
   ["02", "Strategize", "Define priorities, scope, and how success will be measured."],
-  ["03", "Design", "Shape the brand, experience, and system architecture."],
+  ["03", "Design", "Shape how your brand, website and tools will look and work together."],
   ["04", "Develop", "Build, test, and refine the approved solution."],
-  ["05", "Launch & grow", "Deploy, learn from use, and improve over time."],
+  ["05", "Launch & grow", "Go live, learn from real use, and keep improving."],
 ];
 
 export default function Home() { return <>
   <section className="hero" id="home"><div className="hero-visual"><div className="hero-visual-glow"/><HeroVisual/></div><div className="container hero-inner"><HeroCopy/></div><div className="container hero-tags"><span><b>Brand</b> · identity that is remembered</span><span><b>Technology</b> · software that fits</span><span><b>Growth</b> · measured, then improved</span></div><div className="hero-bottom container"><span>DIGITAL SOLUTIONS FOR EVERY BUSINESS</span><span>BUILT FOR WHAT’S NEXT <MoveUpRight size={14}/></span></div></section>
 
-  <ScrollMarquee items={["Brand strategy","Websites","Custom software","Mobile & web apps","Automation","AI integration","Analytics","Digital marketing","Consulting"]}/>
+  <ScrollMarquee items={["Brand strategy","Websites","Custom software","Mobile & web apps","Automation","AI helpers","Insights","Digital marketing","Consulting"]}/>
 
   <section className="recipe-section section" id="recipe"><div className="container"><div className="section-heading split"><div><span className="eyebrow">SAME RECIPE · EVERY BUSINESS</span><h2>Same recipe,<br/><span>your own feeling.</span></h2></div><p>Three disciplines, one job each. We tune the mix to your business, so a local shop and a growing operation both get something that feels like theirs.</p></div><div className="recipe-grid">{recipe.map((r, i) => <Reveal className="recipe-card" from={i === 0 ? "left" : i === 2 ? "right" : "up"} delay={i * .08} key={r.tool}><r.icon size={26} strokeWidth={1.4}/><span className="recipe-job">{String(i + 1).padStart(2, "0")} · {r.tool} <b>{r.job}</b></span><p>{r.text}</p></Reveal>)}</div></div></section>
 
@@ -51,7 +51,7 @@ export default function Home() { return <>
 
   <section className="work-section section" id="work"><div className="container"><div className="section-heading split"><div><span className="eyebrow">06 / EXPLORATIONS</span><h2>Ideas made <span>visible.</span></h2></div><p>These are clearly labeled illustrative concepts showing how a challenge might become a considered digital solution. Client work will appear here only with permission.</p></div><WorkFilter/></div></section>
 
-  <section className="principles-section section"><div className="container principles-layout"><div><span className="eyebrow">07 / OUR APPROACH</span><h2>Thoughtful by design.<br/><span>Useful by default.</span></h2><p>Our working principles keep the focus on what your business and your customers actually need.</p></div><div className="principles-list">{["Brand and technology planned together", "Solutions shaped around your requirements", "Usable, maintainable systems", "Performance and accessibility considered early", "Clear communication at each milestone", "Support beyond launch where agreed"].map((item, i) => <div key={item}><span>0{i + 1}</span><Check size={17}/><h3>{item}</h3></div>)}</div></div></section>
+  <section className="principles-section section"><div className="container principles-layout"><div><span className="eyebrow">07 / OUR APPROACH</span><h2>Thoughtful by design.<br/><span>Useful by default.</span></h2><p>Our working principles keep the focus on what your business and your customers actually need.</p></div><div className="principles-list">{["Brand and technology planned together", "Solutions shaped around your requirements", "Simple, dependable tools", "Speed and ease of use considered from day one", "Clear communication at each milestone", "Support beyond launch where agreed"].map((item, i) => <div key={item}><span>0{i + 1}</span><Check size={17}/><h3>{item}</h3></div>)}</div></div></section>
 
   <section className="faq-section section"><div className="container faq-layout"><div><span className="eyebrow">08 / GOOD TO KNOW</span><h2>Questions, <span>answered.</span></h2><p>Have something more specific in mind? We’re happy to hear it.</p><Link className="text-link" href="/contact">Ask us directly <ArrowUpRight size={17}/></Link></div><FAQ/></div></section>
 

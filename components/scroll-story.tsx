@@ -9,8 +9,8 @@ import { palette } from "@/config/palette";
 const stages = [
   { word: "Strategy", text: "Every build starts with a clear picture of your goals, customers and constraints, so the next steps are chosen rather than guessed.", href: "/services/technology-consulting", cta: "Technology consulting" },
   { word: "Brand", text: "A recognizable identity gives your message a shape: positioning, visual language and guidelines your whole team can use.", href: "/services/branding", cta: "Branding & identity" },
-  { word: "Website", text: "A fast, welcoming website turns attention into enquiries, and is built to be found, read and maintained.", href: "/services/web-development", cta: "Website development" },
-  { word: "Software", text: "Custom tools and applications shaped around the way your team really works, not the other way round.", href: "/services/custom-software", cta: "Custom software" },
+  { word: "Website", text: "A fast, welcoming website turns visitors into enquiries, and is easy to find, easy to read and easy to keep up to date.", href: "/services/web-development", cta: "Websites" },
+  { word: "Software", text: "Custom tools and apps shaped around the way your team really works, not the other way round.", href: "/services/custom-software", cta: "Custom software" },
   { word: "Automation", text: "Connect your tools and remove repetitive hand-offs so people can spend time on work that matters.", href: "/services/ai-automation", cta: "Automation & AI" },
   { word: "Growth", text: "Measure what is working, learn from real use and keep improving, with support that continues after launch where agreed.", href: "/services/digital-marketing", cta: "Digital marketing" },
 ];
