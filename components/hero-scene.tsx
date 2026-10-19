@@ -1,132 +1,213 @@
 "use client";
 
-import { Canvas, useFrame } from "@react-three/fiber";
-import { Environment, Lightformer, MeshDistortMaterial } from "@react-three/drei";
-import { Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import Image from "next/image";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { Suspense, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import * as THREE from "three";
+import { palette } from "@/config/palette";
 
 const damp = THREE.MathUtils.damp;
 const reducedQuery = "(prefers-reduced-motion: reduce)";
-function subscribeReduced(cb: () => void) { const m = window.matchMedia(reducedQuery); m.addEventListener("change", cb); return () => m.removeEventListener("change", cb); }
+const subscribeReduced = (cb: () => void) => { const m = window.matchMedia(reducedQuery); m.addEventListener("change", cb); return () => m.removeEventListener("change", cb); };
+const noop = () => () => {};
 let webglCache: boolean | undefined;
 function hasWebGL() { if (webglCache !== undefined) return webglCache; try { const c = document.createElement("canvas"); webglCache = Boolean(c.getContext("webgl2") || c.getContext("webgl")); } catch { webglCache = false; } return webglCache; }
-const noop = () => () => {};
 const isSmall = () => window.innerWidth < 700;
 
-const palette = ["#e0673c", "#f4b183", "#e9b44c", "#b4532a", "#f7d9c0", "#d9708a"].map(c => new THREE.Color(c));
-const GOLDEN = Math.PI * (3 - Math.sqrt(5));
+const MARK_SRC = "/logo-mark.png";
+const MARK_WIDTH = 4.5;
 
-/** A sunflower-spiral disc of small spheres that ripples outward: growth as a pattern. */
-function Bloom({ small }: { small: boolean }) {
-  const count = small ? 130 : 240;
-  const mesh = useRef<THREE.InstancedMesh>(null);
-  const disc = useRef<THREE.Group>(null);
-  const seeds = useMemo(() => Array.from({ length: count }, (_, i) => {
-    const radius = 2.55 + 0.085 * Math.sqrt(i) * (small ? 1.45 : 1);
-    return { angle: i * GOLDEN, radius, size: 0.03 + (i % 7) * 0.005 + (radius - 2.55) * 0.012 };
-  }), [count, small]);
-  const dummy = useMemo(() => new THREE.Object3D(), []);
+interface Cloud { home: Float32Array; color: Float32Array; seed: Float32Array; scatter: Float32Array; count: number; height: number }
 
-  useLayoutEffect(() => {
-    const m = mesh.current; if (!m) return;
-    seeds.forEach((_, i) => m.setColorAt(i, palette[(i * 7) % palette.length]));
-    if (m.instanceColor) m.instanceColor.needsUpdate = true;
-  }, [seeds]);
+/** Reads the real logo pixels and scatters `max` points across its silhouette, keeping each pixel's own colour. */
+async function sampleLogo(max: number): Promise<Cloud> {
+  const img = new window.Image();
+  img.src = MARK_SRC;
+  await img.decode();
+  const W = 200; const H = Math.round((W * img.naturalHeight) / img.naturalWidth);
+  const canvas = document.createElement("canvas"); canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext("2d", { willReadFrequently: true })!;
+  ctx.drawImage(img, 0, 0, W, H);
+  const data = ctx.getImageData(0, 0, W, H).data;
+  const solid: number[] = [];
+  for (let i = 0; i < W * H; i++) if (data[i * 4 + 3] > 150) solid.push(i);
+  const height = (MARK_WIDTH * H) / W;
+  const home = new Float32Array(max * 3); const color = new Float32Array(max * 3); const seed = new Float32Array(max * 3); const scatter = new Float32Array(max * 3);
+  const lift = new THREE.Color(palette.emblem.lift); const c = new THREE.Color();
+  for (let n = 0; n < max; n++) {
+    const px = solid[Math.floor(Math.random() * solid.length)];
+    const x = px % W; const y = Math.floor(px / W);
+    const r = data[px * 4] / 255; const g = data[px * 4 + 1] / 255; const b = data[px * 4 + 2] / 255;
+    const lum = 0.3 * r + 0.59 * g + 0.11 * b;
+    // Dark folds of the logo would vanish under additive light, so lift them slightly toward the brand blue.
+    c.setRGB(r, g, b).lerp(lift, 0.22 * (1 - lum)).multiplyScalar(1.15);
+    home.set([((x + Math.random()) / W - 0.5) * MARK_WIDTH, (0.5 - (y + Math.random()) / H) * height, (Math.random() - 0.5) * 0.42 + (lum - 0.5) * 0.35], n * 3);
+    color.set([c.r, c.g, c.b], n * 3);
+    seed.set([Math.random(), Math.random(), Math.random()], n * 3);
+    scatter.set([Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1], n * 3);
+  }
+  return { home, color, seed, scatter, count: max, height };
+}
+
+const vertex = /* glsl */ `
+  attribute vec3 aColor;
+  attribute vec3 aSeed;
+  attribute vec3 aScatter;
+  uniform vec2 uSpread;
+  uniform vec2 uShift;
+  uniform float uTime;
+  uniform float uForm;
+  uniform float uBurst;
+  uniform float uSize;
+  uniform vec2 uPointer;
+  uniform float uPush;
+  varying vec3 vColor;
+  varying float vGlow;
+  void main() {
+    // Assemble: the points start spread across the whole screen, then each flies in to its place on the logo, on its own delay.
+    float t = clamp((uForm - aSeed.x * 0.4) / 0.6, 0.0, 1.0);
+    t = t * t * t * (t * (t * 6.0 - 15.0) + 10.0);
+    vec3 from = vec3(aScatter.xy * uSpread + uShift, aScatter.z * 3.5);
+    vec3 p = mix(from, position, t);
+    // A slight curved sweep on the way in, so they swirl rather than travel in straight lines.
+    float arc = sin(t * 3.14159265) * (1.0 - aSeed.y) * 1.1;
+    p.xy += vec2(sin(aSeed.z * 6.2831), cos(aSeed.z * 6.2831)) * arc;
+    // Breathing shimmer + gentle depth wave.
+    p += vec3(sin(uTime * 0.9 + aSeed.y * 30.0), cos(uTime * 0.8 + aSeed.z * 24.0), sin(uTime * 0.7 + aSeed.x * 18.0)) * 0.018;
+    p.z += sin(p.y * 2.4 + uTime * 1.3) * 0.05;
+    // The cursor pushes nearby points away; they spring back when it leaves.
+    vec2 away = p.xy - uPointer;
+    float d = length(away);
+    float push = smoothstep(1.25, 0.0, d) * uPush;
+    p.xy += normalize(away + 0.0001) * push * 0.55;
+    p.z += push * (aSeed.z - 0.3) * 0.9;
+    // Click burst: everything exhales outward, then returns.
+    p += normalize(position + 0.0001) * uBurst * (0.5 + aSeed.z * 1.4);
+    // A band of light sweeps across the mark.
+    float sweep = sin(uTime * 0.7) * 2.1;
+    vGlow = smoothstep(0.38, 0.0, abs(p.x * 0.8 + p.y * 0.35 - sweep)) + push * 0.6;
+    vColor = aColor;
+    vec4 mv = modelViewMatrix * vec4(p, 1.0);
+    gl_Position = projectionMatrix * mv;
+    gl_PointSize = uSize * (0.55 + aSeed.y * 0.75) * (1.0 + vGlow * 0.9) / -mv.z;
+  }
+`;
+const fragment = /* glsl */ `
+  varying vec3 vColor;
+  varying float vGlow;
+  void main() {
+    float d = length(gl_PointCoord - 0.5);
+    if (d > 0.5) discard;
+    float a = smoothstep(0.5, 0.05, d);
+    gl_FragColor = vec4(vColor + vGlow * 0.55, a * (0.78 + vGlow * 0.5));
+  }
+`;
+
+/** The Futurvion mark, drawn in points of light: it assembles, parts for your cursor, sweeps with light, and bursts on click. */
+function Emblem({ small, compact }: { small: boolean; compact: boolean }) {
+  const root = useRef<THREE.Group>(null);
+  const ringA = useRef<THREE.Group>(null);
+  const ringB = useRef<THREE.Group>(null);
+  const material = useRef<THREE.ShaderMaterial>(null);
+  const burst = useRef(-10_000);
+  const start = useRef<number | null>(null);
+  const viewport = useThree(s => s.viewport);
+  const dpr = useThree(s => s.gl.getPixelRatio());
+  const [cloud, setCloud] = useState<Cloud | null>(null);
+  const count = small || compact ? 3800 : 8000;
+
+  useEffect(() => { let alive = true; sampleLogo(count).then(c => { if (alive) setCloud(c); }).catch(() => {}); return () => { alive = false; }; }, [count]);
+
+  const geometry = useMemo(() => {
+    if (!cloud) return null;
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.BufferAttribute(cloud.home, 3));
+    g.setAttribute("aColor", new THREE.BufferAttribute(cloud.color, 3));
+    g.setAttribute("aSeed", new THREE.BufferAttribute(cloud.seed, 3));
+    g.setAttribute("aScatter", new THREE.BufferAttribute(cloud.scatter, 3));
+    return g;
+  }, [cloud]);
+  const initial = useMemo(() => ({ uTime: { value: 0 }, uForm: { value: 0 }, uBurst: { value: 0 }, uSize: { value: 30 }, uPointer: { value: new THREE.Vector2(99, 99) }, uPush: { value: 0 }, uSpread: { value: new THREE.Vector2(8, 5) }, uShift: { value: new THREE.Vector2(0, 0) } }), []);
+  const narrow = useSyncExternalStore(noop, () => window.innerWidth < 900, () => false);
+  // Real mouse only: R3F reports (0,0) before the first move, which would carve a hole in the centre on load.
+  const mouse = useRef({ x: 0, y: 0, active: false });
+  const hit = useRef<{ x: number; y: number; at: number } | null>(null);
+  const gl = useThree(s => s.gl);
+  useEffect(() => {
+    const move = (e: PointerEvent) => {
+      if (e.pointerType !== "mouse") return;
+      const r = gl.domElement.getBoundingClientRect();
+      mouse.current.x = ((e.clientX - r.left) / r.width) * 2 - 1; mouse.current.y = -(((e.clientY - r.top) / r.height) * 2 - 1); mouse.current.active = true;
+    };
+    const leave = () => { mouse.current.active = false; };
+    const click = (e: MouseEvent) => {
+      if ((e.target as Element | null)?.closest?.("a, button, input, select, textarea, summary")) return;
+      const r = gl.domElement.getBoundingClientRect();
+      const nx = ((e.clientX - r.left) / r.width) * 2 - 1; const ny = -(((e.clientY - r.top) / r.height) * 2 - 1);
+      if (Math.abs(nx) > 1 || Math.abs(ny) > 1) return;
+      hit.current = { x: nx, y: ny, at: performance.now() };
+    };
+    window.addEventListener("click", click);
+    window.addEventListener("pointermove", move, { passive: true });
+    document.documentElement.addEventListener("mouseleave", leave);
+    return () => { window.removeEventListener("click", click); window.removeEventListener("pointermove", move); document.documentElement.removeEventListener("mouseleave", leave); };
+  }, [gl]);
 
   useFrame(({ clock }, delta) => {
-    const m = mesh.current; if (!m) return;
     const t = clock.elapsedTime;
-    if (disc.current) disc.current.rotation.z += delta * 0.07;
-    seeds.forEach((s, i) => {
-      const wave = Math.sin(s.radius * 2.1 - t * 1.5 + s.angle * 0.3);
-      dummy.position.set(Math.cos(s.angle) * s.radius, Math.sin(s.angle) * s.radius, wave * 0.26);
-      dummy.scale.setScalar(s.size * (1 + wave * 0.35));
-      dummy.updateMatrix();
-      m.setMatrixAt(i, dummy.matrix);
-    });
-    m.instanceMatrix.needsUpdate = true;
+    const r = root.current; if (!r) return;
+    const m = mouse.current;
+    // The canvas fills the whole hero; the emblem sits on the right (or near the top on narrow screens).
+    const anchorX = narrow ? 0 : viewport.width * (compact ? 0.27 : 0.235); const anchorY = narrow ? viewport.height * 0.2 : 0;
+    const fit = Math.min(1.08, viewport.height / 5.6, (narrow ? viewport.width : viewport.width * 0.5) / 5.8) * (compact ? 0.85 : 1);
+    r.scale.setScalar(damp(r.scale.x, fit, 4, delta));
+    const s = r.scale.x || 1;
+    r.position.x = anchorX; r.position.y = anchorY + Math.sin(t * 0.8) * 0.08;
+    const wx = m.active ? (m.x * viewport.width) / 2 : anchorX; const wy = m.active ? (m.y * viewport.height) / 2 : anchorY;
+    const px = THREE.MathUtils.clamp((wx - anchorX) / (viewport.width * 0.3), -1.2, 1.2); const py = THREE.MathUtils.clamp((wy - anchorY) / (viewport.height * 0.5), -1.2, 1.2);
+    r.rotation.y = damp(r.rotation.y, px * 0.5 + Math.sin(t * 0.45) * 0.22, 2.6, delta);
+    r.rotation.x = damp(r.rotation.x, -py * 0.3 + Math.sin(t * 0.35) * 0.06, 2.6, delta);
+    const u = material.current?.uniforms;
+    if (u) {
+      if (start.current === null) start.current = t;
+      const age = Math.min((performance.now() - burst.current) / 1500, 1);
+      u.uTime.value = t;
+      u.uForm.value = Math.min((t - start.current) / 3.2, 1);
+      const h = hit.current;
+      if (h) { const dx = (h.x * viewport.width) / 2 - anchorX; const dy = (h.y * viewport.height) / 2 - anchorY; if (Math.hypot(dx, dy) < 2.6 * s) burst.current = h.at; hit.current = null; }
+      u.uBurst.value = age < 1 ? Math.sin(age * Math.PI) * 0.9 : 0;
+      (u.uSpread.value as THREE.Vector2).set((viewport.width * 0.55) / s, (viewport.height * 0.55) / s);
+      (u.uShift.value as THREE.Vector2).set(-anchorX / s, -anchorY / s);
+      u.uSize.value = (small ? 26 : 32) * dpr;
+      u.uPush.value = damp(u.uPush.value, m.active && Math.abs(m.x) < 1 && Math.abs(m.y) < 1 ? 1 : 0, 4, delta);
+      (u.uPointer.value as THREE.Vector2).set((wx - anchorX) / s, (wy - anchorY) / s);
+    }
+    if (ringA.current) ringA.current.rotation.z += delta * 0.25;
+    if (ringB.current) ringB.current.rotation.z -= delta * 0.16;
   });
 
-  return <group ref={disc} rotation={[0, 0, 0]}>
-    <instancedMesh ref={mesh} args={[undefined, undefined, count]}>
-      <sphereGeometry args={[1, 14, 14]} />
-      <meshStandardMaterial roughness={0.32} metalness={0.15} />
-    </instancedMesh>
+  const satellite = (angle: number, radius: number, color: string, size: number) => <mesh position={[Math.cos(angle) * radius, Math.sin(angle) * radius, 0]}><sphereGeometry args={[size, 12, 12]} /><meshBasicMaterial color={color} toneMapped={false} /></mesh>;
+
+  return <group ref={root} scale={0.001}>
+    {geometry && <points geometry={geometry} frustumCulled={false}>
+      <shaderMaterial ref={material} vertexShader={vertex} fragmentShader={fragment} uniforms={initial} transparent depthWrite={false} blending={THREE.AdditiveBlending} />
+    </points>}
+    <group ref={ringA} rotation={[1.15, 0.2, 0]}>
+      <mesh><torusGeometry args={[3.05, 0.006, 6, 200]} /><meshBasicMaterial color={palette.emblem.ringA} transparent opacity={0.3} /></mesh>
+      {satellite(0.6, 3.05, palette.emblem.ringA, 0.06)}{satellite(3.7, 3.05, palette.emblem.ringB, 0.04)}
+    </group>
+    <group ref={ringB} rotation={[-0.55, -0.35, 0.4]}>
+      <mesh><torusGeometry args={[3.5, 0.005, 6, 220]} /><meshBasicMaterial color={palette.emblem.ringB} transparent opacity={0.22} /></mesh>
+      {satellite(2.2, 3.5, palette.emblem.ringB, 0.055)}{satellite(5.4, 3.5, palette.emblem.ringA, 0.04)}
+    </group>
   </group>;
 }
 
-function Rings() {
-  const a = useRef<THREE.Mesh>(null);
-  const b = useRef<THREE.Mesh>(null);
-  useFrame((_, delta) => { if (a.current) a.current.rotation.z += delta * 0.18; if (b.current) b.current.rotation.z -= delta * 0.12; });
-  return <>
-    <mesh ref={a} rotation={[0.25, 0.3, 0]}><torusGeometry args={[2.3, 0.012, 8, 200]} /><meshStandardMaterial color="#b4532a" roughness={0.4} metalness={0.6} /></mesh>
-    <mesh ref={b} rotation={[-0.2, -0.35, 0]}><torusGeometry args={[3.9, 0.008, 8, 220]} /><meshStandardMaterial color="#e9b44c" roughness={0.4} metalness={0.6} transparent opacity={0.7} /></mesh>
-  </>;
-}
-
-function Drift({ small }: { small: boolean }) {
-  const count = small ? 18 : 34;
-  const mesh = useRef<THREE.InstancedMesh>(null);
-  const items = useMemo(() => Array.from({ length: count }, (_, i) => {
-    const a = i * GOLDEN * 1.7; const r = 3.2 + ((i * 53) % 37) / 37 * 2.2; const y = (((i * 31) % 29) / 29 - 0.5) * 5.4;
-    return { x: Math.cos(a) * r, y, z: Math.sin(a) * r - 1.5, s: 0.045 + ((i * 17) % 11) / 11 * 0.07, p: i * 0.9 };
-  }), [count]);
-  const dummy = useMemo(() => new THREE.Object3D(), []);
-  useLayoutEffect(() => { const m = mesh.current; if (!m) return; items.forEach((_, i) => m.setColorAt(i, palette[i % palette.length])); if (m.instanceColor) m.instanceColor.needsUpdate = true; }, [items]);
-  useFrame(({ clock }) => {
-    const m = mesh.current; if (!m) return;
-    items.forEach((it, i) => { dummy.position.set(it.x, it.y + Math.sin(clock.elapsedTime * 0.6 + it.p) * 0.25, it.z); dummy.scale.setScalar(it.s); dummy.updateMatrix(); m.setMatrixAt(i, dummy.matrix); });
-    m.instanceMatrix.needsUpdate = true;
-  });
-  return <instancedMesh ref={mesh} args={[undefined, undefined, count]}><icosahedronGeometry args={[1, 0]} /><meshStandardMaterial roughness={0.4} metalness={0.1} /></instancedMesh>;
-}
-
-function World({ small }: { small: boolean }) {
-  const root = useRef<THREE.Group>(null);
-  const blob = useRef<THREE.Mesh>(null);
-  const mat = useRef<{ distort: number; speed: number } | null>(null);
-  const hovered = useRef(false);
-  const pulse = useRef(-10_000);
-
-  useFrame(({ clock, pointer, camera }, delta) => {
-    const t = clock.elapsedTime;
-    const scroll = Math.min(window.scrollY / 800, 1);
-    if (root.current) {
-      root.current.rotation.y = damp(root.current.rotation.y, pointer.x * 0.4 + scroll * 0.8, 3, delta);
-      root.current.rotation.x = damp(root.current.rotation.x, -pointer.y * 0.25 - 0.45 + scroll * 0.3, 3, delta);
-      root.current.position.y = damp(root.current.position.y, Math.sin(t * 0.7) * 0.12 - scroll * 0.9, 4, delta);
-      root.current.scale.setScalar(damp(root.current.scale.x, 1 - scroll * 0.2, 4, delta));
-    }
-    const age = Math.min((performance.now() - pulse.current) / 1200, 1);
-    const kick = age < 1 ? Math.sin(age * Math.PI) * 0.35 : 0;
-    if (mat.current) {
-      mat.current.distort = damp(mat.current.distort, (hovered.current ? 0.52 : 0.38) + kick, 4, delta);
-      mat.current.speed = damp(mat.current.speed, hovered.current ? 3 : 1.5, 3, delta);
-    }
-    if (blob.current) { blob.current.rotation.y += delta * 0.15; blob.current.scale.setScalar(damp(blob.current.scale.x, hovered.current ? 1.06 : 1, 4, delta)); }
-    camera.position.x = damp(camera.position.x, pointer.x * 0.4, 2.5, delta);
-    camera.position.y = damp(camera.position.y, pointer.y * 0.25, 2.5, delta);
-    camera.lookAt(0, 0, 0);
-  });
-
-  return <group ref={root} onPointerOver={() => { hovered.current = true; document.body.style.cursor = "pointer"; }} onPointerOut={() => { hovered.current = false; document.body.style.cursor = ""; }} onClick={() => { pulse.current = performance.now(); }}>
-    <mesh ref={blob}>
-      <icosahedronGeometry args={[1.95, small ? 24 : 40]} />
-      <MeshDistortMaterial ref={mat as never} color="#dc5a32" distort={0.38} speed={1.5} roughness={0.2} metalness={0.2} clearcoat={1} clearcoatRoughness={0.1} envMapIntensity={0.85} />
-    </mesh>
-    <mesh scale={0.62}><icosahedronGeometry args={[1.95, 5]} /><meshStandardMaterial color="#fff0dc" emissive="#ffd9a8" emissiveIntensity={0.9} roughness={0.5} transparent opacity={0.35} /></mesh>
-    <Bloom small={small} />
-    <Rings />
-    <Drift small={small} />
-  </group>;
-}
-
-function Scene() {
+function Scene({ compact }: { compact: boolean }) {
   const small = useSyncExternalStore(noop, isSmall, () => false);
   const wrap = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(true);
-  // Pause rendering entirely while the hero is scrolled out of view.
+  // Pause rendering entirely while the emblem is scrolled out of view.
   useEffect(() => {
     const el = wrap.current; if (!el) return;
     const io = new IntersectionObserver(([e]) => setVisible(e.isIntersecting));
@@ -135,25 +216,23 @@ function Scene() {
   }, []);
   return <div ref={wrap} className="hero-canvas" aria-hidden="true">
     <Suspense fallback={<div className="orb-fallback" />}>
-      <Canvas frameloop={visible ? "always" : "never"} dpr={[1, small ? 1.25 : 1.6]} camera={{ position: [0, 0, 11.5], fov: 40 }} gl={{ alpha: true, antialias: !small, powerPreference: "high-performance" }}>
-        <ambientLight intensity={0.7} />
-        <directionalLight position={[4, 5, 6]} intensity={2.2} color="#fff1e0" />
-        <directionalLight position={[-5, -2, 3]} intensity={1.1} color="#ffb199" />
-        <Environment resolution={128} frames={1}>
-          <mesh scale={50}><sphereGeometry args={[1, 16, 16]} /><meshBasicMaterial color="#f1d3bb" side={THREE.BackSide} /></mesh>
-          <Lightformer form="rect" intensity={3.2} position={[4, 4, 5]} scale={[7, 4, 1]} color="#fff6ea" />
-          <Lightformer form="rect" intensity={2} position={[-6, 1, 3]} scale={[3, 6, 1]} color="#ffc9a8" />
-          <Lightformer form="ring" intensity={2.2} position={[0, -4, 3]} scale={5} color="#ffe2b8" />
-        </Environment>
-        <World small={small} />
+      <Canvas frameloop={visible ? "always" : "never"} dpr={[1, small ? 1.5 : 2]} camera={{ position: [0, 0, 9], fov: 35 }} gl={{ alpha: true, antialias: true, powerPreference: "high-performance" }}>
+        <Emblem small={small} compact={compact} />
       </Canvas>
     </Suspense>
   </div>;
 }
 
-export function HeroScene() {
+/** Static stand-in: used without WebGL and for reduced motion. */
+function EmblemFallback() {
+  return <div className="orb-fallback" role="img" aria-label="Futurvion emblem"><Image src={MARK_SRC} alt="" width={512} height={451} /></div>;
+}
+
+export function HeroScene({ compact = false }: { compact?: boolean }) {
   const reduced = useSyncExternalStore(subscribeReduced, () => window.matchMedia(reducedQuery).matches, () => true);
   const webgl = useSyncExternalStore(noop, hasWebGL, () => false);
-  if (!webgl || reduced) return <div className="orb-fallback" role="img" aria-label="Abstract warm glowing sphere"><div className="orb-fallback-core"/><div className="orb-ring orb-ring-one"/><div className="orb-ring orb-ring-two"/></div>;
-  return <Scene />;
+  const tooSmall = useSyncExternalStore(noop, () => compact && window.innerWidth < 900, () => false);
+  if (tooSmall) return null;
+  if (!webgl || reduced) return <EmblemFallback />;
+  return <Scene compact={compact} />;
 }

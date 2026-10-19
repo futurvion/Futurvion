@@ -18,11 +18,11 @@ const configuredUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://futurvion.exa
 
 export const site: SiteConfig = {
   name: "Futurvion",
-  tagline: "One partner for your brand, technology, and business growth.",
-  description: "Branding, digital experiences, custom software, and smarter workflows for ambitious businesses.",
+  tagline: "Digital Solutions for every business",
+  description: "Digital Solutions for every business: branding, websites, custom software, and smarter workflows that fit businesses of every size.",
   url: configuredUrl.replace(/\/$/, ""),
   email: process.env.NEXT_PUBLIC_BUSINESS_EMAIL || "hello@futurvion.example",
-  logo: "/logo.svg",
+  logo: "/logo-mark.png",
   bookingUrl: process.env.NEXT_PUBLIC_BOOKING_URL || undefined,
   socials: [],
   navigation: [
@@ -39,8 +39,8 @@ export const site: SiteConfig = {
     { label: "Terms", href: "/terms" },
   ],
   seo: {
-    title: "Futurvion | Brand, technology & business growth",
-    description: "Futurvion brings brand strategy, modern websites, custom software, and automation together to help growing businesses move forward.",
+    title: "Futurvion | Digital Solutions for every business",
+    description: "Futurvion is a digital solutions studio: brand strategy, modern websites, custom software, and automation for businesses of every size and industry.",
     image: "/og-image.svg",
   },
 };

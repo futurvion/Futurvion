@@ -4,15 +4,18 @@ import Link from "next/link";
 import { useRef, useState } from "react";
 import { AnimatePresence, motion, useMotionValueEvent, useReducedMotion, useScroll } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
+import { palette } from "@/config/palette";
 
 const stages = [
-  { word: "Strategy", text: "Every build starts with a clear picture of your goals, customers and constraints, so the next steps are chosen rather than guessed.", href: "/services/technology-consulting", cta: "Technology consulting", bg: "#f7d9c0", fg: "#4a2a1c" },
-  { word: "Brand", text: "A recognizable identity gives your message a shape: positioning, visual language and guidelines your whole team can use.", href: "/services/branding", cta: "Branding & identity", bg: "#f4b183", fg: "#3f2014" },
-  { word: "Website", text: "A fast, welcoming website turns attention into enquiries, and is built to be found, read and maintained.", href: "/services/web-development", cta: "Website development", bg: "#e9b44c", fg: "#3a2a0c" },
-  { word: "Software", text: "Custom tools and applications shaped around the way your team really works, not the other way round.", href: "/services/custom-software", cta: "Custom software", bg: "#e0673c", fg: "#fff6ee" },
-  { word: "Automation", text: "Connect your tools and remove repetitive hand-offs so people can spend time on work that matters.", href: "/services/ai-automation", cta: "Automation & AI", bg: "#b4532a", fg: "#fff6ee" },
-  { word: "Growth", text: "Measure what is working, learn from real use and keep improving, with support that continues after launch where agreed.", href: "/services/digital-marketing", cta: "Digital marketing", bg: "#d9708a", fg: "#fff6ee" },
+  { word: "Strategy", text: "Every build starts with a clear picture of your goals, customers and constraints, so the next steps are chosen rather than guessed.", href: "/services/technology-consulting", cta: "Technology consulting" },
+  { word: "Brand", text: "A recognizable identity gives your message a shape: positioning, visual language and guidelines your whole team can use.", href: "/services/branding", cta: "Branding & identity" },
+  { word: "Website", text: "A fast, welcoming website turns attention into enquiries, and is built to be found, read and maintained.", href: "/services/web-development", cta: "Website development" },
+  { word: "Software", text: "Custom tools and applications shaped around the way your team really works, not the other way round.", href: "/services/custom-software", cta: "Custom software" },
+  { word: "Automation", text: "Connect your tools and remove repetitive hand-offs so people can spend time on work that matters.", href: "/services/ai-automation", cta: "Automation & AI" },
+  { word: "Growth", text: "Measure what is working, learn from real use and keep improving, with support that continues after launch where agreed.", href: "/services/digital-marketing", cta: "Digital marketing" },
 ];
+
+const tone = (i: number) => { const [from, to, text] = palette.story[i % palette.story.length]; return { bg: `linear-gradient(135deg,${from},${to})`, fg: text }; };
 
 export function ScrollStory() {
   const ref = useRef<HTMLElement>(null);
@@ -49,7 +52,7 @@ export function ScrollStory() {
           {stages.map((s, i) => {
             const depth = active - i;
             const shown = depth >= 0;
-            return <motion.div key={s.word} className="story-layer" data-back={depth > 0} style={{ background: s.bg, color: s.fg, zIndex: i }} initial={false}
+            return <motion.div key={s.word} className="story-layer" data-back={depth > 0} style={{ background: tone(i).bg, color: tone(i).fg, zIndex: i }} initial={false}
               animate={{ opacity: shown ? Math.max(0, 1 - depth * 0.12) : 0, y: shown ? -depth * 34 : 90, scale: shown ? 1 - depth * 0.05 : 0.92, rotateX: shown ? 8 : 0 }}
               transition={reduced ? { duration: 0 } : { type: "spring", stiffness: 140, damping: 20 }}>
               <span>0{i + 1}</span><strong>{s.word}</strong>
