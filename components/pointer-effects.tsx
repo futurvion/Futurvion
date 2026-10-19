@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 
-const glowSelector = ".service-card, .outcome-card, .work-card, .solution-tiles a, .capability-card";
+const glowSelector = ".service-card, .outcome-card, .work-card, .solution-tiles a, .capability-card, .recipe-card, .sector-card";
 
 /**
  * One delegated listener drives every pointer-reactive effect through CSS variables:

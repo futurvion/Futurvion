@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
+import { PageHero } from "@/components/page-hero";
 import { pageMetadata } from "@/lib/seo";
 export const metadata = pageMetadata("Solutions by business type", "Explore practical brand, website, software, and automation opportunities for different businesses.", "/solutions");
 const sectors = [
@@ -12,4 +13,4 @@ const sectors = [
   ["local", "Local businesses", "Make it easier for nearby customers to find, understand, and contact your business."],
   ["operations", "Growing operations", "Replace disconnected spreadsheets and manual handoffs with systems designed for your workflow."],
 ];
-export default function SolutionsPage() { return <><section className="inner-hero"><div className="container"><span className="eyebrow">SOLUTIONS</span><h1>Built for your <em>reality.</em></h1><p>Different teams face different challenges. These examples show possibilities to explore, not a preset package.</p></div></section><section className="page-section"><div className="container sector-grid">{sectors.map(([id,title,description],i) => <article className="sector-card" id={id} key={id}><span>{String(i+1).padStart(2,"0")} / BUSINESS TYPE</span><h2>{title}</h2><p>{description}</p><Link className="text-link" href="/contact">Get a tailored recommendation <ArrowUpRight size={16}/></Link></article>)}</div></section></>; }
+export default function SolutionsPage() { return <><PageHero eyebrow="SOLUTIONS" title={<>Built for your <em>business.</em></>}><p>Digital Solutions for every business. These examples show possibilities to explore, not a preset package.</p></PageHero><section className="page-section"><div className="container sector-grid">{sectors.map(([id,title,description],i) => <article className="sector-card" id={id} key={id}><span>{String(i+1).padStart(2,"0")} / BUSINESS TYPE</span><h2>{title}</h2><p>{description}</p><Link className="text-link" href="/contact">Get a tailored recommendation <ArrowUpRight size={16}/></Link></article>)}</div></section></>; }
