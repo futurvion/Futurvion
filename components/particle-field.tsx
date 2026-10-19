@@ -17,8 +17,8 @@ function rng(seed: number) { return () => { seed |= 0; seed = (seed + 0x6d2b79f5
 
 /** Every point owns a home position in each shape; scrolling swarms them from one home to the next. */
 const shapeBuilders: ((i: number, n: number, r: () => number) => [number, number, number])[] = [
-  // 0 · a wide spiral galaxy
-  (i, n, r) => { const arm = i % 3; const d = Math.sqrt(r()) * 6; const a = d * 0.95 + (arm * Math.PI * 2) / 3 + (r() - 0.5) * 0.55; return [Math.cos(a) * d, (r() - 0.5) * 0.35 * (1 - d / 8), Math.sin(a) * d]; },
+  // 0 · calm, structureless dust (keeps the hero emblem the only focal point)
+  (i, n, r) => [(r() - 0.5) * 17, (r() - 0.5) * 9.5, (r() - 0.5) * 7],
   // 1 · a sphere (brand: one recognisable form)
   (i, n) => { const y = 1 - (i / (n - 1)) * 2; const rad = Math.sqrt(1 - y * y); const a = i * GOLDEN; return [Math.cos(a) * rad * 3.1, y * 3.1, Math.sin(a) * rad * 3.1]; },
   // 2 · a torus (loops, workflows, automation)
@@ -102,9 +102,11 @@ function Points({ progress, count, size, reduced }: { progress: MotionValue<numb
       (a.array as Float32Array).set(shapes[seg]); (b.array as Float32Array).set(shapes[seg + 1]);
       a.needsUpdate = true; b.needsUpdate = true;
     }
-    const u = material.current?.uniforms; if (u) { u.uMix.value = Math.min(current.current - seg, 1); u.uTime.value = reduced ? 0 : clock.elapsedTime; }
+    // Dim while the hero is on screen, then bring the field up as you scroll into the page.
+    const fade = 0.3 + 0.7 * THREE.MathUtils.smoothstep(current.current, 0.04, 0.5);
+    const u = material.current?.uniforms; if (u) { u.uOpacity.value = 0.7 * fade; u.uMix.value = Math.min(current.current - seg, 1); u.uTime.value = reduced ? 0 : clock.elapsedTime; }
     const g = group.current; if (!g) return;
-    const tilt = THREE.MathUtils.lerp(0.95, 0.18, Math.min(current.current, 1));
+    const tilt = 0.18;
     g.rotation.x = THREE.MathUtils.damp(g.rotation.x, tilt - pointer.y * 0.12, 2.5, delta);
     g.rotation.y += reduced ? 0 : delta * 0.05;
     g.rotation.z = THREE.MathUtils.damp(g.rotation.z, -pointer.x * 0.08, 2.5, delta);

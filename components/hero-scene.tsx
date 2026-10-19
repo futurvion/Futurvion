@@ -1,9 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import * as THREE from "three";
-import { palette, toGlsl } from "@/config/palette";
+import { palette } from "@/config/palette";
 
 const damp = THREE.MathUtils.damp;
 const reducedQuery = "(prefers-reduced-motion: reduce)";
@@ -13,135 +14,192 @@ let webglCache: boolean | undefined;
 function hasWebGL() { if (webglCache !== undefined) return webglCache; try { const c = document.createElement("canvas"); webglCache = Boolean(c.getContext("webgl2") || c.getContext("webgl")); } catch { webglCache = false; } return webglCache; }
 const isSmall = () => window.innerWidth < 700;
 
-const orbVertex = /* glsl */ `
+const MARK_SRC = "/logo-mark.png";
+const MARK_WIDTH = 4.5;
+
+interface Cloud { home: Float32Array; color: Float32Array; seed: Float32Array; scatter: Float32Array; count: number; height: number }
+
+/** Reads the real logo pixels and scatters `max` points across its silhouette, keeping each pixel's own colour. */
+async function sampleLogo(max: number): Promise<Cloud> {
+  const img = new window.Image();
+  img.src = MARK_SRC;
+  await img.decode();
+  const W = 200; const H = Math.round((W * img.naturalHeight) / img.naturalWidth);
+  const canvas = document.createElement("canvas"); canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext("2d", { willReadFrequently: true })!;
+  ctx.drawImage(img, 0, 0, W, H);
+  const data = ctx.getImageData(0, 0, W, H).data;
+  const solid: number[] = [];
+  for (let i = 0; i < W * H; i++) if (data[i * 4 + 3] > 150) solid.push(i);
+  const height = (MARK_WIDTH * H) / W;
+  const home = new Float32Array(max * 3); const color = new Float32Array(max * 3); const seed = new Float32Array(max * 3); const scatter = new Float32Array(max * 3);
+  const lift = new THREE.Color(palette.emblem.lift); const c = new THREE.Color();
+  for (let n = 0; n < max; n++) {
+    const px = solid[Math.floor(Math.random() * solid.length)];
+    const x = px % W; const y = Math.floor(px / W);
+    const r = data[px * 4] / 255; const g = data[px * 4 + 1] / 255; const b = data[px * 4 + 2] / 255;
+    const lum = 0.3 * r + 0.59 * g + 0.11 * b;
+    // Dark folds of the logo would vanish under additive light, so lift them slightly toward the brand blue.
+    c.setRGB(r, g, b).lerp(lift, 0.22 * (1 - lum)).multiplyScalar(1.15);
+    home.set([((x + Math.random()) / W - 0.5) * MARK_WIDTH, (0.5 - (y + Math.random()) / H) * height, (Math.random() - 0.5) * 0.42 + (lum - 0.5) * 0.35], n * 3);
+    color.set([c.r, c.g, c.b], n * 3);
+    seed.set([Math.random(), Math.random(), Math.random()], n * 3);
+    scatter.set([Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1], n * 3);
+  }
+  return { home, color, seed, scatter, count: max, height };
+}
+
+const vertex = /* glsl */ `
+  attribute vec3 aColor;
+  attribute vec3 aSeed;
+  attribute vec3 aScatter;
+  uniform vec2 uSpread;
+  uniform vec2 uShift;
   uniform float uTime;
-  uniform float uAmp;
-  varying vec3 vNormal;
-  varying vec3 vView;
-  varying float vNoise;
-  // Ashima 3D simplex noise
-  vec3 mod289(vec3 x){return x-floor(x*(1.0/289.0))*289.0;}
-  vec4 mod289(vec4 x){return x-floor(x*(1.0/289.0))*289.0;}
-  vec4 permute(vec4 x){return mod289(((x*34.0)+10.0)*x);}
-  vec4 taylorInvSqrt(vec4 r){return 1.79284291400159-0.85373472095314*r;}
-  float snoise(vec3 v){
-    const vec2 C=vec2(1.0/6.0,1.0/3.0); const vec4 D=vec4(0.0,0.5,1.0,2.0);
-    vec3 i=floor(v+dot(v,C.yyy)); vec3 x0=v-i+dot(i,C.xxx);
-    vec3 g=step(x0.yzx,x0.xyz); vec3 l=1.0-g; vec3 i1=min(g.xyz,l.zxy); vec3 i2=max(g.xyz,l.zxy);
-    vec3 x1=x0-i1+C.xxx; vec3 x2=x0-i2+C.yyy; vec3 x3=x0-D.yyy;
-    i=mod289(i);
-    vec4 p=permute(permute(permute(i.z+vec4(0.0,i1.z,i2.z,1.0))+i.y+vec4(0.0,i1.y,i2.y,1.0))+i.x+vec4(0.0,i1.x,i2.x,1.0));
-    float n_=0.142857142857; vec3 ns=n_*D.wyz-D.xzx;
-    vec4 j=p-49.0*floor(p*ns.z*ns.z); vec4 x_=floor(j*ns.z); vec4 y_=floor(j-7.0*x_);
-    vec4 x=x_*ns.x+ns.yyyy; vec4 y=y_*ns.x+ns.yyyy; vec4 h=1.0-abs(x)-abs(y);
-    vec4 b0=vec4(x.xy,y.xy); vec4 b1=vec4(x.zw,y.zw);
-    vec4 s0=floor(b0)*2.0+1.0; vec4 s1=floor(b1)*2.0+1.0; vec4 sh=-step(h,vec4(0.0));
-    vec4 a0=b0.xzyw+s0.xzyw*sh.xxyy; vec4 a1=b1.xzyw+s1.xzyw*sh.zzww;
-    vec3 p0=vec3(a0.xy,h.x); vec3 p1=vec3(a0.zw,h.y); vec3 p2=vec3(a1.xy,h.z); vec3 p3=vec3(a1.zw,h.w);
-    vec4 norm=taylorInvSqrt(vec4(dot(p0,p0),dot(p1,p1),dot(p2,p2),dot(p3,p3)));
-    p0*=norm.x; p1*=norm.y; p2*=norm.z; p3*=norm.w;
-    vec4 m=max(0.5-vec4(dot(x0,x0),dot(x1,x1),dot(x2,x2),dot(x3,x3)),0.0); m=m*m;
-    return 105.0*dot(m*m,vec4(dot(p0,x0),dot(p1,x1),dot(p2,x2),dot(p3,x3)));
-  }
-  void main(){
-    float n = snoise(normal * 1.35 + vec3(0.0, uTime * 0.22, uTime * 0.1));
-    float n2 = snoise(normal * 3.2 - uTime * 0.35);
-    float d = n * (0.1 + uAmp * 0.2) + n2 * 0.02 * (1.0 + uAmp * 2.0);
-    vec3 p = position + normal * d;
-    vNoise = n;
-    vNormal = normalize(normalMatrix * normal);
+  uniform float uForm;
+  uniform float uBurst;
+  uniform float uSize;
+  uniform vec2 uPointer;
+  uniform float uPush;
+  varying vec3 vColor;
+  varying float vGlow;
+  void main() {
+    // Assemble: the points start spread across the whole screen, then each flies in to its place on the logo, on its own delay.
+    float t = clamp((uForm - aSeed.x * 0.4) / 0.6, 0.0, 1.0);
+    t = t * t * t * (t * (t * 6.0 - 15.0) + 10.0);
+    vec3 from = vec3(aScatter.xy * uSpread + uShift, aScatter.z * 3.5);
+    vec3 p = mix(from, position, t);
+    // A slight curved sweep on the way in, so they swirl rather than travel in straight lines.
+    float arc = sin(t * 3.14159265) * (1.0 - aSeed.y) * 1.1;
+    p.xy += vec2(sin(aSeed.z * 6.2831), cos(aSeed.z * 6.2831)) * arc;
+    // Breathing shimmer + gentle depth wave.
+    p += vec3(sin(uTime * 0.9 + aSeed.y * 30.0), cos(uTime * 0.8 + aSeed.z * 24.0), sin(uTime * 0.7 + aSeed.x * 18.0)) * 0.018;
+    p.z += sin(p.y * 2.4 + uTime * 1.3) * 0.05;
+    // The cursor pushes nearby points away; they spring back when it leaves.
+    vec2 away = p.xy - uPointer;
+    float d = length(away);
+    float push = smoothstep(1.25, 0.0, d) * uPush;
+    p.xy += normalize(away + 0.0001) * push * 0.55;
+    p.z += push * (aSeed.z - 0.3) * 0.9;
+    // Click burst: everything exhales outward, then returns.
+    p += normalize(position + 0.0001) * uBurst * (0.5 + aSeed.z * 1.4);
+    // A band of light sweeps across the mark.
+    float sweep = sin(uTime * 0.7) * 2.1;
+    vGlow = smoothstep(0.38, 0.0, abs(p.x * 0.8 + p.y * 0.35 - sweep)) + push * 0.6;
+    vColor = aColor;
     vec4 mv = modelViewMatrix * vec4(p, 1.0);
-    vView = -mv.xyz;
     gl_Position = projectionMatrix * mv;
+    gl_PointSize = uSize * (0.55 + aSeed.y * 0.75) * (1.0 + vGlow * 0.9) / -mv.z;
   }
 `;
-const orbFragment = /* glsl */ `
-  uniform float uAmp;
-  varying vec3 vNormal;
-  varying vec3 vView;
-  varying float vNoise;
-  void main(){
-    vec3 n = normalize(vNormal); vec3 v = normalize(vView);
-    float fres = pow(1.0 - max(dot(n, v), 0.0), 2.4);
-    float shade = vNoise * 0.5 + 0.5;
-    vec3 deep = ${toGlsl(palette.orb.deep)};
-    vec3 mid = ${toGlsl(palette.orb.mid)};
-    vec3 hot = ${toGlsl(palette.orb.hot)};
-    vec3 col = mix(deep, mid, smoothstep(0.1, 0.75, shade));
-    col = mix(col, hot, smoothstep(0.62, 1.0, shade) * 0.55);
-    float light = pow(max(dot(n, normalize(vec3(-0.5, 0.65, 0.6))), 0.0), 1.6);
-    col += ${toGlsl(palette.orb.light)} * light * 0.5;
-    col += mix(${toGlsl(palette.orb.rimA)}, ${toGlsl(palette.orb.rimB)}, vNoise * 0.5 + 0.5) * fres * (0.65 + uAmp * 0.5);
-    float spot = pow(max(dot(n, normalize(vec3(-0.3, 0.5, 0.8))), 0.0), 120.0);
-    col += ${toGlsl(palette.orb.highlight)} * spot * 0.6;
-    gl_FragColor = vec4(col, 1.0);
+const fragment = /* glsl */ `
+  varying vec3 vColor;
+  varying float vGlow;
+  void main() {
+    float d = length(gl_PointCoord - 0.5);
+    if (d > 0.5) discard;
+    float a = smoothstep(0.5, 0.05, d);
+    gl_FragColor = vec4(vColor + vGlow * 0.55, a * (0.78 + vGlow * 0.5));
   }
 `;
 
-/** The talking orb: a noise-shaded sphere that breathes, ringed by ticks that move like a voice. */
-function Orb({ small, compact }: { small: boolean; compact: boolean }) {
+/** The Futurvion mark, drawn in points of light: it assembles, parts for your cursor, sweeps with light, and bursts on click. */
+function Emblem({ small, compact }: { small: boolean; compact: boolean }) {
   const root = useRef<THREE.Group>(null);
-  const orb = useRef<THREE.Mesh>(null);
-  const ticks = useRef<THREE.InstancedMesh>(null);
-  const hovered = useRef(false);
-  const burst = useRef(-10_000);
-  const viewport = useThree(s => s.viewport);
-  const count = small || compact ? 84 : 132;
+  const ringA = useRef<THREE.Group>(null);
+  const ringB = useRef<THREE.Group>(null);
   const material = useRef<THREE.ShaderMaterial>(null);
-  const initial = useMemo(() => ({ uTime: { value: 0 }, uAmp: { value: 0 } }), []);
-  const dummy = useMemo(() => new THREE.Object3D(), []);
-  const amp = useRef(0.4);
+  const burst = useRef(-10_000);
+  const start = useRef<number | null>(null);
+  const viewport = useThree(s => s.viewport);
+  const dpr = useThree(s => s.gl.getPixelRatio());
+  const [cloud, setCloud] = useState<Cloud | null>(null);
+  const count = small || compact ? 3800 : 8000;
 
-  useLayoutEffect(() => {
-    const m = ticks.current; if (!m) return;
-    const a = new THREE.Color(palette.ticks.from); const b = new THREE.Color(palette.ticks.to); const c = new THREE.Color();
-    for (let i = 0; i < count; i++) { const k = Math.abs(Math.sin((i / count) * Math.PI * 3)); m.setColorAt(i, c.copy(a).lerp(b, k)); }
-    if (m.instanceColor) m.instanceColor.needsUpdate = true;
-  }, [count]);
+  useEffect(() => { let alive = true; sampleLogo(count).then(c => { if (alive) setCloud(c); }).catch(() => {}); return () => { alive = false; }; }, [count]);
 
-  useFrame(({ clock, pointer }, delta) => {
+  const geometry = useMemo(() => {
+    if (!cloud) return null;
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.BufferAttribute(cloud.home, 3));
+    g.setAttribute("aColor", new THREE.BufferAttribute(cloud.color, 3));
+    g.setAttribute("aSeed", new THREE.BufferAttribute(cloud.seed, 3));
+    g.setAttribute("aScatter", new THREE.BufferAttribute(cloud.scatter, 3));
+    return g;
+  }, [cloud]);
+  const initial = useMemo(() => ({ uTime: { value: 0 }, uForm: { value: 0 }, uBurst: { value: 0 }, uSize: { value: 30 }, uPointer: { value: new THREE.Vector2(99, 99) }, uPush: { value: 0 }, uSpread: { value: new THREE.Vector2(8, 5) }, uShift: { value: new THREE.Vector2(0, 0) } }), []);
+  const narrow = useSyncExternalStore(noop, () => window.innerWidth < 900, () => false);
+  // Real mouse only: R3F reports (0,0) before the first move, which would carve a hole in the centre on load.
+  const mouse = useRef({ x: 0, y: 0, active: false });
+  const hit = useRef<{ x: number; y: number; at: number } | null>(null);
+  const gl = useThree(s => s.gl);
+  useEffect(() => {
+    const move = (e: PointerEvent) => {
+      if (e.pointerType !== "mouse") return;
+      const r = gl.domElement.getBoundingClientRect();
+      mouse.current.x = ((e.clientX - r.left) / r.width) * 2 - 1; mouse.current.y = -(((e.clientY - r.top) / r.height) * 2 - 1); mouse.current.active = true;
+    };
+    const leave = () => { mouse.current.active = false; };
+    const click = (e: MouseEvent) => {
+      if ((e.target as Element | null)?.closest?.("a, button, input, select, textarea, summary")) return;
+      const r = gl.domElement.getBoundingClientRect();
+      const nx = ((e.clientX - r.left) / r.width) * 2 - 1; const ny = -(((e.clientY - r.top) / r.height) * 2 - 1);
+      if (Math.abs(nx) > 1 || Math.abs(ny) > 1) return;
+      hit.current = { x: nx, y: ny, at: performance.now() };
+    };
+    window.addEventListener("click", click);
+    window.addEventListener("pointermove", move, { passive: true });
+    document.documentElement.addEventListener("mouseleave", leave);
+    return () => { window.removeEventListener("click", click); window.removeEventListener("pointermove", move); document.documentElement.removeEventListener("mouseleave", leave); };
+  }, [gl]);
+
+  useFrame(({ clock }, delta) => {
     const t = clock.elapsedTime;
-    const age = Math.min((performance.now() - burst.current) / 1400, 1);
-    const kick = age < 1 ? Math.sin(age * Math.PI) : 0;
-    // A speech-like envelope: slow phrases with quicker syllables on top.
-    const speech = 0.5 + 0.5 * Math.sin(t * 1.3) * Math.sin(t * 0.47 + 1.2);
-    const goal = 0.28 + speech * 0.45 + (hovered.current ? 0.25 : 0) + kick * 0.5;
-    amp.current = damp(amp.current, goal, 5, delta);
-    const u = material.current?.uniforms; if (u) { u.uTime.value = t; u.uAmp.value = amp.current; }
-
-    const m = ticks.current;
-    if (m) {
-      const inner = 1.78; const step = (Math.PI * 2) / count;
-      for (let i = 0; i < count; i++) {
-        const a = i * step;
-        const voice = Math.abs(Math.sin(i * 0.37 + t * 2.4) * Math.sin(i * 0.113 - t * 1.5)) * 0.65 + Math.abs(Math.sin(i * 1.7 + t * 5)) * 0.35;
-        const len = 0.12 + voice * amp.current * 1.05;
-        dummy.position.set(Math.cos(a) * (inner + len / 2), Math.sin(a) * (inner + len / 2), 0);
-        dummy.rotation.set(0, 0, a - Math.PI / 2);
-        dummy.scale.set(1, len, 1);
-        dummy.updateMatrix(); m.setMatrixAt(i, dummy.matrix);
-      }
-      m.instanceMatrix.needsUpdate = true;
-      m.rotation.z += delta * 0.04;
-    }
-    if (orb.current) { orb.current.scale.setScalar(1 + amp.current * 0.05); orb.current.rotation.y += delta * 0.12; }
     const r = root.current; if (!r) return;
-    r.rotation.y = damp(r.rotation.y, pointer.x * 0.35, 3, delta);
-    r.rotation.x = damp(r.rotation.x, -pointer.y * 0.25, 3, delta);
-    r.scale.setScalar(damp(r.scale.x, Math.min(1, viewport.width / 5.6, viewport.height / 5.6) * (compact ? 1 : 1.04), 4, delta));
+    const m = mouse.current;
+    // The canvas fills the whole hero; the emblem sits on the right (or near the top on narrow screens).
+    const anchorX = narrow ? 0 : viewport.width * (compact ? 0.27 : 0.235); const anchorY = narrow ? viewport.height * 0.2 : 0;
+    const fit = Math.min(1.08, viewport.height / 5.6, (narrow ? viewport.width : viewport.width * 0.5) / 5.8) * (compact ? 0.85 : 1);
+    r.scale.setScalar(damp(r.scale.x, fit, 4, delta));
+    const s = r.scale.x || 1;
+    r.position.x = anchorX; r.position.y = anchorY + Math.sin(t * 0.8) * 0.08;
+    const wx = m.active ? (m.x * viewport.width) / 2 : anchorX; const wy = m.active ? (m.y * viewport.height) / 2 : anchorY;
+    const px = THREE.MathUtils.clamp((wx - anchorX) / (viewport.width * 0.3), -1.2, 1.2); const py = THREE.MathUtils.clamp((wy - anchorY) / (viewport.height * 0.5), -1.2, 1.2);
+    r.rotation.y = damp(r.rotation.y, px * 0.5 + Math.sin(t * 0.45) * 0.22, 2.6, delta);
+    r.rotation.x = damp(r.rotation.x, -py * 0.3 + Math.sin(t * 0.35) * 0.06, 2.6, delta);
+    const u = material.current?.uniforms;
+    if (u) {
+      if (start.current === null) start.current = t;
+      const age = Math.min((performance.now() - burst.current) / 1500, 1);
+      u.uTime.value = t;
+      u.uForm.value = Math.min((t - start.current) / 3.2, 1);
+      const h = hit.current;
+      if (h) { const dx = (h.x * viewport.width) / 2 - anchorX; const dy = (h.y * viewport.height) / 2 - anchorY; if (Math.hypot(dx, dy) < 2.6 * s) burst.current = h.at; hit.current = null; }
+      u.uBurst.value = age < 1 ? Math.sin(age * Math.PI) * 0.9 : 0;
+      (u.uSpread.value as THREE.Vector2).set((viewport.width * 0.55) / s, (viewport.height * 0.55) / s);
+      (u.uShift.value as THREE.Vector2).set(-anchorX / s, -anchorY / s);
+      u.uSize.value = (small ? 26 : 32) * dpr;
+      u.uPush.value = damp(u.uPush.value, m.active && Math.abs(m.x) < 1 && Math.abs(m.y) < 1 ? 1 : 0, 4, delta);
+      (u.uPointer.value as THREE.Vector2).set((wx - anchorX) / s, (wy - anchorY) / s);
+    }
+    if (ringA.current) ringA.current.rotation.z += delta * 0.25;
+    if (ringB.current) ringB.current.rotation.z -= delta * 0.16;
   });
 
-  return <group ref={root} scale={0.001} onPointerOver={() => { hovered.current = true; document.body.style.cursor = "pointer"; }} onPointerOut={() => { hovered.current = false; document.body.style.cursor = ""; }} onClick={() => { burst.current = performance.now(); }}>
-    <mesh ref={orb}>
-      <icosahedronGeometry args={[1.3, small || compact ? 28 : 48]} />
-      <shaderMaterial ref={material} vertexShader={orbVertex} fragmentShader={orbFragment} uniforms={initial} />
-    </mesh>
-    <instancedMesh ref={ticks} args={[undefined, undefined, count]} frustumCulled={false}>
-      <boxGeometry args={[0.026, 1, 0.02]} />
-      <meshBasicMaterial toneMapped={false} transparent opacity={0.7} />
-    </instancedMesh>
-    <mesh><torusGeometry args={[2.95, 0.004, 6, 160]} /><meshBasicMaterial color={palette.ticks.ring} transparent opacity={0.16} /></mesh>
-    <mesh scale={1.55}><sphereGeometry args={[1.3, 24, 24]} /><meshBasicMaterial color={palette.orb.glow} transparent opacity={0.04} depthWrite={false} side={THREE.BackSide} /></mesh>
+  const satellite = (angle: number, radius: number, color: string, size: number) => <mesh position={[Math.cos(angle) * radius, Math.sin(angle) * radius, 0]}><sphereGeometry args={[size, 12, 12]} /><meshBasicMaterial color={color} toneMapped={false} /></mesh>;
+
+  return <group ref={root} scale={0.001}>
+    {geometry && <points geometry={geometry} frustumCulled={false}>
+      <shaderMaterial ref={material} vertexShader={vertex} fragmentShader={fragment} uniforms={initial} transparent depthWrite={false} blending={THREE.AdditiveBlending} />
+    </points>}
+    <group ref={ringA} rotation={[1.15, 0.2, 0]}>
+      <mesh><torusGeometry args={[3.05, 0.006, 6, 200]} /><meshBasicMaterial color={palette.emblem.ringA} transparent opacity={0.3} /></mesh>
+      {satellite(0.6, 3.05, palette.emblem.ringA, 0.06)}{satellite(3.7, 3.05, palette.emblem.ringB, 0.04)}
+    </group>
+    <group ref={ringB} rotation={[-0.55, -0.35, 0.4]}>
+      <mesh><torusGeometry args={[3.5, 0.005, 6, 220]} /><meshBasicMaterial color={palette.emblem.ringB} transparent opacity={0.22} /></mesh>
+      {satellite(2.2, 3.5, palette.emblem.ringB, 0.055)}{satellite(5.4, 3.5, palette.emblem.ringA, 0.04)}
+    </group>
   </group>;
 }
 
@@ -149,7 +207,7 @@ function Scene({ compact }: { compact: boolean }) {
   const small = useSyncExternalStore(noop, isSmall, () => false);
   const wrap = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(true);
-  // Pause rendering entirely while the orb is scrolled out of view.
+  // Pause rendering entirely while the emblem is scrolled out of view.
   useEffect(() => {
     const el = wrap.current; if (!el) return;
     const io = new IntersectionObserver(([e]) => setVisible(e.isIntersecting));
@@ -159,17 +217,22 @@ function Scene({ compact }: { compact: boolean }) {
   return <div ref={wrap} className="hero-canvas" aria-hidden="true">
     <Suspense fallback={<div className="orb-fallback" />}>
       <Canvas frameloop={visible ? "always" : "never"} dpr={[1, small ? 1.5 : 2]} camera={{ position: [0, 0, 9], fov: 35 }} gl={{ alpha: true, antialias: true, powerPreference: "high-performance" }}>
-        <Orb small={small} compact={compact} />
+        <Emblem small={small} compact={compact} />
       </Canvas>
     </Suspense>
   </div>;
 }
 
+/** Static stand-in: used without WebGL and for reduced motion. */
+function EmblemFallback() {
+  return <div className="orb-fallback" role="img" aria-label="Futurvion emblem"><Image src={MARK_SRC} alt="" width={512} height={451} /></div>;
+}
+
 export function HeroScene({ compact = false }: { compact?: boolean }) {
   const reduced = useSyncExternalStore(subscribeReduced, () => window.matchMedia(reducedQuery).matches, () => true);
   const webgl = useSyncExternalStore(noop, hasWebGL, () => false);
-  const tooSmall = useSyncExternalStore(noop, () => compact && window.innerWidth < 760, () => false);
+  const tooSmall = useSyncExternalStore(noop, () => compact && window.innerWidth < 900, () => false);
   if (tooSmall) return null;
-  if (!webgl || reduced) return <div className="orb-fallback" role="img" aria-label="Abstract glowing orb"><div className="orb-fallback-core" /><div className="orb-ring orb-ring-one" /><div className="orb-ring orb-ring-two" /></div>;
+  if (!webgl || reduced) return <EmblemFallback />;
   return <Scene compact={compact} />;
 }

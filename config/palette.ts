@@ -23,8 +23,8 @@ export const palette = {
   surfaceRaised: "#070a18", // nav pills, popovers
   surfaceDeep: "#04060e", // footer, header, overlays
   ink: "#eef2ff", // main text
-  muted: "#9aa5c4", // body copy
-  dim: "#646f91", // labels and captions
+  muted: "#b4bdd8", // body copy
+  dim: "#8f9bc0", // labels and captions
   line: "#8caaff", // hairline borders (drawn very transparent)
   white: "#ffffff",
 
@@ -34,19 +34,12 @@ export const palette = {
   danger: "#ff5a46",
   dangerText: "#ffc2b8",
 
-  // The talking orb (3D)
-  orb: {
-    deep: "#030512", // shadow side
-    mid: "#0f2a8c", // body
-    hot: "#6b38d9", // violet noise highlights
-    light: "#1f59cc", // key-light wash
-    rimA: "#1ad0ff", // fresnel rim, cool end
-    rimB: "#9e4dff", // fresnel rim, warm end
-    highlight: "#ccf2ff", // small specular dot
-    glow: "#3a6bff", // soft halo behind the orb
+  // The hero emblem (the logo drawn in points of light)
+  emblem: {
+    lift: "#4f8bff", // dark folds of the logo are lifted toward this so they stay visible
+    ringA: "#7fd8ff", // orbit ring + satellites, cool
+    ringB: "#9a4dff", // orbit ring + satellites, violet
   },
-  // The ring of voice ticks around the orb
-  ticks: { from: "#22d6ff", to: "#9a4dff", ring: "#7fd8ff" },
   // Particle field: points blend cyan → blue → violet
   particles: { a: "#1ad1ff", b: "#3b6bff", c: "#a64dff" },
 
@@ -83,7 +76,6 @@ export function paletteCss() {
     bg: palette.background, surface: palette.surface, "surface-raised": palette.surfaceRaised, "surface-deep": palette.surfaceDeep,
     ink: palette.ink, muted: palette.muted, dim: palette.dim, "line-base": palette.line, white: palette.white,
     success: palette.success, "success-text": palette.successText, danger: palette.danger, "danger-text": palette.dangerText,
-    "orb-deep": palette.orb.deep, "orb-mid": palette.orb.mid,
   };
   const vars = Object.entries(flat).flatMap(([k, v]) => [`--${k}:${v}`, `--${k}-rgb:${hexToRgbTriplet(v)}`]);
   vars.push(
