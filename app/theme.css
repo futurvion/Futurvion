@@ -381,9 +381,9 @@ h2 span { color: var(--dim); }
   .site-header, .header-inner { height: 68px; }
   .desktop-nav { display: none; }
   .menu-toggle { display: flex; align-items: center; justify-content: center; width: 42px; height: 42px; color: var(--ink); }
-  .mobile-nav { display: grid; position: fixed; top: 68px; left: 0; right: 0; bottom: 0; height: calc(100dvh - 68px); align-content: start; gap: 2px; padding: 24px 18px calc(24px + env(safe-area-inset-bottom)); background: rgb(var(--bg-rgb) / 0.98); backdrop-filter: blur(20px); overscroll-behavior: contain; opacity: 0; visibility: hidden; transform: translateY(-8px); transition: opacity 0.3s, transform 0.3s, visibility 0.3s; overflow-y: auto; }
+  .mobile-nav { display: grid; position: absolute; top: 100%; left: 0; right: 0; width: 100%; box-sizing: border-box; height: calc(100dvh - 68px); grid-template-columns: minmax(0, 1fr); align-content: start; gap: 2px; padding: 24px 18px calc(24px + env(safe-area-inset-bottom)); background: rgb(var(--bg-rgb) / 0.98); backdrop-filter: blur(20px); overscroll-behavior: contain; opacity: 0; visibility: hidden; transform: translateY(-8px); transition: opacity 0.3s, transform 0.3s, visibility 0.3s; overflow-y: auto; }
   .mobile-nav.is-open { opacity: 1; visibility: visible; transform: none; }
-  .mobile-nav a { display: flex; justify-content: space-between; align-items: center; padding: 18px 4px; border-bottom: 1px solid var(--line); font-family: var(--display); font-size: 1.6rem; letter-spacing: -0.03em; }
+  .mobile-nav a { min-width: 0; display: flex; justify-content: space-between; align-items: center; padding: 18px 4px; border-bottom: 1px solid var(--line); font-family: var(--display); font-size: 1.6rem; letter-spacing: -0.03em; }
   .mobile-nav a svg { color: var(--accent); }
   .mobile-nav .mobile-book { margin-top: 20px; justify-content: center; gap: 8px; border: 0; border-radius: 999px; background: var(--accent); color: var(--on-accent); font-family: var(--mono); font-size: 13px; }
   .mobile-nav .mobile-book svg { color: var(--on-accent); }
