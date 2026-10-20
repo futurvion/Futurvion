@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState } from "react";
-import { AnimatePresence, motion, useMotionValueEvent, useReducedMotion, useScroll } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion, useIsPresent, useMotionValueEvent, useReducedMotion, useScroll } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import { palette } from "@/config/palette";
 import { StoryArtwork, type StoryArtworkKind } from "./story-artwork";
@@ -18,50 +18,85 @@ const stages: { word: string; text: string; href: string; cta: string; artwork: 
 
 const tone = (i: number) => { const [from, to, text] = palette.story[i % palette.story.length]; return { bg: `linear-gradient(135deg,${from},${to})`, fg: text }; };
 
+function StoryPanel({ index, direction, artwork = false, reduced }: { index: number; direction: number; artwork?: boolean; reduced: boolean }) {
+  const stage = stages[index];
+  const present = useIsPresent();
+  return <motion.div className={artwork ? "story-layer" : "story-stage-content"} data-active="true"
+    inert={!present} aria-hidden={!present || artwork}
+    custom={direction}
+    variants={{
+      enter: { opacity: 0, y: reduced ? 0 : direction * (artwork ? 18 : 10), scale: artwork && !reduced ? 0.985 : 1 },
+      visible: { opacity: 1, y: 0, scale: 1, transition: { duration: reduced ? 0 : 0.45, ease: [0.22, 1, 0.36, 1] } },
+      exit: (scrollDirection: number) => ({ opacity: 0, y: reduced ? 0 : -scrollDirection * 8, scale: artwork && !reduced ? 0.99 : 1, transition: { duration: reduced ? 0 : 0.18, ease: [0.4, 0, 1, 1] } }),
+    }}
+    initial="enter" animate="visible" exit="exit"
+    style={artwork ? { background: tone(index).bg, color: tone(index).fg } : undefined}>
+    {artwork ? <>
+      <div className="story-layer-top"><span>0{index + 1} / 0{stages.length}</span><span>Connected capability</span></div>
+      <StoryArtwork kind={stage.artwork} />
+      <div className="story-layer-bottom"><strong>{stage.word}</strong><span>Futurvion</span></div>
+    </> : <>
+      <h2>{stage.word}<span>.</span></h2>
+      <p>{stage.text}</p>
+      <Link className="text-link" href={stage.href}>{stage.cta} <ArrowUpRight size={17} /></Link>
+    </>}
+  </motion.div>;
+}
+
 export function ScrollStory() {
   const ref = useRef<HTMLElement>(null);
   const reduced = useReducedMotion();
   const [active, setActive] = useState(0);
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end end"] });
-  useMotionValueEvent(scrollYProgress, "change", v => setActive(Math.max(0, Math.min(stages.length - 1, Math.floor(v * stages.length)))));
+  const activeRef = useRef(0);
+  const [direction, setDirection] = useState(1);
+  const [headerHeight, setHeaderHeight] = useState(78);
+  useEffect(() => {
+    const header = document.querySelector(".site-header");
+    if (!header) return;
+    const observer = new ResizeObserver(() => setHeaderHeight(header.getBoundingClientRect().height));
+    observer.observe(header);
+    return () => observer.disconnect();
+  }, []);
+  const { scrollYProgress } = useScroll({ target: ref, offset: [`start ${headerHeight}px`, "end end"] });
+  useMotionValueEvent(scrollYProgress, "change", v => {
+    // A small dead zone prevents trackpad jitter from repeatedly replaying a reveal.
+    const current = activeRef.current;
+    const next = Math.max(0, Math.min(stages.length - 1, Math.floor(v * stages.length)));
+    if (next === current) return;
+    const boundary = (next > current ? current + 1 : current) / stages.length;
+    if (Math.abs(v - boundary) < 0.008) return;
+    setDirection(next > current ? 1 : -1);
+    activeRef.current = next;
+    setActive(next);
+  });
 
   function jump(index: number) {
     const el = ref.current; if (!el) return;
-    const scrollable = el.offsetHeight - window.innerHeight;
-    window.scrollTo({ top: el.offsetTop + ((index + 0.5) / stages.length) * scrollable, behavior: reduced ? "auto" : "smooth" });
+    const start = window.scrollY + el.getBoundingClientRect().top - headerHeight;
+    const scrollable = el.offsetHeight - window.innerHeight + headerHeight;
+    window.scrollTo({ top: start + ((index + 0.5) / stages.length) * scrollable, behavior: reduced ? "auto" : "smooth" });
   }
 
-  const stage = stages[active];
-  return <section ref={ref} className="story" style={{ height: `${stages.length * 55 + 45}vh` }} aria-labelledby="story-title">
+  return <section ref={ref} className="story" style={{ height: `${stages.length * 60 + 100}svh` }} aria-labelledby="story-title">
     <h2 className="story-static-title" id="story-title">Connected capabilities from idea to growth</h2>
     <div className="story-pin">
       <div className="container story-layout">
         <div className="story-copy">
           <span className="eyebrow">Connected capabilities / From idea to growth</span>
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div key={stage.word} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={reduced ? undefined : { opacity: 0, y: -16 }} transition={reduced ? { duration: 0 } : { duration: 0.35, ease: [0.2, 0.8, 0.2, 1] }}>
-              <h2>{stage.word}<span>.</span></h2>
-              <p>{stage.text}</p>
-              <Link className="text-link" href={stage.href}>{stage.cta} <ArrowUpRight size={17} /></Link>
-            </motion.div>
-          </AnimatePresence>
+          <div className="story-stage">
+            <AnimatePresence mode="wait" initial={false} custom={direction}>
+            <StoryPanel key={active} index={active} direction={direction} reduced={Boolean(reduced)} />
+            </AnimatePresence>
+          </div>
           <div className="story-count">
             <span>0{active + 1} / 0{stages.length}</span>
             <div className="story-dots">{stages.map((s, i) => <button key={s.word} type="button" aria-label={`Show ${s.word} stage`} aria-pressed={i === active} onClick={() => jump(i)} />)}</div>
           </div>
         </div>
         <div className="story-stack" aria-hidden="true">
-          {stages.map((s, i) => {
-            const depth = active - i;
-            const shown = depth >= 0;
-            return <motion.div key={s.word} className="story-layer" data-active={depth === 0} style={{ background: tone(i).bg, color: tone(i).fg, zIndex: i }} initial={false}
-              animate={{ opacity: shown ? Math.max(0, 1 - depth * 0.1) : 0, y: shown ? -depth * 14 : 70 }}
-              transition={reduced ? { duration: 0 } : { type: "spring", stiffness: 110, damping: 24 }}>
-              <div className="story-layer-top"><span>0{i + 1} / 0{stages.length}</span><span>Connected capability</span></div>
-              <StoryArtwork kind={s.artwork} />
-              <div className="story-layer-bottom"><strong>{s.word}</strong><span>Futurvion</span></div>
-            </motion.div>;
-          })}
+          <AnimatePresence mode="wait" initial={false} custom={direction}>
+          <StoryPanel key={active} index={active} direction={direction} artwork reduced={Boolean(reduced)} />
+          </AnimatePresence>
         </div>
       </div>
     </div>
