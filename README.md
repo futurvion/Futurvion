@@ -81,3 +81,4 @@ After deploying, add `futurvion.in` as a **Domain property** in [Google Search C
 - No Playwright end-to-end or axe accessibility tests yet (unit tests cover validation and SEO helpers).
 - No authenticated analytics dashboard (intentionally, rather than an unprotected one).
 - Rate limiting is DB-backed and keyed on `x-forwarded-for`; confirm your host sets it trustworthily.
+
