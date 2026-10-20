@@ -15,7 +15,7 @@ export interface SiteConfig {
 }
 
 // Match the primary domain configured in Vercel even when the optional env var is unset.
-const configuredUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.futurvion.in";
+const configuredUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://futurvion.in";
 
 export const site: SiteConfig = {
   name: "Futurvion",

@@ -62,11 +62,11 @@ Create an API key, verify your sending domain, set `CONTACT_FROM_EMAIL` to an ad
 
 1. Provision PostgreSQL (e.g. Neon/Supabase/Vercel Postgres) and run `npx prisma migrate deploy` against it.
 2. Import the repo in Vercel and add the environment variables from `.env.example` (secrets as server-side only).
-3. Attach `www.futurvion.in` as the primary domain and redirect `futurvion.in` to it; HTTPS is automatic. The site defaults to `https://www.futurvion.in` for its canonical URLs, sitemap, and robots file. If `NEXT_PUBLIC_SITE_URL` is set in Vercel, set it to that exact URL and redeploy. An `.example` value triggers `noindex`.
+3. Attach `futurvion.in` as the primary domain and redirect `www.futurvion.in` to it; HTTPS is automatic. The site defaults to `https://futurvion.in` for its canonical URLs, sitemap, and robots file. If `NEXT_PUBLIC_SITE_URL` is set in Vercel, set it to that exact URL and redeploy. An `.example` value triggers `noindex`.
 
 ## Search Console
 
-After deploying, add `futurvion.in` as a **Domain property** in [Google Search Console](https://search.google.com/search-console) and verify it with the DNS TXT record Google provides. Submit `https://www.futurvion.in/sitemap.xml`, then inspect `https://www.futurvion.in/` and request indexing. Check that the live page has `index, follow`, a canonical URL on `www.futurvion.in`, and no `X-Robots-Tag: noindex` header. A URL-prefix property can instead use `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` with the verification token and a redeploy. Indexing and rankings are not guaranteed.
+After deploying, add `futurvion.in` as a **Domain property** in [Google Search Console](https://search.google.com/search-console) and verify it with the DNS TXT record Google provides. Submit `https://futurvion.in/sitemap.xml`, then inspect `https://futurvion.in/` and request indexing. Check that the live page has `index, follow`, a canonical URL on `futurvion.in`, and no `X-Robots-Tag: noindex` header. A URL-prefix property can instead use `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` with the verification token and a redeploy. Indexing and rankings are not guaranteed.
 
 ## Smoke test after deploy
 
