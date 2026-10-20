@@ -1,12 +1,12 @@
 # Futurvion
 
-Marketing site for Futurvion: Next.js 16 (App Router), React 19, TypeScript (strict), Tailwind CSS 4, React Three Fiber, Framer Motion/Lucide, Zod, Prisma 7 + PostgreSQL, Resend.
+Marketing site for Futurvion: Next.js 16 (App Router), React 19, TypeScript (strict), Tailwind CSS 4, Lucide, Zod, Prisma 7 + PostgreSQL, Resend.
 
 ## What works immediately vs. what needs credentials
 
 | Works with no setup | Needs setup |
 |---|---|
-| All pages, 3D hero (with WebGL/reduced-motion fallback), navigation, FAQ, sitemap, robots, JSON-LD, security headers | Contact form backend (`DATABASE_URL`, `ABUSE_HASH_SECRET`, `RESEND_API_KEY`, `CONTACT_TO_EMAIL`, `CONTACT_FROM_EMAIL`) |
+| All pages, animated hero emblem with a static reduced-motion/WebGL fallback, scroll-controlled capability story, scroll reveals for text and cards, scroll progress, responsive navigation, FAQ, sitemap, robots, JSON-LD, security headers | Contact form backend (`DATABASE_URL`, `ABUSE_HASH_SECRET`, `RESEND_API_KEY`, `CONTACT_TO_EMAIL`, `CONTACT_FROM_EMAIL`) |
 | `mailto:` fallback shown on the contact page | Analytics (`DATABASE_URL`, `ABUSE_HASH_SECRET`) — silently disabled otherwise, and the consent banner is hidden |
 | | Booking CTA (`NEXT_PUBLIC_BOOKING_URL`), Search Console (`NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION`) |
 
@@ -26,7 +26,7 @@ Checks: `npm run typecheck`, `npm run lint`, `npm test`, `npm run build`.
 
 - Company info, navigation, SEO defaults: [config/site.ts](config/site.ts) (no secrets here).
 - Services: [data/services.ts](data/services.ts). Portfolio: [data/portfolio.ts](data/portfolio.ts) — all entries are labelled illustrative concepts; replace with real, approved case studies.
-- Logo: replace [public/logo.svg](public/logo.svg) and the share image [public/og-image.svg](public/og-image.svg) (use a 1200×630 PNG/JPG for best social previews).
+- Logo: replace [public/logo-mark.png](public/logo-mark.png) and the share image [public/og-image.svg](public/og-image.svg) (use a 1200×630 PNG/JPG for best social previews).
 - There are deliberately no testimonials, client logos or statistics. Add only verified, approved ones.
 
 ## Database
