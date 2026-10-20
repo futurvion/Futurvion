@@ -1,20 +1,110 @@
 "use client";
 
-import { motion, useReducedMotion, type TargetAndTransition, type Variants } from "framer-motion";
-import type { ReactNode } from "react";
+import { useEffect } from "react";
 
-type Direction = "up" | "left" | "right" | "scale";
-const hidden: Record<Direction, TargetAndTransition> = {
-  up: { opacity: 0, y: 48, scale: 0.97, filter: "blur(10px)" },
-  left: { opacity: 0, x: -56, filter: "blur(10px)" },
-  right: { opacity: 0, x: 56, filter: "blur(10px)" },
-  scale: { opacity: 0, scale: 0.88, y: 24, filter: "blur(10px)" },
-};
-const shown = { opacity: 1, x: 0, y: 0, scale: 1, filter: "blur(0px)" };
+const cardSelector = [
+  ".service-card",
+  ".solution-tiles > a",
+  ".process-step",
+  ".work-preview-item",
+  ".faq-list details",
+  ".capability-card",
+  ".sector-card",
+  ".contact-form",
+  ".work-card",
+  ".case-grid > div",
+  ".footer-top > div",
+].join(", ");
 
-/** Scroll-triggered entrance: content rises out of a soft blur, once, with a springy settle. */
-export function Reveal({ children, className = "", delay = 0, from = "up" }: { children: ReactNode; className?: string; delay?: number; from?: Direction }) {
-  const reduced = useReducedMotion();
-  const variants: Variants = { hidden: hidden[from], shown: { ...shown, transition: { type: "spring", stiffness: 90, damping: 18, mass: 0.9, delay } } };
-  return <motion.div className={className} variants={variants} initial={reduced ? "shown" : "hidden"} whileInView="shown" viewport={{ once: true, amount: 0.15, margin: "0px 0px -6% 0px" }}>{children}</motion.div>;
+const textSelector = "main :is(.eyebrow, h2, h3, p, .text-link, .button, .filter-row), .footer-bottom";
+const targetSelector = `${cardSelector}, ${textSelector}`;
+const animatedElsewhere = ".hero, .inner-hero, .story";
+
+/** Reveals page content as it enters view, without hiding it before JavaScript runs. */
+export function ScrollReveal() {
+  useEffect(() => {
+    if (!("IntersectionObserver" in window)) return;
+
+    const motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const main = document.getElementById("main-content");
+    if (!main) return;
+
+    const observer = new IntersectionObserver(entries => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        const element = entry.target as HTMLElement;
+        element.classList.remove("scroll-reveal-pending");
+        element.classList.add("scroll-reveal-visible");
+        element.dataset.revealState = "shown";
+        observer.unobserve(element);
+      }
+    }, { threshold: 0.08, rootMargin: "0px 0px -6% 0px" });
+
+    function prepare(element: HTMLElement) {
+      if (element.closest(animatedElsewhere)) return;
+      const card = element.matches(cardSelector);
+      if (!card && element.closest(cardSelector)) return;
+      if (element.dataset.revealState === "shown" || motionPreference.matches) return;
+
+      const bounds = element.getBoundingClientRect();
+      if (bounds.bottom > 0 && bounds.top < window.innerHeight * 0.94) {
+        element.classList.remove("scroll-reveal-pending");
+        element.dataset.revealState = "shown";
+        observer.unobserve(element);
+        return;
+      }
+
+      if (element.dataset.revealState !== "pending") {
+        element.dataset.revealState = "pending";
+        element.classList.add("scroll-reveal-pending");
+        if (card) {
+          element.classList.add("scroll-reveal-card");
+          const siblings = Array.from(element.parentElement?.children ?? []).filter(child => child.matches(cardSelector));
+          element.style.setProperty("--reveal-delay", `${(siblings.indexOf(element) % 3) * 75}ms`);
+        }
+      }
+      observer.observe(element);
+    }
+
+    function scan(root: ParentNode) {
+      if (root instanceof HTMLElement && root.matches(targetSelector)) prepare(root);
+      root.querySelectorAll<HTMLElement>(targetSelector).forEach(prepare);
+    }
+
+    scan(document);
+    const changes = new MutationObserver(records => {
+      for (const record of records) {
+        for (const node of record.addedNodes) {
+          if (node instanceof HTMLElement) scan(node);
+        }
+        for (const node of record.removedNodes) {
+          if (!(node instanceof HTMLElement)) continue;
+          observer.unobserve(node);
+          node.querySelectorAll<HTMLElement>(".scroll-reveal-pending").forEach(element => observer.unobserve(element));
+        }
+      }
+    });
+    changes.observe(main, { childList: true, subtree: true });
+
+    const onMotionChange = () => {
+      if (!motionPreference.matches) {
+        scan(document);
+        return;
+      }
+      document.querySelectorAll<HTMLElement>(".scroll-reveal-pending").forEach(element => {
+        element.classList.remove("scroll-reveal-pending");
+        element.dataset.revealState = "shown";
+        observer.unobserve(element);
+      });
+    };
+    motionPreference.addEventListener("change", onMotionChange);
+
+    return () => {
+      observer.disconnect();
+      changes.disconnect();
+      motionPreference.removeEventListener("change", onMotionChange);
+    };
+  }, []);
+
+  return null;
 }
