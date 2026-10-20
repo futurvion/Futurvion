@@ -8,7 +8,7 @@ const ease = [0.2, 0.8, 0.2, 1] as const;
 const container: Variants = { hidden: {}, show: { transition: { staggerChildren: 0.07, delayChildren: 0.1 } } };
 const word: Variants = { hidden: { y: "110%", opacity: 0 }, show: { y: "0%", opacity: 1, transition: { duration: 0.8, ease } } };
 const rise: Variants = { hidden: { y: 22, opacity: 0 }, show: { y: 0, opacity: 1, transition: { duration: 0.7, ease } } };
-const lead = ["Digital", "Solutions"];
+const lead = ["Digital", "solution"];
 const second = ["for"];
 const accent = ["every", "business"];
 
@@ -17,7 +17,7 @@ export function HeroCopy() {
   const reduced = useReducedMotion();
   return <motion.div className="hero-copy" variants={container} initial={reduced ? "show" : "hidden"} animate="show">
     <motion.div variants={rise} className="eyebrow eyebrow-line"><span className="pulse-dot" />FUTURVION · DIGITAL STUDIO</motion.div>
-    <h1 aria-label="Digital Solutions for every business.">
+    <h1 aria-label="Digital solution for every business">
       <span aria-hidden="true">
         {lead.map(w => <span key={w}><span className="word"><motion.span variants={word}>{w}</motion.span></span>{" "}</span>)}
         <br />

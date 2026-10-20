@@ -10,4 +10,4 @@ const faq = [
   ["Do you offer ongoing maintenance?", "Ongoing support can be discussed and included in a project agreement where needed."],
   ["How can I start a project?", "Use the contact form or email us with a brief description of your goals. We can then discuss the most useful next step."],
 ];
-export function FAQ() { return <div className="faq-list">{faq.map(([question, answer], i) => <details key={question}><summary><span className="faq-number">{String(i + 1).padStart(2, "0")}</span><span>{question}</span><span className="faq-plus" aria-hidden="true">+</span></summary><p>{answer}</p></details>)}</div>; }
+export function FAQ({ limit = faq.length }: { limit?: number }) { return <div className="faq-list">{faq.slice(0, limit).map(([question, answer], i) => <details key={question}><summary><span className="faq-number">{String(i + 1).padStart(2, "0")}</span><span>{question}</span><span className="faq-plus" aria-hidden="true">+</span></summary><p>{answer}</p></details>)}</div>; }

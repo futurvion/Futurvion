@@ -1,31 +1,31 @@
 /**
  * ─────────────────────────────────────────────────────────────
  *  FUTURVION COLOUR PALETTE: the single source of truth.
- *  Change a hex value here and the whole site follows:
- *  page CSS, the particle field, the 3D orb, scroll-story cards.
+ *  Shared colors for the site. The page styles use the CSS variables
+ *  generated below; illustration colors remain for optional visuals.
  *  (Values must be 6-digit hex: #rrggbb.)
  * ─────────────────────────────────────────────────────────────
  */
 export const palette = {
-  // Brand gradient (taken from the logo): cyan → blue → violet
-  cyan: "#19d3ff",
-  blue: "#3a6bff",
-  violet: "#a64dff",
+  // Restrained blue palette for optional illustrations
+  cyan: "#79b4c4",
+  blue: "#266887",
+  violet: "#263e61",
 
   // Interactive accents (links, eyebrows, focus, buttons)
-  accent: "#2d9cff",
-  accentSoft: "#7fd8ff",
-  onAccent: "#02061a", // text on top of accent-coloured buttons
+  accent: "#175d78",
+  accentSoft: "#286f89",
+  onAccent: "#ffffff", // text on top of accent-coloured buttons
 
   // Page surfaces and text
-  background: "#05070f",
-  surface: "#090d1e", // cards and panels (drawn semi-transparent)
-  surfaceRaised: "#070a18", // nav pills, popovers
-  surfaceDeep: "#04060e", // footer, header, overlays
-  ink: "#eef2ff", // main text
-  muted: "#b4bdd8", // body copy
-  dim: "#8f9bc0", // labels and captions
-  line: "#8caaff", // hairline borders (drawn very transparent)
+  background: "#f7f8f6",
+  surface: "#ffffff", // cards and panels
+  surfaceRaised: "#ffffff", // nav pills, popovers
+  surfaceDeep: "#132b3b", // footer and dark calls to action
+  ink: "#172b38", // main text
+  muted: "#536572", // body copy
+  dim: "#60717c", // labels and captions
+  line: "#596e7a", // hairline borders (drawn very transparent)
   white: "#ffffff",
 
   // Form feedback
@@ -45,12 +45,12 @@ export const palette = {
 
   // Scroll-story cards, one [from, to, text] per stage
   story: [
-    ["#0a1030", "#0f1d5c", "#cfe0ff"],
-    ["#0d1a4a", "#15307f", "#d6e6ff"],
-    ["#0f2a78", "#1c5bd6", "#e0f0ff"],
-    ["#1a3fb0", "#2f86ff", "#effaff"],
-    ["#4a2fc8", "#8a4dff", "#f4eeff"],
-    ["#19b8ff", "#a64dff", "#031030"],
+    ["#1b3a4b", "#285565", "#eff8f8"],
+    ["#194451", "#2a6270", "#eff8f8"],
+    ["#1b475a", "#2d6a7b", "#eff8f8"],
+    ["#203e54", "#355b70", "#eff8f8"],
+    ["#20505e", "#367482", "#eff8f8"],
+    ["#1b4252", "#32707b", "#eff8f8"],
   ] as readonly (readonly [string, string, string])[],
 } as const;
 
@@ -80,10 +80,10 @@ export function paletteCss() {
   const vars = Object.entries(flat).flatMap(([k, v]) => [`--${k}:${v}`, `--${k}-rgb:${hexToRgbTriplet(v)}`]);
   vars.push(
     "--accent-2:var(--accent-soft)",
-    "--panel:rgb(255 255 255 / .025)",
-    "--card:rgb(var(--surface-rgb) / .7)",
-    "--line:rgb(var(--line-base-rgb) / .12)",
-    "--line-strong:rgb(var(--accent-rgb) / .4)",
+    "--panel:#eef2f2",
+    "--card:var(--surface)",
+    "--line:rgb(var(--line-base-rgb) / .2)",
+    "--line-strong:rgb(var(--accent-rgb) / .45)",
     "--brand-gradient:linear-gradient(100deg,var(--cyan),var(--blue) 55%,var(--violet))",
   );
   return `:root{${vars.join(";")}}`;

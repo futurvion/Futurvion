@@ -18,8 +18,8 @@ const configuredUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://futurvion.exa
 
 export const site: SiteConfig = {
   name: "Futurvion",
-  tagline: "Digital Solutions for every business",
-  description: "Digital Solutions for every business: branding, websites, custom software, and smarter workflows that fit businesses of every size.",
+  tagline: "Digital solution for every business",
+  description: "Digital solution for every business: branding, websites, custom software, and smarter workflows that fit businesses of every size.",
   url: configuredUrl.replace(/\/$/, ""),
   email: process.env.NEXT_PUBLIC_BUSINESS_EMAIL || "hello@futurvion.example",
   logo: "/logo-mark.png",
@@ -39,7 +39,7 @@ export const site: SiteConfig = {
     { label: "Terms", href: "/terms" },
   ],
   seo: {
-    title: "Futurvion | Digital Solutions for every business",
+    title: "Futurvion | Digital solution for every business",
     description: "Futurvion is a digital solutions studio: brand strategy, modern websites, custom software, and automation for businesses of every size and industry.",
     image: "/og-image.svg",
   },

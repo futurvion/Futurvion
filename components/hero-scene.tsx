@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { Canvas, useFrame, useLoader, useThree } from "@react-three/fiber";
 import { Suspense, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import * as THREE from "three";
 import { palette } from "@/config/palette";
@@ -24,7 +24,7 @@ async function sampleLogo(max: number): Promise<Cloud> {
   const img = new window.Image();
   img.src = MARK_SRC;
   await img.decode();
-  const W = 200; const H = Math.round((W * img.naturalHeight) / img.naturalWidth);
+  const W = img.naturalWidth; const H = img.naturalHeight;
   const canvas = document.createElement("canvas"); canvas.width = W; canvas.height = H;
   const ctx = canvas.getContext("2d", { willReadFrequently: true })!;
   ctx.drawImage(img, 0, 0, W, H);
@@ -104,18 +104,27 @@ const fragment = /* glsl */ `
 `;
 
 /** The Futurvion mark, drawn in points of light: it assembles, parts for your cursor, sweeps with light, and bursts on click. */
-function Emblem({ small, compact }: { small: boolean; compact: boolean }) {
+function Emblem({ small, compact, contained }: { small: boolean; compact: boolean; contained: boolean }) {
   const root = useRef<THREE.Group>(null);
   const ringA = useRef<THREE.Group>(null);
   const ringB = useRef<THREE.Group>(null);
   const material = useRef<THREE.ShaderMaterial>(null);
+  const markMaterial = useRef<THREE.MeshBasicMaterial>(null);
   const burst = useRef(-10_000);
   const start = useRef<number | null>(null);
   const viewport = useThree(s => s.viewport);
   const dpr = useThree(s => s.gl.getPixelRatio());
+  const loadedMarkTexture = useLoader(THREE.TextureLoader, MARK_SRC);
+  const markTexture = useMemo(() => {
+    const texture = loadedMarkTexture.clone();
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.needsUpdate = true;
+    return texture;
+  }, [loadedMarkTexture]);
   const [cloud, setCloud] = useState<Cloud | null>(null);
-  const count = small || compact ? 3800 : 8000;
+  const count = contained ? (small ? 5000 : 6500) : small || compact ? 3800 : 8000;
 
+  useEffect(() => () => markTexture.dispose(), [markTexture]);
   useEffect(() => { let alive = true; sampleLogo(count).then(c => { if (alive) setCloud(c); }).catch(() => {}); return () => { alive = false; }; }, [count]);
 
   const geometry = useMemo(() => {
@@ -158,8 +167,8 @@ function Emblem({ small, compact }: { small: boolean; compact: boolean }) {
     const r = root.current; if (!r) return;
     const m = mouse.current;
     // The canvas fills the whole hero; the emblem sits on the right (or near the top on narrow screens).
-    const anchorX = narrow ? 0 : viewport.width * (compact ? 0.27 : 0.235); const anchorY = narrow ? viewport.height * 0.2 : 0;
-    const fit = Math.min(1.08, viewport.height / 5.6, (narrow ? viewport.width : viewport.width * 0.5) / 5.8) * (compact ? 0.85 : 1);
+    const anchorX = contained ? 0 : narrow ? 0 : viewport.width * (compact ? 0.27 : 0.235); const anchorY = contained ? 0 : narrow ? viewport.height * 0.2 : 0;
+    const fit = contained ? Math.min(0.94, viewport.height / 5.8, viewport.width / 5.8) : Math.min(1.08, viewport.height / 5.6, (narrow ? viewport.width : viewport.width * 0.5) / 5.8) * (compact ? 0.85 : 1);
     r.scale.setScalar(damp(r.scale.x, fit, 4, delta));
     const s = r.scale.x || 1;
     r.position.x = anchorX; r.position.y = anchorY + Math.sin(t * 0.8) * 0.08;
@@ -178,9 +187,10 @@ function Emblem({ small, compact }: { small: boolean; compact: boolean }) {
       u.uBurst.value = age < 1 ? Math.sin(age * Math.PI) * 0.9 : 0;
       (u.uSpread.value as THREE.Vector2).set((viewport.width * 0.55) / s, (viewport.height * 0.55) / s);
       (u.uShift.value as THREE.Vector2).set(-anchorX / s, -anchorY / s);
-      u.uSize.value = (small ? 26 : 32) * dpr;
+      u.uSize.value = (contained ? 20 : small ? 26 : 32) * dpr;
       u.uPush.value = damp(u.uPush.value, m.active && Math.abs(m.x) < 1 && Math.abs(m.y) < 1 ? 1 : 0, 4, delta);
       (u.uPointer.value as THREE.Vector2).set((wx - anchorX) / s, (wy - anchorY) / s);
+      if (markMaterial.current) markMaterial.current.opacity = THREE.MathUtils.smoothstep(u.uForm.value, 0.55, 1) * 0.72;
     }
     if (ringA.current) ringA.current.rotation.z += delta * 0.25;
     if (ringB.current) ringB.current.rotation.z -= delta * 0.16;
@@ -189,6 +199,10 @@ function Emblem({ small, compact }: { small: boolean; compact: boolean }) {
   const satellite = (angle: number, radius: number, color: string, size: number) => <mesh position={[Math.cos(angle) * radius, Math.sin(angle) * radius, 0]}><sphereGeometry args={[size, 12, 12]} /><meshBasicMaterial color={color} toneMapped={false} /></mesh>;
 
   return <group ref={root} scale={0.001}>
+    {contained && <mesh position={[0, 0, -0.3]}>
+      <planeGeometry args={[MARK_WIDTH, cloud?.height ?? MARK_WIDTH * 451 / 512]} />
+      <meshBasicMaterial ref={markMaterial} map={markTexture} transparent opacity={0} depthWrite={false} toneMapped={false} side={THREE.DoubleSide} />
+    </mesh>}
     {geometry && <points geometry={geometry} frustumCulled={false}>
       <shaderMaterial ref={material} vertexShader={vertex} fragmentShader={fragment} uniforms={initial} transparent depthWrite={false} blending={THREE.AdditiveBlending} />
     </points>}
@@ -203,7 +217,7 @@ function Emblem({ small, compact }: { small: boolean; compact: boolean }) {
   </group>;
 }
 
-function Scene({ compact }: { compact: boolean }) {
+function Scene({ compact, contained }: { compact: boolean; contained: boolean }) {
   const small = useSyncExternalStore(noop, isSmall, () => false);
   const wrap = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(true);
@@ -216,8 +230,8 @@ function Scene({ compact }: { compact: boolean }) {
   }, []);
   return <div ref={wrap} className="hero-canvas" aria-hidden="true">
     <Suspense fallback={<div className="orb-fallback" />}>
-      <Canvas frameloop={visible ? "always" : "never"} dpr={[1, small ? 1.5 : 2]} camera={{ position: [0, 0, 9], fov: 35 }} gl={{ alpha: true, antialias: true, powerPreference: "high-performance" }}>
-        <Emblem small={small} compact={compact} />
+      <Canvas frameloop={visible ? "always" : "never"} dpr={[1, small && !contained ? 1.5 : 2]} camera={{ position: [0, 0, 9], fov: 35 }} gl={{ alpha: true, antialias: true, powerPreference: "high-performance" }}>
+        <Emblem small={small} compact={compact} contained={contained} />
       </Canvas>
     </Suspense>
   </div>;
@@ -228,11 +242,11 @@ function EmblemFallback() {
   return <div className="orb-fallback" role="img" aria-label="Futurvion emblem"><Image src={MARK_SRC} alt="" width={512} height={451} /></div>;
 }
 
-export function HeroScene({ compact = false }: { compact?: boolean }) {
+export function HeroScene({ compact = false, contained = false }: { compact?: boolean; contained?: boolean }) {
   const reduced = useSyncExternalStore(subscribeReduced, () => window.matchMedia(reducedQuery).matches, () => true);
   const webgl = useSyncExternalStore(noop, hasWebGL, () => false);
   const tooSmall = useSyncExternalStore(noop, () => compact && window.innerWidth < 900, () => false);
   if (tooSmall) return null;
   if (!webgl || reduced) return <EmblemFallback />;
-  return <Scene compact={compact} />;
+  return <Scene compact={compact} contained={contained} />;
 }
