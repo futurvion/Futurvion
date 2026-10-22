@@ -19,7 +19,7 @@ The jobs extension adds `lib/jobs/` for validated provider adapters, queries, an
 | `lib/validation.ts` | Zod request schemas and accepted service slugs. |
 | `app/api/contact/route.ts`, `app/api/analytics/route.ts` | Public Node.js POST handlers. |
 | `lib/db.ts`, `lib/email.ts`, `lib/security.ts` | Server-only Prisma/PostgreSQL access, Resend notifications, HMAC and rate-limit helpers. |
-| `prisma/` | Three-table schema and initial migration. |
+| `prisma/` | Lead, analytics, abuse, jobs, and admin models with initial and jobs migrations. |
 
 ```mermaid
 flowchart LR

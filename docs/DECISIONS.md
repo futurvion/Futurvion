@@ -6,7 +6,7 @@
 - **Decision:** Extend the existing Prisma/PostgreSQL setup, store normalized jobs and admin sessions in new tables, and trigger sync through a secret-protected external cron request.
 - **Reason:** Prisma was already deployed in this repository; a second ORM would duplicate schema and migrations. Next.js requests do not provide a persistent timer.
 - **Trade-off:** Sync work currently occupies the request; large feeds need a durable worker and deployment timeout review. Provider data is displayed only after explicit configuration and a successful sync.
-- **Status:** Implemented locally; migration and live integrations unverified.
+- **Status:** Implemented locally; migrations applied to the configured Neon database on 2026-10-22. Live application and provider integrations remain unverified.
 
 This record separates current code choices from historical approval. Dates and alternatives are marked unknown where the repository does not establish them. `Accepted (observed)` means the approach is present in code; it does not claim a formal decision meeting occurred.
 

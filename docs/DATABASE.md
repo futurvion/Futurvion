@@ -2,7 +2,7 @@
 
 ## Engine and access
 
-The schema in `prisma/schema.prisma` and committed SQL migrations define PostgreSQL tables. Prisma 7 is generated into ignored `generated/prisma/`; `lib/db.ts` creates a `PrismaClient` with `@prisma/adapter-pg` only when `DATABASE_URL` exists and reuses it through a global variable. The jobs models add foreign keys and unique provider/job identity. Their migration has not been applied.
+The schema in `prisma/schema.prisma` and committed SQL migrations define PostgreSQL tables. Prisma 7 is generated into ignored `generated/prisma/`; `lib/db.ts` creates a `PrismaClient` with `@prisma/adapter-pg` only when `DATABASE_URL` exists and reuses it through a global variable. The jobs models add foreign keys and unique provider/job identity. Both migrations were applied to the configured Neon database on 2026-10-22; live application queries remain unverified.
 
 `prisma/migrations/20261022090000_jobs_portal/migration.sql` adds `JobProvider`, `Job`, `JobSyncRun`, `JobSyncSettings`, `AdminUser`, and `AdminSession`. It includes source identity and slug uniqueness, filter indexes, valid status/work mode and salary checks, and a partial unique index permitting only one running sync. Admin sessions store hashes of random tokens. The migration creates no admin credentials; `scripts/bootstrap-admin.mjs` provisions one separately when explicitly run.
 
@@ -26,4 +26,4 @@ There is no relation between the original three tables. The accepted event types
 
 ## Migration and retention
 
-`npm install` runs `prisma generate`; `npm run db:deploy` runs `prisma migrate deploy` against the configured `DATABASE_URL`. The repository contains the initial migration and the new jobs migration, plus a separate one-time admin bootstrap script. Use a migration-capable credential for deployment and a limited runtime database role where possible. Never run a reset against valuable data. There is no automated retention job; `README.md` contains suggested deletion SQL, and the actual retention policy is pending operator approval. Database size, query plans, and production performance are **not verified**.
+`npm install` runs `prisma generate`; `npm run db:deploy` runs `prisma migrate deploy` against `DATABASE_URL_UNPOOLED` when set, otherwise `DATABASE_URL`. Prisma config loads `.env` with `dotenv`. The repository contains the initial migration and the new jobs migration, plus a separate one-time admin bootstrap script. Use a migration-capable credential for deployment and a limited runtime database role where possible. Never run a reset against valuable data. There is no automated retention job; `README.md` contains suggested deletion SQL, and the actual retention policy is pending operator approval. Database size, query plans, and production performance are **not verified**.

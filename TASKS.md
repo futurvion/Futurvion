@@ -4,14 +4,14 @@ Status is based on the current repository and local checks on 2026-10-22. `DONE`
 
 ## Project status summary
 
-The public marketing pages and content are implemented. The contact and analytics backends are implemented behind environment configuration. The jobs portal now has local code for public discovery, a URL-only admin login/dashboard, provider adapters, synchronization, and a reviewable migration. No live PostgreSQL, Resend, provider, or deployed-site flow has been exercised. There is no AI agent runtime or durable background worker. The tracked automated suite includes validation and jobs-core tests.
+The public marketing pages and content are implemented. The contact and analytics backends are implemented behind environment configuration. The jobs portal has public discovery, a URL-only admin login/dashboard, provider adapters, synchronization, and a migration applied to the configured Neon database. Live application queries, Resend, provider, and deployed-site flows have not been exercised. There is no AI agent runtime or durable background worker. The tracked automated suite includes validation and jobs-core tests.
 
 ## Jobs portal status
 
 | Status | Capability and evidence | Remaining check |
 | --- | --- | --- |
 | DONE | `/jobs` and `/jobs/[slug]` pages, header/mobile Jobs link, database filters and pagination, no admin link in public UI. | Build and local unit checks. |
-| NEEDS_VERIFICATION | Prisma jobs/admin schema and `prisma/migrations/20261022090000_jobs_portal/migration.sql`. | Apply only to an intended Neon database after review; confirm constraints and queries. Migration was not run. |
+| NEEDS_VERIFICATION | Prisma jobs/admin schema and `prisma/migrations/20261022090000_jobs_portal/migration.sql`. | Both migrations applied to configured Neon database on 2026-10-22 and Prisma reports schema current; verify live application queries and constraints. |
 | NEEDS_VERIFICATION | Remotive, Greenhouse, and Lever adapters; sync and expiration logic. | Mocked adapter/integration tests and authorized live provider checks; no real API was called. |
 | NEEDS_VERIFICATION | Admin login, session, provider management, schedule and manual/cron sync. | Test with migrated test DB and HTTPS host; validate cookie, origin, concurrent sync, timeout and recovery behavior. |
 
@@ -53,12 +53,14 @@ No authenticated analytics dashboard or AI agent feature is a confirmed requirem
 
 ## Current focus and next tasks
 
-1. **NEEDS_VERIFICATION** — After the operator supplies a Neon test database, review and apply the jobs migration, bootstrap a unique admin credential, verify `/jobs` filters and admin sessions, then exercise authorized provider feeds and the external scheduler. Do not enable production cron before timeout and permission review.
+1. **NEEDS_VERIFICATION** — Set a unique admin password hash and auth secret, bootstrap the first admin credential, verify `/jobs` filters and admin sessions against the migrated Neon database, then exercise authorized provider feeds and the external scheduler. Do not enable production cron before timeout and permission review.
 2. **NEEDS_VERIFICATION** — Run a live integration pass with a test database and Resend account. Dependency: environment setup. Acceptance: contact success/failure and analytics consent checks above pass, with actual results recorded here.
 3. **PLANNED** — Set and enforce a data-retention policy. Dependency: operator policy decision. Acceptance: live deletion schedule and matching privacy notice.
 4. **PLANNED** — Add focused API and browser tests for the highest-risk flows. Dependency: test environment and desired browser coverage. Acceptance: critical success and failure paths run automatically.
 
 ## Recent progress and validation
+
+- 2026-10-22: Applied both committed migrations to the configured Neon database via Prisma Migrate. A follow-up migration status reported the schema up to date; a read-only query found all 9 expected tables. Fixed Prisma CLI `.env` loading with `dotenv` and made it prefer optional `DATABASE_URL_UNPOOLED` for migrations; `npm run db:deploy` then reported no pending migrations. `npm run typecheck`, `npm run lint`, `npm test` (7 files, 23 tests), and `npm run build` passed. Admin bootstrap was skipped because `ADMIN_PASSWORD_HASH` is empty; live application queries, provider sync, and deployed authentication remain unverified.
 
 - 2026-10-22: Added jobs portal code, generated a reviewable Prisma SQL migration without applying it, and kept `/admin` off public navigation. Local checks after implementation: `npm run typecheck` passed, `npm run lint` passed, `npm test` passed (7 files, 23 tests), and `npm run build` passed. A local production-server browser smoke check confirmed `/jobs`, `/admin`, mobile Jobs navigation, no public admin link, no horizontal overflow, public jobs API setup state, and 401 for unauthenticated admin API. No database, external provider, email, or deployed integration was exercised. Live database/provider and broader accessibility verification remain open.
 
