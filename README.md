@@ -1,6 +1,8 @@
 # Futurvion
 
-Marketing site for Futurvion: Next.js 16 (App Router), React 19, TypeScript (strict), Tailwind CSS 4, Lucide, Zod, Prisma 7 + PostgreSQL, Resend.
+Futurvion's public marketing site presents its digital services, business solutions, and illustrative work concepts, and lets visitors send an enquiry. It runs on Next.js 16.4.2 (App Router), React 19, strict TypeScript, Tailwind CSS 4, React Three Fiber/Three.js, Framer Motion, Lucide, Zod, Prisma 7 + PostgreSQL, and Resend. The work examples are concepts, not completed client projects.
+
+For verified implementation details and current progress, see [TASKS.md](TASKS.md), [the project overview](docs/PROJECT_OVERVIEW.md), [architecture](docs/ARCHITECTURE.md), [API](docs/API.md), [database](docs/DATABASE.md), [security](docs/SECURITY.md), and [deployment](docs/DEPLOYMENT.md). [AGENTS.md](AGENTS.md) defines the documentation maintenance workflow.
 
 ## What works immediately vs. what needs credentials
 
@@ -14,13 +16,29 @@ The form reports success only after the lead is stored **and** the notification 
 
 ## Local setup
 
+Use Node.js 20.9.0 or newer (the installed Next.js package's engine requirement) and npm; this repository does not pin an exact runtime version. PostgreSQL and a Resend account are needed to exercise the contact backend. Configure `DATABASE_URL` and `ABUSE_HASH_SECRET` to exercise analytics.
+
 ```bash
-npm install            # also runs `prisma generate`
-cp .env.example .env   # fill in what you need
+npm install            # runs `prisma generate` via postinstall
+cp .env.example .env   # fill in the values needed for your environment
 npm run dev
 ```
 
-Checks: `npm run typecheck`, `npm run lint`, `npm test`, `npm run build`.
+The committed scripts are `npm run dev`, `npm run build`, `npm run start`, `npm run typecheck`, `npm run lint`, `npm test`, and `npm run db:deploy`. `npm run start` serves a production build. `npm run db:deploy` applies committed migrations to the configured database. Run it against the intended database before testing data-backed features.
+
+`.env.example` lists every configured variable. `NEXT_PUBLIC_SITE_URL` sets canonical URLs (the code defaults to `https://futurvion.in`); `NEXT_PUBLIC_BUSINESS_EMAIL` supplies public contact links; `NEXT_PUBLIC_BOOKING_URL` adds a booking CTA; `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` supplies an optional verification token. These four names are browser-exposed. Server-only `DATABASE_URL` connects PostgreSQL, `ABUSE_HASH_SECRET` provides HMAC pseudonyms (minimum 32 characters), and `RESEND_API_KEY`, `CONTACT_TO_EMAIL`, and `CONTACT_FROM_EMAIL` configure contact notifications. Keep actual secret values out of Git; `.env*` files are ignored except `.env.example`.
+
+Local checks: `npm run typecheck`, `npm run lint`, `npm test`, `npm run build`. The tracked Vitest suite currently tests the validation schemas; browser, API integration, and live service checks remain to be added.
+
+## Project structure
+
+| Path | Responsibility |
+| --- | --- |
+| `app/` | Pages, layouts, metadata routes, and the two POST Route Handlers. |
+| `components/` | Shared display and browser-interactive components. |
+| `config/`, `data/` | Site/palette configuration and service/portfolio content. |
+| `lib/` | Validation, SEO, database, email, and security helpers. |
+| `prisma/`, `tests/`, `public/` | Schema/migration, Vitest tests, and static assets. |
 
 ## Editing content
 
@@ -32,7 +50,7 @@ Checks: `npm run typecheck`, `npm run lint`, `npm test`, `npm run build`.
 ## Database
 
 ```bash
-npx prisma migrate deploy   # applies prisma/migrations
+npm run db:deploy   # applies prisma/migrations
 ```
 
 Tables: `Lead`, `AnalyticsEvent`, `AbuseAttempt`. Use a DB role limited to those tables (no DDL) at runtime and a separate role for migrations.
@@ -45,6 +63,8 @@ Tables: `Lead`, `AnalyticsEvent`, `AbuseAttempt`. Use a DB role limited to those
 - Events are recorded only after the visitor opts in; bots by user-agent are ignored; the endpoint is rate-limited. There is no public counter and no public dashboard. Query data directly with SQL, or build an authenticated dashboard before exposing any of it.
 
 ## Data retention (suggested; run on a schedule)
+
+These SQL statements are examples only; no deletion job is configured in this repository.
 
 ```sql
 DELETE FROM "AbuseAttempt"   WHERE "createdAt" < now() - interval '2 days';
@@ -78,7 +98,7 @@ After deploying, add `futurvion.in` as a **Domain property** in [Google Search C
 
 ## Known gaps
 
-- No Playwright end-to-end or axe accessibility tests yet (unit tests cover validation and SEO helpers).
+- No Playwright end-to-end or axe accessibility tests yet (the tracked unit tests cover validation schemas).
 - No authenticated analytics dashboard (intentionally, rather than an unprotected one).
 - Rate limiting is DB-backed and keyed on `x-forwarded-for`; confirm your host sets it trustworthily.
 
