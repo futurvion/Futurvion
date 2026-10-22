@@ -4,7 +4,18 @@ Status is based on the current repository and local checks on 2026-10-22. `DONE`
 
 ## Project status summary
 
-The public marketing pages and content are implemented. The contact and analytics backends are implemented behind environment configuration, but no live PostgreSQL, Resend, or deployed-site flow was exercised for this documentation task. There is no login, admin dashboard, AI agent runtime, or background job in this repository. The tracked automated suite currently contains seven validation-schema tests in `tests/validation.test.ts`.
+The public marketing pages and content are implemented. The contact and analytics backends are implemented behind environment configuration. The jobs portal now has local code for public discovery, a URL-only admin login/dashboard, provider adapters, synchronization, and a reviewable migration. No live PostgreSQL, Resend, provider, or deployed-site flow has been exercised. There is no AI agent runtime or durable background worker. The tracked automated suite includes validation and jobs-core tests.
+
+## Jobs portal status
+
+| Status | Capability and evidence | Remaining check |
+| --- | --- | --- |
+| DONE | `/jobs` and `/jobs/[slug]` pages, header/mobile Jobs link, database filters and pagination, no admin link in public UI. | Build and local unit checks. |
+| NEEDS_VERIFICATION | Prisma jobs/admin schema and `prisma/migrations/20261022090000_jobs_portal/migration.sql`. | Apply only to an intended Neon database after review; confirm constraints and queries. Migration was not run. |
+| NEEDS_VERIFICATION | Remotive, Greenhouse, and Lever adapters; sync and expiration logic. | Mocked adapter/integration tests and authorized live provider checks; no real API was called. |
+| NEEDS_VERIFICATION | Admin login, session, provider management, schedule and manual/cron sync. | Test with migrated test DB and HTTPS host; validate cookie, origin, concurrent sync, timeout and recovery behavior. |
+
+Manual runs are queued in PostgreSQL and processed by the next external scheduler call; the scheduler endpoint processes one run synchronously. Large feeds or a host with short execution limits need a dedicated worker before production activation. `maxConcurrency` bounds simultaneous provider fetches and `batchSize` bounds transactional upserts. First-party application flow is not implemented. Do not treat the portal as production verified yet.
 
 ## Implemented and verified
 
@@ -42,11 +53,14 @@ No authenticated analytics dashboard or AI agent feature is a confirmed requirem
 
 ## Current focus and next tasks
 
-1. **NEEDS_VERIFICATION** — Run a live integration pass with a test database and Resend account. Dependency: environment setup. Acceptance: contact success/failure and analytics consent checks above pass, with actual results recorded here.
-2. **PLANNED** — Set and enforce a data-retention policy. Dependency: operator policy decision. Acceptance: live deletion schedule and matching privacy notice.
-3. **PLANNED** — Add focused API and browser tests for the highest-risk flows. Dependency: test environment and desired browser coverage. Acceptance: critical success and failure paths run automatically.
+1. **NEEDS_VERIFICATION** — After the operator supplies a Neon test database, review and apply the jobs migration, bootstrap a unique admin credential, verify `/jobs` filters and admin sessions, then exercise authorized provider feeds and the external scheduler. Do not enable production cron before timeout and permission review.
+2. **NEEDS_VERIFICATION** — Run a live integration pass with a test database and Resend account. Dependency: environment setup. Acceptance: contact success/failure and analytics consent checks above pass, with actual results recorded here.
+3. **PLANNED** — Set and enforce a data-retention policy. Dependency: operator policy decision. Acceptance: live deletion schedule and matching privacy notice.
+4. **PLANNED** — Add focused API and browser tests for the highest-risk flows. Dependency: test environment and desired browser coverage. Acceptance: critical success and failure paths run automatically.
 
 ## Recent progress and validation
+
+- 2026-10-22: Added jobs portal code, generated a reviewable Prisma SQL migration without applying it, and kept `/admin` off public navigation. Local checks after implementation: `npm run typecheck` passed, `npm run lint` passed, `npm test` passed (7 files, 23 tests), and `npm run build` passed. A local production-server browser smoke check confirmed `/jobs`, `/admin`, mobile Jobs navigation, no public admin link, no horizontal overflow, public jobs API setup state, and 401 for unauthenticated admin API. No database, external provider, email, or deployed integration was exercised. Live database/provider and broader accessibility verification remain open.
 
 - 2026-10-22: Established project context documents from current code, schema, tests, and Git history. No application behavior changed.
 - 2026-10-22: `npm run typecheck` passed; `npm run lint` passed; `npm test` passed (1 file, 7 tests); `npm run build` passed (Next.js 16.4.2; static and dynamic routes compiled). Database migration and live email/browser checks were not run because no test service configuration was used.

@@ -50,3 +50,118 @@ model AbuseAttempt {
   @@index([key, kind, createdAt])
   @@index([createdAt])
 }
+
+model JobProvider {
+  id String @id @default(uuid()) @db.Uuid
+  name String
+  slug String @unique
+  providerType String
+  enabled Boolean @default(false)
+  configuration Json @default("{}")
+  lastSyncAt DateTime?
+  lastSuccessAt DateTime?
+  lastErrorAt DateTime?
+  lastErrorSummary String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  jobs Job[]
+  runs JobSyncRun[]
+}
+
+model Job {
+  id String @id @default(uuid()) @db.Uuid
+  slug String @unique
+  title String
+  companyName String
+  companyLogoUrl String?
+  location String?
+  countryCode String?
+  workMode String @default("unknown")
+  employmentType String?
+  experienceLevel String?
+  category String?
+  descriptionText String?
+  requirements String?
+  responsibilities String?
+  benefits String?
+  salaryMin Int?
+  salaryMax Int?
+  salaryCurrency String?
+  salaryPeriod String?
+  applicationUrl String
+  sourceProviderId String @db.Uuid
+  sourceProvider JobProvider @relation(fields: [sourceProviderId], references: [id], onDelete: Restrict)
+  externalJobId String
+  publishedAt DateTime?
+  lastSeenAt DateTime
+  lastVerifiedAt DateTime?
+  expiresAt DateTime?
+  status String @default("active")
+  contentHash String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([sourceProviderId, externalJobId])
+  @@index([status, publishedAt])
+  @@index([companyName])
+  @@index([location])
+  @@index([workMode, employmentType])
+}
+
+model JobSyncRun {
+  id String @id @default(uuid()) @db.Uuid
+  providerId String? @db.Uuid
+  provider JobProvider? @relation(fields: [providerId], references: [id], onDelete: SetNull)
+  triggerType String
+  status String
+  startedAt DateTime @default(now())
+  finishedAt DateTime?
+  jobsFetched Int @default(0)
+  jobsInserted Int @default(0)
+  jobsUpdated Int @default(0)
+  jobsUnchanged Int @default(0)
+  jobsExpired Int @default(0)
+  errorCount Int @default(0)
+  errorSummary String?
+  @@index([startedAt])
+  @@index([providerId, startedAt])
+}
+
+model JobSyncSettings {
+  id Int @id @default(1)
+  enabled Boolean @default(false)
+  frequencyMinutes Int @default(360)
+  timezone String @default("UTC")
+  batchSize Int @default(100)
+  maxConcurrency Int @default(2)
+  retryLimit Int @default(2)
+  retryDelaySeconds Int @default(5)
+  expireAfterDays Int @default(14)
+  lastScheduledRunAt DateTime?
+  nextScheduledRunAt DateTime?
+  updatedBy String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AdminUser {
+  id String @id @default(uuid()) @db.Uuid
+  email String @unique
+  passwordHash String
+  role String @default("admin")
+  isActive Boolean @default(true)
+  lastLoginAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  sessions AdminSession[]
+}
+
+model AdminSession {
+  id String @id @default(uuid()) @db.Uuid
+  adminUserId String @db.Uuid
+  adminUser AdminUser @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+  sessionTokenHash String @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  lastSeenAt DateTime?
+  @@index([adminUserId, expiresAt])
+}

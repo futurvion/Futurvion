@@ -4,9 +4,11 @@
 
 `package.json` pins Next.js **16.4.2**, React 19.3.0, and the App Router in root `app/`; the project uses strict TypeScript and Tailwind CSS 4 (`app/globals.css`). `app/layout.tsx` supplies fonts, navigation, footer, metadata, JSON-LD, palette CSS, scroll UI, and the analytics-consent component. `app/template.tsx` wraps route changes. Most route pages are Server Components; interactive form, filters, navigation, consent, scroll effects, and WebGL visuals are Client Components marked `"use client"`.
 
-The service and work detail pages use `generateStaticParams` and `dynamicParams = false`. `/contact` awaits `searchParams` and validates the optional service slug. The production build identifies static pages, statically generated detail pages, and dynamic `/contact` plus two API handlers. There are no Server Actions, proxy/middleware, queues, scheduled jobs, or explicit server-side cache layer in the repository.
+The service and work detail pages use `generateStaticParams` and `dynamicParams = false`. `/contact` awaits `searchParams` and validates the optional service slug. Jobs listing and detail pages render dynamically from PostgreSQL. There are no Server Actions, proxy/middleware, queues, or explicit server-side cache layer. Scheduled jobs depend on an external cron call, not an in-process timer.
 
 ## Module map
+
+The jobs extension adds `lib/jobs/` for validated provider adapters, queries, and synchronization; `lib/admin-auth.ts` for database-backed sessions; `app/jobs/` for server-rendered discovery and details; `app/admin/` for a URL-only operations page; and jobs/admin/internal Route Handlers. Prisma remains the sole ORM. Manual sync creates a queued database run. The external scheduler calls a secret-protected route that handles one queued or due run; there is no in-process timer. Processing occurs within that request and relies on a database unique partial index to reject overlap.
 
 | Module | Responsibility |
 | --- | --- |
@@ -44,4 +46,4 @@ The consent banner stores an allow/deny choice in `localStorage`. On allow, clie
 
 ## Errors and operations
 
-Both handlers return generic client errors and call `console.error` for processing failures. There is no structured tracing, health endpoint, or monitoring configuration. Route-level error handling uses a custom not-found page; no custom error boundary is present. Security headers are configured in `next.config.ts`. Production operation and provider availability have not been verified.
+The original contact and analytics handlers return generic client errors and call `console.error` for processing failures. Jobs has a route-level error boundary and loading UI. There is no structured tracing, health endpoint, or monitoring configuration. Security headers are configured in `next.config.ts`. Production operation and provider availability have not been verified.

@@ -2,7 +2,9 @@
 
 ## Engine and access
 
-The schema in `prisma/schema.prisma` and committed SQL in `prisma/migrations/20261016090000_initial/migration.sql` define PostgreSQL tables. Prisma 7 is generated into ignored `generated/prisma/`; `lib/db.ts` creates a `PrismaClient` with `@prisma/adapter-pg` only when `DATABASE_URL` exists and reuses it through a global variable. Both API handlers request the client from server code. No table relationships, foreign keys, database enums, or seed script are defined.
+The schema in `prisma/schema.prisma` and committed SQL migrations define PostgreSQL tables. Prisma 7 is generated into ignored `generated/prisma/`; `lib/db.ts` creates a `PrismaClient` with `@prisma/adapter-pg` only when `DATABASE_URL` exists and reuses it through a global variable. The jobs models add foreign keys and unique provider/job identity. Their migration has not been applied.
+
+`prisma/migrations/20261022090000_jobs_portal/migration.sql` adds `JobProvider`, `Job`, `JobSyncRun`, `JobSyncSettings`, `AdminUser`, and `AdminSession`. It includes source identity and slug uniqueness, filter indexes, valid status/work mode and salary checks, and a partial unique index permitting only one running sync. Admin sessions store hashes of random tokens. The migration creates no admin credentials; `scripts/bootstrap-admin.mjs` provisions one separately when explicitly run.
 
 Prisma `String` maps to `TEXT`, `DateTime` to `TIMESTAMP(3)`, and `Boolean` to `BOOLEAN` in the migration. IDs are generated with `cuid()` by Prisma; database default for ID is not in the SQL migration.
 
@@ -14,7 +16,7 @@ Prisma `String` maps to `TEXT`, `DateTime` to `TIMESTAMP(3)`, and `Boolean` to `
 | `AnalyticsEvent` | `id` TEXT primary key; `eventId` TEXT required unique; `createdAt` TIMESTAMP(3) required default now; `type`, `path`, `visitorKey`, `sessionKey` TEXT required; `referrerCategory`, `deviceCategory` TEXT nullable; `consent` BOOLEAN required. | Unique `eventId`; `(createdAt, type)`, `(visitorKey, createdAt)`, `(sessionKey, createdAt)`, `(path, createdAt)` |
 | `AbuseAttempt` | `id` TEXT primary key; `key`, `kind` TEXT required; `createdAt` TIMESTAMP(3) required default now. | `(key, kind, createdAt)`, `createdAt` |
 
-There is no relation between these tables. The accepted event types, categories, contact budget values, and service slugs are application-level Zod constraints in `lib/validation.ts`, not database enums or CHECK constraints. `privacyConsent` and `consent` record `true` from validated submissions; the schema itself permits either Boolean value.
+There is no relation between the original three tables. The accepted event types, categories, contact budget values, and service slugs are application-level Zod constraints in `lib/validation.ts`, not database enums or CHECK constraints. `privacyConsent` and `consent` record `true` from validated submissions; the schema itself permits either Boolean value.
 
 ## Writes, ownership, and transactions
 
@@ -24,4 +26,4 @@ There is no relation between these tables. The accepted event types, categories,
 
 ## Migration and retention
 
-`npm install` runs `prisma generate`; `npm run db:deploy` runs `prisma migrate deploy` against the configured `DATABASE_URL`. The repository contains one initial migration and no seed command. Use a migration-capable credential for deployment and a limited runtime database role where possible. Never run a reset against valuable data. There is no automated retention job; `README.md` contains suggested deletion SQL, and the actual retention policy is pending operator approval. Database size, query plans, and production performance are **not verified**.
+`npm install` runs `prisma generate`; `npm run db:deploy` runs `prisma migrate deploy` against the configured `DATABASE_URL`. The repository contains the initial migration and the new jobs migration, plus a separate one-time admin bootstrap script. Use a migration-capable credential for deployment and a limited runtime database role where possible. Never run a reset against valuable data. There is no automated retention job; `README.md` contains suggested deletion SQL, and the actual retention policy is pending operator approval. Database size, query plans, and production performance are **not verified**.

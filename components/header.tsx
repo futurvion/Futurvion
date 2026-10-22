@@ -27,6 +27,6 @@ export function Header() {
       <Link className="header-cta" href={site.bookingUrl || "/contact"} target={site.bookingUrl ? "_blank" : undefined} rel={site.bookingUrl ? "noopener noreferrer" : undefined}>{site.bookingUrl ? "Book a consultation" : "Let's talk"} <ArrowUpRight size={16} /></Link>
       <button className="menu-toggle" type="button" aria-label={open ? "Close menu" : "Open menu"} aria-expanded={open} aria-controls="mobile-navigation" onClick={() => setOpen(!open)}>{open ? <X /> : <Menu />}</button>
     </div>
-    <nav id="mobile-navigation" aria-label="Mobile navigation" className={`mobile-nav ${open ? "is-open" : ""}`} inert={!open}>{site.navigation.map(item => <Link key={item.href} href={item.href} onClick={() => setOpen(false)}>{item.label}<ArrowUpRight size={16} /></Link>)}{site.bookingUrl && <Link className="mobile-book" href={site.bookingUrl} target="_blank" rel="noopener noreferrer" onClick={() => setOpen(false)}>Book a consultation <ArrowUpRight size={16} /></Link>}</nav>
+    <nav id="mobile-navigation" aria-label="Mobile navigation" className={`mobile-nav ${open ? "is-open" : ""}`} inert={!open}>{site.navigation.map(item => <Link key={item.href} href={item.href} aria-current={pathname === item.href ? "page" : undefined} onClick={() => setOpen(false)}>{item.label}<ArrowUpRight size={16} /></Link>)}{site.bookingUrl && <Link className="mobile-book" href={site.bookingUrl} target="_blank" rel="noopener noreferrer" onClick={() => setOpen(false)}>Book a consultation <ArrowUpRight size={16} /></Link>}</nav>
   </header>;
 }

@@ -13,7 +13,10 @@ This describes implemented protections and known review items in the repository;
 
 ## Review items and limitations
 
-- There is no login or role-based authorization. The analytics endpoint trusts the caller's `consent: true` field; the server cannot confirm a browser choice from that field alone. Do not expose private records without server-side access control.
+- Jobs admin mutations use server-side session checks plus an Origin check against `APP_URL`; the admin cookie is HttpOnly, SameSite Strict, and Secure in production. Tokens are hashed in PostgreSQL. Login has a per-email attempt limit. Configure `APP_URL` precisely and use HTTPS in production. No live authentication penetration or browser test has been performed.
+- Job descriptions are rendered as plain React text after provider HTML stripping. Application links require HTTP(S) and disallow embedded credentials. Provider identifiers are validated; URL hosts are fixed by adapter. The scheduler endpoint compares a bearer secret. Long sync requests require adequate hosting timeouts or a durable worker before high-volume deployment.
+
+- The analytics endpoint trusts the caller's `consent: true` field; the server cannot confirm a browser choice from that field alone. Admin authorization does not grant analytics or lead reads.
 - The first `x-forwarded-for` value is assumed to identify the client. Confirm the deployment proxy sets and sanitizes that header; otherwise rate limits may be bypassed or shared incorrectly. Count and insert are separate DB calls, so concurrent requests can exceed the nominal threshold.
 - Body limits rely on the declared `content-length`; streaming/absent-header body sizes are not bounded by application code. Review host-level limits and add an enforced reader limit if abuse warrants it. Bot detection based on user-agent is only a heuristic.
 - Email processing follows a lead insert without a transaction or delivery retry. A failed notification leaves stored contact information with `notificationSent = false`. Review operator access, failed-send handling, and data retention.

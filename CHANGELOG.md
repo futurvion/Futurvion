@@ -5,6 +5,7 @@ Only changes supported by the repository or Git history are listed. Unreleased e
 ## Unreleased
 
 - Established shared agent instructions, a progress tracker, and implementation-based project documentation. No application code was changed.
+- Added public jobs search and details, a protected URL-only admin dashboard, Remotive/Greenhouse/Lever adapters, sync logic, and a Prisma SQL migration. The migration and live provider sync were not run.
 
 ## 2026-10-21
 

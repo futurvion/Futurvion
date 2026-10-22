@@ -1,0 +1,15 @@
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import type { Metadata } from "next";
+import { getJob } from "@/lib/jobs/queries";
+import { safeUrl } from "@/lib/jobs/core";
+import { site } from "@/config/site";
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params; const job = await getJob(slug);
+  return { title: job ? `${job.title} at ${job.companyName} | Futurvion Jobs` : "Job not found", alternates: { canonical: `${site.url}/jobs/${slug}` }, robots: { index: Boolean(job?.status === "active") } };
+}
+export default async function JobPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params; const job = await getJob(slug); if (!job) notFound();
+  const apply = job.status === "active" ? safeUrl(job.applicationUrl) : undefined;
+  return <><section className="jobs-hero job-detail-hero"><div className="container"><Link className="job-back" href="/jobs">← All jobs</Link><span className="eyebrow">{job.sourceProvider.name} / {job.category ?? "Opportunity"}</span><h1>{job.title}</h1><p>{job.companyName}</p><div className="job-tags">{[job.location, job.workMode !== "unknown" ? job.workMode : null, job.employmentType, job.experienceLevel].filter(Boolean).map(value => <span key={value}>{value}</span>)}</div>{apply ? <a className="button button-light" href={apply} target="_blank" rel="noopener noreferrer">Apply on {job.sourceProvider.name} ↗</a> : <p>This opportunity is no longer accepting applications.</p>}</div></section><section className="page-section"><div className="container job-detail-layout"><article><span className="eyebrow">The opportunity</span><h2>About this role</h2><p className="job-description">{job.descriptionText ?? "The source has not provided a description. Visit the original posting for details."}</p>{[["Responsibilities", job.responsibilities], ["Requirements", job.requirements], ["Benefits", job.benefits]].filter((item): item is [string, string] => Boolean(item[1])).map(([title, value]) => <section key={title}><h3>{title}</h3><p>{value}</p></section>)}</article><aside className="job-facts"><h3>At a glance</h3><dl><dt>Company</dt><dd>{job.companyName}</dd><dt>Location</dt><dd>{job.location ?? "Not specified"}</dd><dt>Work mode</dt><dd>{job.workMode}</dd><dt>Employment</dt><dd>{job.employmentType ?? "Not specified"}</dd>{job.salaryMin !== null && <><dt>Salary</dt><dd>{job.salaryCurrency} {job.salaryMin.toLocaleString()}{job.salaryMax !== null && `–${job.salaryMax.toLocaleString()}`} {job.salaryPeriod ?? ""}</dd></>}<dt>Posted</dt><dd>{job.publishedAt?.toLocaleDateString() ?? "Not specified"}</dd><dt>Last verified</dt><dd>{job.lastVerifiedAt?.toLocaleDateString() ?? "Not yet verified"}</dd><dt>Source</dt><dd>{job.sourceProvider.name}</dd></dl>{apply && <a className="button button-primary" href={apply} target="_blank" rel="noopener noreferrer">Apply now ↗</a>}</aside></div></section></>;
+}
