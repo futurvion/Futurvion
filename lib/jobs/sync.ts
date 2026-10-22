@@ -43,18 +43,26 @@ export async function syncJobs(triggerType: "manual" | "scheduled", selectedProv
         for (let offset = 0; offset < result.jobs.length; offset += settings?.batchSize ?? 100) {
           const operations: Prisma.PrismaPromise<unknown>[] = [];
           const changes: ("inserted" | "updated" | "unchanged")[] = [];
-          for (const job of result.jobs.slice(offset, offset + (settings?.batchSize ?? 100))) {
-            if (ids.has(job.externalJobId)) continue;
+          const batch = result.jobs.slice(offset, offset + (settings?.batchSize ?? 100)).filter(job => {
+            if (ids.has(job.externalJobId)) return false;
             ids.add(job.externalJobId);
+            return true;
+          });
+          const previousJobs = await db.job.findMany({
+            where: { sourceProviderId: provider.id, externalJobId: { in: batch.map(job => job.externalJobId) } },
+            select: { externalJobId: true, contentHash: true },
+          });
+          const previousById = new Map(previousJobs.map(job => [job.externalJobId, job]));
+          for (const job of batch) {
             const hash = contentHash(job);
-            const previous = await db.job.findUnique({ where: { sourceProviderId_externalJobId: { sourceProviderId: provider.id, externalJobId: job.externalJobId } }, select: { id: true, contentHash: true } });
+            const previous = previousById.get(job.externalJobId);
             changes.push(!previous ? "inserted" : previous.contentHash === hash ? "unchanged" : "updated");
             operations.push(db.job.upsert({ where: { sourceProviderId_externalJobId: { sourceProviderId: provider.id, externalJobId: job.externalJobId } },
               create: { ...job, slug: slugFor(job, provider.slug), sourceProviderId: provider.id, contentHash: hash, lastSeenAt: started, lastVerifiedAt: started, status: "active" },
               update: previous?.contentHash === hash ? { lastSeenAt: started, lastVerifiedAt: started, status: "active" } : { ...Object.fromEntries(Object.entries(job).filter(([, value]) => value !== undefined)), contentHash: hash, lastSeenAt: started, lastVerifiedAt: started, status: "active" },
             }));
           }
-          if (operations.length) await db.$transaction(operations);
+          if (operations.length) await db.$transaction(operations, { maxWait: 15000, timeout: 30000 });
           for (const change of changes) {
             fetched++; pFetched++;
             if (change === "inserted") { inserted++; pInserted++; }

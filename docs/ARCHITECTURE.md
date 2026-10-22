@@ -8,7 +8,7 @@ The service and work detail pages use `generateStaticParams` and `dynamicParams 
 
 ## Module map
 
-The jobs extension adds `lib/jobs/` for validated provider adapters, queries, and synchronization; `lib/admin-auth.ts` for database-backed sessions; `app/jobs/` for server-rendered discovery and details; `app/admin/` for a URL-only operations page; and jobs/admin/internal Route Handlers. Prisma remains the sole ORM. Manual sync creates a queued database run. The external scheduler calls a secret-protected route that handles one queued or due run; there is no in-process timer. Processing occurs within that request and relies on a database unique partial index to reject overlap.
+The jobs extension adds `lib/jobs/` for validated provider adapters, queries, and synchronization; `lib/admin-auth.ts` for database-backed sessions; `app/jobs/` for server-rendered discovery and details; `app/admin/` for a URL-only operations page; and jobs/admin/internal Route Handlers. Prisma remains the sole ORM. `scripts/seed-job-providers.mjs` configures four real public feeds on a new database without overwriting existing provider rows. Sync reads existing job hashes in batches, upserts normalized rows, and marks missing jobs expired after the configured grace period. Manual sync processes during the authenticated admin request. The external scheduler calls a secret-protected route for due runs or older queued runs; there is no in-process timer. Processing occurs within that request and relies on a database unique partial index to reject overlap.
 
 | Module | Responsibility |
 | --- | --- |
@@ -46,4 +46,4 @@ The consent banner stores an allow/deny choice in `localStorage`. On allow, clie
 
 ## Errors and operations
 
-The original contact and analytics handlers return generic client errors and call `console.error` for processing failures. Jobs has a route-level error boundary and loading UI. There is no structured tracing, health endpoint, or monitoring configuration. Security headers are configured in `next.config.ts`. Production operation and provider availability have not been verified.
+The original contact and analytics handlers return generic client errors and call `console.error` for processing failures. Jobs has a route-level error boundary and loading UI. There is no structured tracing, health endpoint, or monitoring configuration. Security headers are configured in `next.config.ts`. The first local production-server import and public reads were verified against Neon; deployed scheduling and ongoing provider availability remain unverified.

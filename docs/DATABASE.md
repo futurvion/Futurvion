@@ -2,7 +2,7 @@
 
 ## Engine and access
 
-The schema in `prisma/schema.prisma` and committed SQL migrations define PostgreSQL tables. Prisma 7 is generated into ignored `generated/prisma/`; `lib/db.ts` creates a `PrismaClient` with `@prisma/adapter-pg` only when `DATABASE_URL` exists and reuses it through a global variable. The jobs models add foreign keys and unique provider/job identity. Both migrations were applied to the configured Neon database on 2026-10-22; live application queries remain unverified.
+The schema in `prisma/schema.prisma` and committed SQL migrations define PostgreSQL tables. Prisma 7 is generated into ignored `generated/prisma/`; `lib/db.ts` creates a `PrismaClient` with `@prisma/adapter-pg` only when `DATABASE_URL` exists and reuses it through a global variable. The jobs models add foreign keys and unique provider/job identity. Both migrations were applied to the configured Neon database on 2026-10-22. Four providers were added and a live sync inserted 297 jobs; public listing and detail reads were verified against those rows.
 
 `prisma/migrations/20261022090000_jobs_portal/migration.sql` adds `JobProvider`, `Job`, `JobSyncRun`, `JobSyncSettings`, `AdminUser`, and `AdminSession`. It includes source identity and slug uniqueness, filter indexes, valid status/work mode and salary checks, and a partial unique index permitting only one running sync. Admin sessions store hashes of random tokens. The migration creates no admin credentials; `scripts/bootstrap-admin.mjs` provisions one separately when explicitly run.
 
@@ -20,6 +20,7 @@ There is no relation between the original three tables. The accepted event types
 
 ## Writes, ownership, and transactions
 
+- The public jobs listing runs its page and count reads concurrently without a transaction; this avoids a transaction acquisition timeout during a cold database connection. Synchronization looks up existing job hashes once per batch and keeps transactional upsert batches with a longer acquisition and execution timeout.
 - `POST /api/contact` inserts a lead, calls Resend, and updates `notificationSent` after a successful send. It does not wrap email and database operations in a transaction; a failed email can leave an unsent lead. Leads contain personal contact and project information.
 - `POST /api/analytics` inserts consented events. Raw visitor/session UUIDs are HMACed before storage; path and coarse categories are stored directly. `eventId` prevents duplicate inserts.
 - `lib/security.ts` counts matching `AbuseAttempt` rows within a time window, then inserts another row. These are separate queries and can race under concurrent traffic. The index supports the `(key, kind, createdAt)` lookup; there is no automatic expiry.

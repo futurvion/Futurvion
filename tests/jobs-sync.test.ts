@@ -14,7 +14,7 @@ function mockDb() {
     jobSyncSettings: { findUnique: vi.fn(async () => ({ enabled: true, frequencyMinutes: 360, expireAfterDays: 14, batchSize: 10, maxConcurrency: 2, retryLimit: 0, retryDelaySeconds: 1 })), upsert: vi.fn(async () => ({})) },
     jobProvider: { findMany: vi.fn(async () => [provider]), update: vi.fn(async () => ({})) },
     jobSyncRun: { updateMany: vi.fn(async () => ({})), create: vi.fn(async ({ data }) => ({ id: "run-1", ...data })), update: vi.fn(async () => ({})) },
-    job: { findUnique: vi.fn(async ({ where }) => jobs.get(where.sourceProviderId_externalJobId.externalJobId) ?? null), upsert: vi.fn(async ({ where, create, update }) => { const key = where.sourceProviderId_externalJobId.externalJobId; jobs.set(key, { contentHash: create.contentHash ?? update.contentHash }); return {}; }), updateMany },
+    job: { findMany: vi.fn(async ({ where }) => where.externalJobId.in.flatMap((externalJobId: string) => jobs.has(externalJobId) ? [{ externalJobId, ...jobs.get(externalJobId) }] : [])), upsert: vi.fn(async ({ where, create, update }) => { const key = where.sourceProviderId_externalJobId.externalJobId; jobs.set(key, { contentHash: create.contentHash ?? update.contentHash }); return {}; }), updateMany },
     $transaction: vi.fn(async (operations) => Promise.all(operations)),
   };
   vi.mocked(getDb).mockReturnValue(db as never);
@@ -31,6 +31,7 @@ describe("jobs synchronization", () => {
     expect(second).toMatchObject({ inserted: 0, unchanged: 1 });
     expect(jobs.size).toBe(1);
     expect(db.job.upsert).toHaveBeenCalledTimes(2);
+    expect(db.job.findMany).toHaveBeenCalledTimes(2);
   });
   it("does not expire jobs after a provider failure", async () => {
     const { updateMany } = mockDb();

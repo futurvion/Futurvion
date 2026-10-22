@@ -53,3 +53,6 @@ export function slugFor(job: Pick<NormalizedJob, "title" | "companyName" | "exte
   return `${base || "job"}-${createHash("sha256").update(`${source}:${job.externalJobId}`).digest("hex").slice(0, 12)}`;
 }
 export function contentHash(job: NormalizedJob) { return createHash("sha256").update(JSON.stringify(job)).digest("hex"); }
+export function sourceLabel(provider: { name: string; providerType: string }) {
+  return provider.providerType === "remotive" ? provider.name : `${provider.name} via ${provider.providerType === "greenhouse" ? "Greenhouse" : "Lever"}`;
+}

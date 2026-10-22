@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { adminSession, authorizedMutation } from "@/lib/admin-auth";
 import { getDb } from "@/lib/db";
+import { syncJobs } from "@/lib/jobs/sync";
 import { readJson } from "@/lib/read-json";
 export const runtime = "nodejs";
 export const maxDuration = 300;
@@ -17,9 +18,9 @@ export async function POST(request: Request) {
   const provider = parsed.data.providerId ? await db.jobProvider.findFirst({ where: { id: parsed.data.providerId, enabled: true } }) : null;
   if (parsed.data.providerId && !provider) return Response.json({ error: "Provider not found or disabled" }, { status: 404 });
   if (!parsed.data.providerId && await db.jobProvider.count({ where: { enabled: true } }) === 0) return Response.json({ error: "No enabled providers" }, { status: 400 });
-  if (await db.jobSyncRun.count({ where: { status: "queued" } }) >= 5) return Response.json({ error: "Too many queued runs" }, { status: 429 });
   try {
-    const run = await db.jobSyncRun.create({ data: { triggerType: "manual", status: "queued", providerId: parsed.data.providerId } });
-    return Response.json({ status: "queued", runId: run.id }, { status: 202, headers: { "Cache-Control": "no-store" } });
-  } catch (error) { console.error("Could not queue sync", error); return Response.json({ error: "Could not queue synchronization" }, { status: 503 }); }
+    const result = await syncJobs("manual", parsed.data.providerId);
+    if (result.status === "already_running") return Response.json({ error: "A synchronization is already running" }, { status: 409 });
+    return Response.json(result, { headers: { "Cache-Control": "no-store" } });
+  } catch (error) { console.error("Manual sync failed", error); return Response.json({ error: "Synchronization failed" }, { status: 503 }); }
 }

@@ -24,13 +24,13 @@ export async function listJobs(raw: Record<string, string | string[] | undefined
   const db = getDb();
   if (!db) return { jobs: [], total: 0, page: query.page, pages: 0, configured: false };
   const where = jobWhere(query);
-  const [jobs, total] = await db.$transaction([
-    db.job.findMany({ where, select: { slug: true, title: true, companyName: true, location: true, workMode: true, employmentType: true, category: true, salaryMin: true, salaryMax: true, salaryCurrency: true, salaryPeriod: true, publishedAt: true, descriptionText: true, applicationUrl: true, sourceProvider: { select: { name: true, slug: true } } }, orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }], skip: (query.page - 1) * 12, take: 12 }),
+  const [jobs, total] = await Promise.all([
+    db.job.findMany({ where, select: { slug: true, title: true, companyName: true, location: true, workMode: true, employmentType: true, category: true, salaryMin: true, salaryMax: true, salaryCurrency: true, salaryPeriod: true, publishedAt: true, descriptionText: true, applicationUrl: true, sourceProvider: { select: { name: true, slug: true, providerType: true } } }, orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }], skip: (query.page - 1) * 12, take: 12 }),
     db.job.count({ where }),
   ]);
   return { jobs, total, page: query.page, pages: Math.ceil(total / 12), configured: true };
 }
 export async function getJob(slug: string) {
   const db = getDb();
-  return db?.job.findFirst({ where: { slug }, include: { sourceProvider: { select: { name: true, slug: true } } } }) ?? null;
+  return db?.job.findFirst({ where: { slug }, include: { sourceProvider: { select: { name: true, slug: true, providerType: true } } } }) ?? null;
 }

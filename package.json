@@ -10,7 +10,8 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "postinstall": "prisma generate",
-    "db:deploy": "prisma migrate deploy"
+    "db:deploy": "prisma migrate deploy",
+    "jobs:seed-providers": "node --env-file=.env scripts/seed-job-providers.mjs"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.1",

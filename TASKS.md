@@ -4,18 +4,18 @@ Status is based on the current repository and local checks on 2026-10-22. `DONE`
 
 ## Project status summary
 
-The public marketing pages and content are implemented. The contact and analytics backends are implemented behind environment configuration. The jobs portal has public discovery, a URL-only admin login/dashboard, provider adapters, synchronization, and a migration applied to the configured Neon database. Live application queries, Resend, provider, and deployed-site flows have not been exercised. There is no AI agent runtime or durable background worker. The tracked automated suite includes validation and jobs-core tests.
+The public marketing pages and content are implemented. The contact and analytics backends are implemented behind environment configuration. The jobs portal has public discovery, a URL-only admin login/dashboard, provider adapters, synchronization, and a migration applied to the configured Neon database. A first live provider sync inserted 297 real jobs into Neon and public listing/detail reads work; Resend and deployed-site flows have not been exercised. There is no AI agent runtime or durable background worker. The tracked automated suite includes validation and jobs-core tests.
 
 ## Jobs portal status
 
 | Status | Capability and evidence | Remaining check |
 | --- | --- | --- |
 | DONE | `/jobs` and `/jobs/[slug]` pages, header/mobile Jobs link, database filters and pagination, no admin link in public UI. | Build and local unit checks. |
-| NEEDS_VERIFICATION | Prisma jobs/admin schema and `prisma/migrations/20261022090000_jobs_portal/migration.sql`. | Both migrations applied to configured Neon database on 2026-10-22 and Prisma reports schema current; verify live application queries and constraints. |
-| NEEDS_VERIFICATION | Remotive, Greenhouse, and Lever adapters; sync and expiration logic. | Mocked adapter/integration tests and authorized live provider checks; no real API was called. |
+| NEEDS_VERIFICATION | Prisma jobs/admin schema and `prisma/migrations/20261022090000_jobs_portal/migration.sql`. | Both migrations applied to configured Neon database; 297 job writes and public reads passed. Constraint and long-term expiration behavior still need live checks. |
+| NEEDS_VERIFICATION | Remotive, Greenhouse, and Lever adapters; sync and expiration logic. | First live sync succeeded: 10 Remotive, 270 Greenhouse, 17 Lever jobs. Repeated updates and expiration still need live checks. |
 | NEEDS_VERIFICATION | Admin login, session, provider management, schedule and manual/cron sync. | Test with migrated test DB and HTTPS host; validate cookie, origin, concurrent sync, timeout and recovery behavior. |
 
-Manual runs are queued in PostgreSQL and processed by the next external scheduler call; the scheduler endpoint processes one run synchronously. Large feeds or a host with short execution limits need a dedicated worker before production activation. `maxConcurrency` bounds simultaneous provider fetches and `batchSize` bounds transactional upserts. First-party application flow is not implemented. Do not treat the portal as production verified yet.
+Manual runs process during the authenticated admin request; the external scheduler endpoint processes one queued or due run synchronously. Large feeds or a host with short execution limits need a dedicated worker before production activation. `maxConcurrency` bounds simultaneous provider fetches and `batchSize` bounds transactional upserts. First-party application flow is not implemented. Do not treat the portal as production verified yet.
 
 ## Implemented and verified
 
@@ -53,12 +53,16 @@ No authenticated analytics dashboard or AI agent feature is a confirmed requirem
 
 ## Current focus and next tasks
 
-1. **NEEDS_VERIFICATION** — Set a unique admin password hash and auth secret, bootstrap the first admin credential, verify `/jobs` filters and admin sessions against the migrated Neon database, then exercise authorized provider feeds and the external scheduler. Do not enable production cron before timeout and permission review.
+1. **NEEDS_VERIFICATION** — Set a unique admin password hash, bootstrap the first admin credential, verify admin sessions against Neon, and configure/verify deployed external scheduling. The first provider feeds and `/jobs` filters were exercised locally; review source reuse terms and host timeout before production cron.
 2. **NEEDS_VERIFICATION** — Run a live integration pass with a test database and Resend account. Dependency: environment setup. Acceptance: contact success/failure and analytics consent checks above pass, with actual results recorded here.
 3. **PLANNED** — Set and enforce a data-retention policy. Dependency: operator policy decision. Acceptance: live deletion schedule and matching privacy notice.
 4. **PLANNED** — Add focused API and browser tests for the highest-risk flows. Dependency: test environment and desired browser coverage. Acceptance: critical success and failure paths run automatically.
 
 ## Recent progress and validation
+
+- 2026-10-22: Added an idempotent provider seed script for Remotive, Figma and Twilio Greenhouse boards, and APPLY Digital Lever; enabled them in the configured Neon database. Changed sync to read existing job hashes once per batch and corrected Greenhouse date handling. A first protected sync succeeded with 297 fetched and inserted, zero provider errors. Local production-server `/api/jobs` reported 297 rows (10 Remotive, 270 Greenhouse, 17 Lever); `/jobs` and a job detail page returned 200, displayed source attribution and original links, and kept `/admin` off public navigation. `npm run typecheck`, `npm run lint`, `npm test` (8 files, 26 tests), and `npm run build` passed. Automatic deployed cron and admin login remain unverified.
+
+- 2026-10-22: Fixed a `P2028` jobs listing error by removing an unnecessary read transaction; production-server `/api/jobs` and `/jobs` both returned 200 against Neon, and unauthenticated manual sync returned 401. The Neon database had zero jobs, providers, and admin users, so listings still need provider setup and synchronization; the public empty state now says no roles are available. Made admin **Sync now** process during its request instead of waiting for a scheduler, and increased transaction acquisition/execution limits for sync write batches. Set the ignored local `DATABASE_URL` SSL mode to `verify-full`; a verified TLS query succeeded without a warning. Generated local `AUTH_SECRET` and `JOB_SYNC_SECRET` values without displaying them. Added the Next.js 16 smooth-scroll attribute. `npm run typecheck`, `npm run lint`, `npm test` (8 files, 26 tests), and `npm run build` passed. Admin bootstrap awaits a user-chosen password hash; live provider sync remains unverified.
 
 - 2026-10-22: Applied both committed migrations to the configured Neon database via Prisma Migrate. A follow-up migration status reported the schema up to date; a read-only query found all 9 expected tables. Fixed Prisma CLI `.env` loading with `dotenv` and made it prefer optional `DATABASE_URL_UNPOOLED` for migrations; `npm run db:deploy` then reported no pending migrations. `npm run typecheck`, `npm run lint`, `npm test` (7 files, 23 tests), and `npm run build` passed. Admin bootstrap was skipped because `ADMIN_PASSWORD_HASH` is empty; live application queries, provider sync, and deployed authentication remain unverified.
 

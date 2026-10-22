@@ -35,7 +35,7 @@ export async function fetchProvider(config: ProviderConfig, name: string, retrie
     const jobs = valid(payload.jobs.map(row => ({
       externalJobId: String(row.id ?? ""), title: String(row.title ?? ""), companyName: name,
       location: plainText((row.location as { name?: string } | undefined)?.name), workMode: "unknown",
-      descriptionText: plainText(row.content), applicationUrl: safeUrl(row.absolute_url) ?? "", publishedAt: date(row.updated_at),
+      descriptionText: plainText(row.content), applicationUrl: safeUrl(row.absolute_url) ?? "",
     })));
     if (payload.jobs.length && !jobs.length) throw new Error("No valid Greenhouse jobs");
     return { complete: jobs.length === payload.jobs.length, jobs };

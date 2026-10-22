@@ -8,7 +8,7 @@ The contact and analytics endpoints remain public `POST` Route Handlers. Jobs ad
 
 `POST /api/admin/auth/login` verifies credentials and sets an HttpOnly session cookie. `POST /api/admin/auth/logout` revokes it; `GET /api/admin/auth/session` returns the signed-in email. Login has a five-attempt per-email limit over 15 minutes. `GET` and `POST /api/admin/providers`, `PATCH /api/admin/providers/[id]`, `GET` and `PATCH /api/admin/schedule`, and `GET` and `POST /api/admin/sync-runs` require an active admin session. Mutations also require a matching Origin. Provider creation/configuration changes require `permissionConfirmed: true`; the confirmation time is stored with non-secret configuration. Manual sync accepts an optional `providerId` UUID.
 
-`POST /api/admin/sync-runs` queues a run and returns HTTP 202 with `runId`; `GET /api/admin/sync-runs/[id]` returns its status. `POST /api/internal/jobs/sync` requires `Authorization: Bearer <JOB_SYNC_SECRET>`. Each call processes the oldest queued manual run first, or a due scheduled run. No anonymous management endpoint is exposed.
+`POST /api/admin/sync-runs` processes a manual run during the request and returns its result with HTTP 200, or 409 if a run is already active; `GET /api/admin/sync-runs/[id]` returns stored run status. `POST /api/internal/jobs/sync` requires `Authorization: Bearer <JOB_SYNC_SECRET>` and processes a due scheduled run or any older queued run. No anonymous management endpoint is exposed.
 
 ## `POST /api/contact`
 
