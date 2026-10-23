@@ -14,6 +14,8 @@
 
 ## Environment variable contract
 
+Jobs also needs server-only `DATABASE_URL`, `ADMIN_EMAIL`, `ADMIN_PASSWORD_HASH` for one-time bootstrap, `AUTH_SECRET` for pseudonymous login limits, `APP_URL` for admin mutation origin checks, and `JOB_SYNC_SECRET` for external cron authorization. `DATABASE_URL_UNPOOLED` is an optional direct migration connection preferred by Prisma CLI when set; `.env` is loaded by `prisma.config.ts`. The jobs migration was applied to the configured Neon database on 2026-10-22. Configure a cron service to POST to `/api/internal/jobs/sync` with `Authorization: Bearer <JOB_SYNC_SECRET>` at an appropriate cadence after review. The sync currently runs within the request, so deployment timeouts and provider volume must be checked before enabling it. The admin route is deliberately absent from public navigation.
+
 | Name | Exposure and purpose | Required for |
 | --- | --- | --- |
 | `NEXT_PUBLIC_SITE_URL` | Browser-exposed canonical base URL; code has a default. | Correct metadata for a different domain. |

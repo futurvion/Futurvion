@@ -1,10 +1,21 @@
 # Project tasks and status
 
-Status is based on the current repository and local checks on 2026-10-22. `DONE` means implementation plus relevant local verification; `NEEDS_VERIFICATION` means code is present but a live integration or browser behavior has not been confirmed. The source files named below are the acceptance evidence, not proof of production operation.
+Status is based on the current repository and local checks on 2026-10-23. `DONE` means implementation plus relevant local verification; `NEEDS_VERIFICATION` means code is present but a live integration or browser behavior has not been confirmed. The source files named below are the acceptance evidence, not proof of production operation.
 
 ## Project status summary
 
-The public marketing pages and content are implemented. The contact and analytics backends are implemented behind environment configuration, but no live PostgreSQL, Resend, or deployed-site flow was exercised for this documentation task. There is no login, admin dashboard, AI agent runtime, or background job in this repository. The tracked automated suite currently contains seven validation-schema tests in `tests/validation.test.ts`.
+The public marketing pages and content are implemented. The contact and analytics backends are implemented behind environment configuration. The jobs portal has public discovery, a URL-only admin login/dashboard, provider adapters, synchronization, and a migration applied to the configured Neon database. A first live provider sync inserted 297 real jobs into Neon and public listing/detail reads work; Resend and deployed-site flows have not been exercised. There is no AI agent runtime or durable background worker. The tracked automated suite includes validation and jobs-core tests.
+
+## Jobs portal status
+
+| Status | Capability and evidence | Remaining check |
+| --- | --- | --- |
+| DONE | `/jobs` and `/jobs/[slug]` pages, header/mobile Jobs link, database filters and pagination, no admin link in public UI. | Build and local unit checks. |
+| NEEDS_VERIFICATION | Prisma jobs/admin schema and `prisma/migrations/20261022090000_jobs_portal/migration.sql`. | Both migrations applied to configured Neon database; 297 job writes and public reads passed. Constraint and long-term expiration behavior still need live checks. |
+| NEEDS_VERIFICATION | Remotive, Greenhouse, and Lever adapters; sync and expiration logic. | First live sync succeeded: 10 Remotive, 270 Greenhouse, 17 Lever jobs. Repeated updates and expiration still need live checks. |
+| NEEDS_VERIFICATION | Admin login, protected workspace, provider management, schedule and manual/cron sync. | Local request checks passed for redirects, login, protected pages, and sign-out. Test browser hydration and deployed HTTPS cookie/origin behavior, concurrent sync, timeout, and recovery. |
+
+Manual runs process during the authenticated admin request; the external scheduler endpoint processes one queued or due run synchronously. Large feeds or a host with short execution limits need a dedicated worker before production activation. `maxConcurrency` bounds simultaneous provider fetches and `batchSize` bounds transactional upserts. First-party application flow is not implemented. Do not treat the portal as production verified yet.
 
 ## Implemented and verified
 
@@ -18,9 +29,9 @@ The public marketing pages and content are implemented. The contact and analytic
 
 | Status | Capability and dependencies | Acceptance criteria / next check |
 | --- | --- | --- |
-| NEEDS_VERIFICATION | Contact submission: `components/contact-form.tsx`, `app/api/contact/route.ts`, Prisma `Lead`, Resend (`DATABASE_URL`, `ABUSE_HASH_SECRET`, `RESEND_API_KEY`, `CONTACT_TO_EMAIL`, `CONTACT_FROM_EMAIL`). | With a migrated test database and verified sending domain, submit valid/invalid requests; confirm the lead row, notification delivery, and error behavior. |
-| NEEDS_VERIFICATION | Opt-in analytics: `components/analytics-consent.tsx`, `app/api/analytics/route.ts`, `AnalyticsEvent` (`DATABASE_URL`, `ABUSE_HASH_SECRET`). | In a browser against a migrated test database, accept and decline consent; verify event rows only after acceptance, duplicate handling, and session renewal. |
-| NEEDS_VERIFICATION | WebGL and reduced-motion fallback, scroll effects, responsive navigation (`components/hero-scene.tsx`, `components/reveal.tsx`, `components/header.tsx`). | Manual browser check on mobile, reduced-motion, and WebGL-disabled contexts; no browser automation is configured. |
+| NEEDS_VERIFICATION | Contact submission: `features/contact/components/contact-form.tsx`, `app/api/contact/route.ts`, Prisma `Lead`, Resend (`DATABASE_URL`, `ABUSE_HASH_SECRET`, `RESEND_API_KEY`, `CONTACT_TO_EMAIL`, `CONTACT_FROM_EMAIL`). | With a migrated test database and verified sending domain, submit valid/invalid requests; confirm the lead row, notification delivery, and error behavior. |
+| NEEDS_VERIFICATION | Opt-in analytics: `features/analytics/components/analytics-consent.tsx`, `app/api/analytics/route.ts`, `AnalyticsEvent` (`DATABASE_URL`, `ABUSE_HASH_SECRET`). | In a browser against a migrated test database, accept and decline consent; verify event rows only after acceptance, duplicate handling, and session renewal. |
+| NEEDS_VERIFICATION | WebGL and reduced-motion fallback, scroll effects, responsive navigation (`components/home/hero-scene.tsx`, `components/effects/reveal.tsx`, `components/layout/header.tsx`). | Manual browser check on mobile, reduced-motion, and WebGL-disabled contexts; no browser automation is configured. |
 | NEEDS_VERIFICATION | Production deployment and search metadata (`README.md`, `app/layout.tsx`, `app/sitemap.ts`, `app/robots.ts`). | Confirm host configuration, domain/canonical URLs, migrations, headers, robots output, and API integration on the deployed site. |
 
 ## Partially implemented features
@@ -42,11 +53,88 @@ No authenticated analytics dashboard or AI agent feature is a confirmed requirem
 
 ## Current focus and next tasks
 
-1. **NEEDS_VERIFICATION** — Run a live integration pass with a test database and Resend account. Dependency: environment setup. Acceptance: contact success/failure and analytics consent checks above pass, with actual results recorded here.
-2. **PLANNED** — Set and enforce a data-retention policy. Dependency: operator policy decision. Acceptance: live deletion schedule and matching privacy notice.
-3. **PLANNED** — Add focused API and browser tests for the highest-risk flows. Dependency: test environment and desired browser coverage. Acceptance: critical success and failure paths run automatically.
+1. **NEEDS_VERIFICATION** — Verify admin browser hydration and deployed session behavior, then configure/verify external scheduling. Local requests now confirm unauthenticated redirects, login, both protected pages, and session revocation after sign-out. The first provider feeds and `/jobs` filters were exercised locally; review source reuse terms and host timeout before production cron.
+2. **NEEDS_VERIFICATION** — Run a live integration pass with a test database and Resend account. Dependency: environment setup. Acceptance: contact success/failure and analytics consent checks above pass, with actual results recorded here.
+3. **PLANNED** — Set and enforce a data-retention policy. Dependency: operator policy decision. Acceptance: live deletion schedule and matching privacy notice.
+4. **PLANNED** — Add focused API and browser tests for the highest-risk flows. Dependency: test environment and desired browser coverage. Acceptance: critical success and failure paths run automatically.
 
 ## Recent progress and validation
+
+- 2026-10-23: Fixed the job detail View original posting button's low-contrast label by setting the shared light button text explicitly to the ink token instead of inheriting pale hero text. Chrome on a live job detail at 1440px and 390px verified dark label/arrow across normal, hover, and keyboard-focus states, no horizontal overflow, and preserved external-link attributes. Screenshot reviewed; lint and targeted diff whitespace checks passed. Broader checks skipped for this CSS color-only fix.
+
+
+- 2026-10-23: Resolved jobs module-not-found errors by restoring the existing lockfile dependencies with npm install --ignore-scripts --no-audit --no-fund --prefer-offline. Confirmed entities@8.1.0 and htmlparser2@12.0.0 resolve locally; no package manifest, lockfile, or application code changes were needed. /jobs and /api/jobs returned 200 without module errors. Typecheck, lint, all 33 tests across 10 files, and production build passed, clearing the previously recorded missing-dependency blockers.
+
+
+- 2026-10-23: Applied the explicit on-accent text color to shared primary buttons, including the admin Open jobs CTA, so labels and inherited arrows remain white despite base anchor styles. Authenticated Chrome verification confirmed white label/arrow in normal, hover, and keyboard-focus states and the /admin/jobs destination. Lint and targeted diff whitespace checks passed; broader checks skipped for this CSS color-only change.
+
+
+- 2026-10-23: Set the hero primary CTA label and inherited arrow color explicitly to the on-accent white token, fixing the dark Explore our services text. Chrome at 1440px and 390px confirmed white text and arrow in normal, hover, and keyboard-focus states, retaining /services. Lint and targeted diff whitespace checks passed; broader checks skipped for this scoped CSS color fix.
+
+
+- 2026-10-23: Fixed the footer Let's talk CTA inheriting white text on its white background after the utility-style migration. Added a scoped dark text rule for the light footer button and excluded buttons from the footer link hover rule. Chrome at 1440px and 390px verified dark label/arrow in normal, hover, and keyboard-focus states and the /contact destination; screenshot reviewed. Lint and targeted diff whitespace checks passed. Broader application checks skipped for this scoped CSS color fix.
+
+
+- 2026-10-23: Fixed the white strip below the public footer by clipping reveal-animation overflow at the footer boundary. A browser reproduction translating the bottom row by 24px extended the document beyond the footer before the fix; the fixed footer stays flush within subpixel rounding at 1440px and 390px, including the translated state. Mobile screenshot reviewed; lint and targeted diff whitespace checks passed. Broader application checks skipped for this isolated CSS overflow fix.
+
+
+- 2026-10-23: Refactored shared public layout primitives to Tailwind utility compositions in `config/styles.ts` and applied them across public, jobs, admin, forms, and shared components. Kept the existing semantic classes for scoped component rules and preserved the existing responsive values, colors, spacing, and interactions; component-specific CSS remains in `app/theme.css` and `app/jobs.css`. `npm run typecheck`, `npm run lint`, `npm test` (10 files, 33 tests), `npm run build`, and local HTTP smoke checks for `/`, `/services`, and `/jobs` passed. Browser screenshot verification was unavailable in the CLI sandbox; no intentional visual change was made.
+
+- 2026-10-23: Matched the header and mobile menu to the existing site accent via --header-surface: var(--accent) (#175d78), with cool pale-blue interaction accents. Preserved the transparent full logo and white navigation. Targeted diff whitespace check passed; broader checks skipped for this CSS palette-only change.
+
+
+- 2026-10-23: Changed the header/mobile-menu surface to warm tan (#896b57), with white navigation and warm cream interaction accents to complement the requested skin-tone palette. Kept the full logo transparent. White text contrast is 4.88:1 (calculated from sRGB); targeted whitespace check passed. Broader application checks skipped for this CSS palette-only change.
+
+
+- 2026-10-23: Lightened --header-surface from charcoal to slate (#526778), preserving readable white logo lettering and the shared header/mobile-menu background. Targeted diff whitespace check passed; broader checks skipped for this single CSS color change.
+
+
+- 2026-10-23: Changed the public header and mobile menu surface to charcoal (#242936), sharing one CSS color variable. The full logo retains its transparent wrapper so its background matches the header seamlessly. Chrome confirmed the charcoal computed header color and transparent logo background; screenshot reviewed. Lint passed. Full application checks were skipped for this color-only change; prior dependency blockers remain recorded.
+
+
+- 2026-10-23: Removed the public logo badge background and padding; switched the complete header and mobile menu to a continuous dark navy surface so the original full logo's white lettering remains legible. Updated navigation, CTA, menu button, separators, and focus colors. Lint and diff whitespace checks passed. Chrome checks at 1440px and 390px confirmed a transparent logo wrapper, dark header, no horizontal overflow, and a working readable mobile menu; desktop screenshot reviewed. Restarted the Linux development server to pick up host CSS edits. Typecheck/tests/build were not repeated for this CSS-only change; the previously recorded local dependency blockers remain.
+
+
+- 2026-10-23: Resolved stale admin branding in the running development server by restarting the Linux-hosted instance serving localhost. Authenticated login and admin requests succeeded; the admin HTML now includes the full-logo image and the logo asset returns 200. Browser image decode also succeeded. No application logic changed; prior dependency-related check blockers remain.
+
+
+- 2026-10-23: Adopted the exact supplied logo-full.png, including its tagline, for the public header and admin sidebar. Kept a dark header backing for the original white lettering; hid the secondary sidebar kicker on narrow screens to avoid crowding the logo and account controls. Added image size hints/preloading and removed obsolete header wordmark CSS. Lint and diff whitespace checks passed. Typecheck, three test suites, and build remain blocked by locally missing declared entities/htmlparser2 packages; seven suites and 21 tests passed.
+
+
+- 2026-10-23: Replaced the header's typed brand name with the existing designed wordmark, rendered in dark ink beside the colored logo symbol for contrast on the light header. Chrome checks at 1440px and 390px confirmed the wordmark, accessible home link, and no horizontal overflow; desktop header screenshot visually reviewed. Lint and targeted diff whitespace checks passed. Typecheck, three test suites, and build were blocked by locally missing declared entities/htmlparser2 packages (seven suites and 21 tests passed). A dependency restore was stopped after prolonged dependency resolution; package manifests and lockfile were not changed by this task.
+
+
+- 2026-10-23: Cleared only the configured admin account's failed-login attempt records at the owner's request and verified none remain. The existing five-attempt rolling 15-minute limit remains enabled. No application code changed; application checks were skipped for this targeted operational reset.
+
+
+- 2026-10-23: Updated the configured admin password at the owner's request using the existing rotation script. Verified the stored scrypt hash accepts the requested password, the account is active with the admin role, and existing sessions are revoked. Synchronized the ignored local environment hash. No application code changed; typecheck, lint, unit tests, and build were skipped for this credentials-only operation.
+
+
+- 2026-10-23: Reworked the protected admin area into a distinct operations dashboard with a dark workspace sidebar, overview health/metrics panels, quick actions, provider cards, sync history, and a more structured Jobs operations page. Replaced admin-native `<select>` controls with an accessible custom listbox-style selector for provider type and Lever region. `npx --no-install next typegen`, `npm run typecheck`, `npm run lint`, `npm test` (10 files, 33 tests), and `npm run build` passed. Local HTTP returned 200 for `/admin/login`; an authenticated visual browser pass was not available in the CLI sandbox and database access from that sandbox timed out.
+- 2026-10-23: Hid the public footer on every admin route, including the login page. The protected dashboard keeps its fixed sidebar and independently scrolling content. Local Chrome confirmed the footer is hidden on `/admin/login`, `/admin`, and `/admin/jobs`. `npm run typecheck`, `npm run lint`, `npm test` (10 files, 33 tests), and `npm run build` passed.
+- 2026-10-23: Kept the protected admin sidebar stationary within the viewport while only the content pane scrolls; the narrow layout keeps compact navigation above the scrolling content. A local Chrome check at 1440×900 and 390×844 confirmed an 800px content scroll with unchanged sidebar position, no document or horizontal overflow, and a reset to the top when switching tabs. `npm run typecheck`, `npm run lint`, `npm test` (10 files, 33 tests), and `npm run build` passed. Updated the admin layout CSS; deployed browser behavior remains unverified.
+
+- 2026-10-23: Split admin into `/admin/login`, protected `/admin` overview, and `/admin/jobs` operations with a shared sidebar and sign-out. Session checks run in both protected pages before admin data reads; admin APIs retain independent checks. Local HTTP checks confirmed 307 redirects from both protected routes without a cookie, 200 login and authenticated pages, redirect away from login when signed in, and denied access after sign-out. `npm run typecheck`, `npm run lint`, `npm test` (10 files, 33 tests), and `npm run build` passed. After moving the route, a stale generated `.next/dev/types/validator.ts` initially referenced the old file and blocked typecheck/build; starting `next dev` regenerated it. Browser layout/hydration and deployed auth remain to be checked. Updated README, overview, architecture, authentication, security, and changelog docs.
+
+- 2026-10-23: Fixed the `/admin` hydration mismatch caused by formatting a provider timestamp separately in the server and browser locales. The server now passes a stable UTC label to the interactive dashboard. User-provided logs showed a successful admin login and dashboard response; the earlier jobs import error was transient and the current `/jobs` module compiled in the production build. `npm run typecheck`, `npm run lint`, `npm test` (10 files, 33 tests), and `npm run build` passed. A post-fix browser hydration check and deployed authentication checks remain open.
+
+- 2026-10-23: Bootstrapped the first admin account in the configured Neon database using the user-selected password. Stored only its scrypt hash in the ignored local `.env`; verified that the configured admin row accepts the password using a read-only database check. Admin login, cookie/session behavior, and deployed scheduling remain unverified. No application code changed.
+
+- 2026-10-23: Fixed entity-escaped Greenhouse job descriptions, using the pasted Twilio sample and current provider feed to verify headings, paragraphs, lists, and safe text rendering. Updated the single-job hero, back link, and loading skeleton. Targeted backfill updated 124 Twilio descriptions from the feed and recovered seven older postings from reviewed stored text; all 131 now have readable structured descriptions. The seven older postings remain absent from the live feed and subject to normal expiration. `npm run typecheck`, `npm run lint`, `npm test` (10 files, 33 tests), and `npm run build` passed. A local browser check against the configured database confirmed 19 visible bullets, no markup fragments, the `/jobs` back link, a compact desktop hero, and no mobile horizontal overflow; the streamed response included the detail skeleton. Updated API, architecture, security, database, and changelog docs.
+
+- 2026-10-23: Kept the `/jobs` hero and section headings visible while the first jobs API request loads. Search controls and four card-shaped job placeholders now occupy only their own areas; later searches keep the form visible while job cards load. Grouped secondary filters under an accessible “More filters” control and scoped the route loading fallback to job details. `npm run typecheck`, `npm run lint`, `npm test` (9 files, 29 tests), and `npm run build` passed. A local browser check with delayed mocked API responses confirmed first-load and refetch states, filter behavior, unchanged `/jobs` URL, and no horizontal overflow at 390px. Live database behavior was not exercised.
+
+- 2026-10-23: Moved `/jobs` search, filters, and pagination into client-held state backed by JSON `POST /api/jobs` calls, leaving the page URL unchanged. Kept `GET /api/jobs` for existing API callers. Added bounded body handling and focused POST route tests; updated API and architecture docs. `npm run typecheck`, `npm run lint`, `npm test` (9 files, 29 tests), and `npm run build` passed. A local browser smoke check with mocked jobs responses confirmed initial load, next-page and company-filter POST bodies while the address stayed `/jobs`; browser behavior against a live database remains to be checked.
+
+- 2026-10-22: Reorganized UI into layout, home, effects, shared, and feature-owned folders; moved jobs UI, domain logic, provider adapters, and admin authentication under `features/jobs/` while keeping Next.js routes and APIs in `app/`. Updated source imports and architecture/product/API/security documentation. `npm run typecheck`, `npm run lint`, `npm test` (8 files, 26 tests), and `npm run build` passed. No database or deployment changes were made.
+
+- 2026-10-22: Added an idempotent provider seed script for Remotive, Figma and Twilio Greenhouse boards, and APPLY Digital Lever; enabled them in the configured Neon database. Changed sync to read existing job hashes once per batch and corrected Greenhouse date handling. A first protected sync succeeded with 297 fetched and inserted, zero provider errors. Local production-server `/api/jobs` reported 297 rows (10 Remotive, 270 Greenhouse, 17 Lever); `/jobs` and a job detail page returned 200, displayed source attribution and original links, and kept `/admin` off public navigation. `npm run typecheck`, `npm run lint`, `npm test` (8 files, 26 tests), and `npm run build` passed. Automatic deployed cron and admin login remain unverified.
+
+- 2026-10-22: Fixed a `P2028` jobs listing error by removing an unnecessary read transaction; production-server `/api/jobs` and `/jobs` both returned 200 against Neon, and unauthenticated manual sync returned 401. The Neon database had zero jobs, providers, and admin users, so listings still need provider setup and synchronization; the public empty state now says no roles are available. Made admin **Sync now** process during its request instead of waiting for a scheduler, and increased transaction acquisition/execution limits for sync write batches. Set the ignored local `DATABASE_URL` SSL mode to `verify-full`; a verified TLS query succeeded without a warning. Generated local `AUTH_SECRET` and `JOB_SYNC_SECRET` values without displaying them. Added the Next.js 16 smooth-scroll attribute. `npm run typecheck`, `npm run lint`, `npm test` (8 files, 26 tests), and `npm run build` passed. Admin bootstrap awaits a user-chosen password hash; live provider sync remains unverified.
+
+- 2026-10-22: Applied both committed migrations to the configured Neon database via Prisma Migrate. A follow-up migration status reported the schema up to date; a read-only query found all 9 expected tables. Fixed Prisma CLI `.env` loading with `dotenv` and made it prefer optional `DATABASE_URL_UNPOOLED` for migrations; `npm run db:deploy` then reported no pending migrations. `npm run typecheck`, `npm run lint`, `npm test` (7 files, 23 tests), and `npm run build` passed. Admin bootstrap was skipped because `ADMIN_PASSWORD_HASH` is empty; live application queries, provider sync, and deployed authentication remain unverified.
+
+- 2026-10-22: Added jobs portal code, generated a reviewable Prisma SQL migration without applying it, and kept `/admin` off public navigation. Local checks after implementation: `npm run typecheck` passed, `npm run lint` passed, `npm test` passed (7 files, 23 tests), and `npm run build` passed. A local production-server browser smoke check confirmed `/jobs`, `/admin`, mobile Jobs navigation, no public admin link, no horizontal overflow, public jobs API setup state, and 401 for unauthenticated admin API. No database, external provider, email, or deployed integration was exercised. Live database/provider and broader accessibility verification remain open.
 
 - 2026-10-22: Established project context documents from current code, schema, tests, and Git history. No application behavior changed.
 - 2026-10-22: `npm run typecheck` passed; `npm run lint` passed; `npm test` passed (1 file, 7 tests); `npm run build` passed (Next.js 16.4.2; static and dynamic routes compiled). Database migration and live email/browser checks were not run because no test service configuration was used.

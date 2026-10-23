@@ -10,9 +10,22 @@ For verified implementation details and current progress, see [TASKS.md](TASKS.m
 |---|---|
 | All pages, animated hero emblem with a static reduced-motion/WebGL fallback, scroll-controlled capability story, scroll reveals for text and cards, scroll progress, responsive navigation, FAQ, sitemap, robots, JSON-LD, security headers | Contact form backend (`DATABASE_URL`, `ABUSE_HASH_SECRET`, `RESEND_API_KEY`, `CONTACT_TO_EMAIL`, `CONTACT_FROM_EMAIL`) |
 | `mailto:` fallback shown on the contact page | Analytics (`DATABASE_URL`, `ABUSE_HASH_SECRET`) — silently disabled otherwise, and the consent banner is hidden |
+| `/jobs` setup/empty state and `/admin/login` sign-in screen | Jobs data and admin operations (`DATABASE_URL`, jobs migration, `AUTH_SECRET`, `APP_URL`, admin bootstrap); cron also needs `JOB_SYNC_SECRET` |
 | | Booking CTA (`NEXT_PUBLIC_BOOKING_URL`), Search Console (`NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION`) |
 
 The form reports success only after the lead is stored **and** the notification email is accepted by Resend. If the backend is not configured it returns 503 and the UI points visitors to the email link.
+
+## Jobs portal setup
+
+The public `/jobs` listing and detail pages use PostgreSQL. Without `DATABASE_URL`, the listing displays a setup state. Visit `/admin/login` directly to sign in; the protected `/admin` overview and `/admin/jobs` operations page redirect there without a valid session. No admin link appears in the public UI. The new SQL migration is `prisma/migrations/20261022090000_jobs_portal/migration.sql`. Both committed migrations were applied to the configured Neon database on 2026-10-22. Prisma remains the ORM already used by this repository.
+
+For another database, supply its Neon URL and run `npm run db:deploy` with migration privileges. `DATABASE_URL` is the runtime connection and may be pooled; optional `DATABASE_URL_UNPOOLED` is preferred by the Prisma CLI when set. Set `ADMIN_EMAIL` and create a scrypt hash by setting a temporary `ADMIN_BOOTSTRAP_PASSWORD` and running `node scripts/hash-admin-password.mjs`. Copy the hash to `ADMIN_PASSWORD_HASH`, clear the temporary plaintext variable, then run `node --env-file=.env scripts/bootstrap-admin.mjs` once. The script refuses to create another admin. Use a unique password of at least 12 characters for production. To replace a temporary credential, generate a new hash, set `ADMIN_PASSWORD_HASH` to it, then run `node --env-file=.env scripts/rotate-admin-password.mjs`; this revokes all active admin sessions. No password or admin row is in the migration.
+
+For Neon, use `sslmode=verify-full` in `DATABASE_URL` to verify the server certificate and hostname. A fresh database contains no jobs or providers. Run `npm run jobs:seed-providers` to add the enabled Remotive, Figma and Twilio Greenhouse, and APPLY Digital Lever feeds. The script preserves existing providers and schedule settings and uses a sync batch size of 25 for a new schedule. Start a sync from `/admin/jobs` (or call the protected sync endpoint); `/jobs` reads only the imported database rows. The configured Neon database received 297 real jobs on 2026-10-22: 10 Remotive, 270 Greenhouse, and 17 Lever.
+
+In `/admin/jobs`, add other providers as disabled, confirm display permission, verify their board/site identifier, then enable them. Supported sources are Remotive, explicitly configured Greenhouse boards, and explicitly configured Lever sites. The public pages show each source and link to the original posting. Remotive requires attribution and a link back to its own URL; the adapter preserves that link and limits requests to one every six hours. Greenhouse `updated_at` is not presented as the posting date. Review the [Remotive terms](https://github.com/remotive-com/remote-jobs-api/blob/main/README.md), [Greenhouse Job Board API](https://docs.greenhouse.io/job-board.html), and [Lever Postings API](https://github.com/lever/postings-api/blob/master/README.md) for ongoing use of these feeds.
+
+Set `APP_URL` to the exact public origin, `AUTH_SECRET` to a random value of at least 32 characters, and `JOB_SYNC_SECRET` to a random value of at least 32 characters. The admin's **Sync now** action processes enabled providers during its request and does not need a scheduler. For automatic sync, configure an external scheduler to send `POST https://YOUR_DOMAIN/api/internal/jobs/sync` with `Authorization: Bearer YOUR_JOB_SYNC_SECRET` at least as often as the selected frequency. Saving the schedule does not create a cron job. Both manual and scheduled sync run within a request, so use a host timeout that covers the configured feeds; large feeds or strict serverless limits require a dedicated worker. The initial local sync succeeded against Neon; deployed cron remains to be configured and verified.
 
 ## Local setup
 
@@ -24,20 +37,20 @@ cp .env.example .env   # fill in the values needed for your environment
 npm run dev
 ```
 
-The committed scripts are `npm run dev`, `npm run build`, `npm run start`, `npm run typecheck`, `npm run lint`, `npm test`, and `npm run db:deploy`. `npm run start` serves a production build. `npm run db:deploy` applies committed migrations to the configured database. Run it against the intended database before testing data-backed features.
+The committed scripts are `npm run dev`, `npm run build`, `npm run start`, `npm run typecheck`, `npm run lint`, `npm test`, `npm run db:deploy`, and `npm run jobs:seed-providers`. `npm run start` serves a production build. `npm run db:deploy` applies committed migrations to the configured database. Run it against the intended database before testing data-backed features.
 
 `.env.example` lists every configured variable. `NEXT_PUBLIC_SITE_URL` sets canonical URLs (the code defaults to `https://futurvion.in`); `NEXT_PUBLIC_BUSINESS_EMAIL` supplies public contact links; `NEXT_PUBLIC_BOOKING_URL` adds a booking CTA; `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` supplies an optional verification token. These four names are browser-exposed. Server-only `DATABASE_URL` connects PostgreSQL, `ABUSE_HASH_SECRET` provides HMAC pseudonyms (minimum 32 characters), and `RESEND_API_KEY`, `CONTACT_TO_EMAIL`, and `CONTACT_FROM_EMAIL` configure contact notifications. Keep actual secret values out of Git; `.env*` files are ignored except `.env.example`.
 
-Local checks: `npm run typecheck`, `npm run lint`, `npm test`, `npm run build`. The tracked Vitest suite currently tests the validation schemas; browser, API integration, and live service checks remain to be added.
+Local checks: `npm run typecheck`, `npm run lint`, `npm test`, `npm run build`. The tracked Vitest suite covers validation, job adapters, synchronization, authentication helpers, and bounded request parsing. The first live provider import and local admin login, protected routes, and sign-out checks passed; deployed cron and authentication still need verification.
 
 ## Project structure
 
 | Path | Responsibility |
 | --- | --- |
-| `app/` | Pages, layouts, metadata routes, and the two POST Route Handlers. |
+| `app/` | Pages, layouts, metadata routes, and public/admin/internal Route Handlers. |
 | `components/` | Shared display and browser-interactive components. |
 | `config/`, `data/` | Site/palette configuration and service/portfolio content. |
-| `lib/` | Validation, SEO, database, email, and security helpers. |
+| `lib/` | Validation, SEO, database, email, security, jobs, and admin session helpers. |
 | `prisma/`, `tests/`, `public/` | Schema/migration, Vitest tests, and static assets. |
 
 ## Editing content
@@ -53,7 +66,7 @@ Local checks: `npm run typecheck`, `npm run lint`, `npm test`, `npm run build`. 
 npm run db:deploy   # applies prisma/migrations
 ```
 
-Tables: `Lead`, `AnalyticsEvent`, `AbuseAttempt`. Use a DB role limited to those tables (no DDL) at runtime and a separate role for migrations.
+Tables: `Lead`, `AnalyticsEvent`, `AbuseAttempt`, `Job`, `JobProvider`, `JobSyncRun`, `JobSyncSettings`, `AdminUser`, and `AdminSession`. Use a limited runtime DB role (no DDL) and a separate role for migrations.
 
 ## Analytics definitions
 
@@ -98,7 +111,7 @@ After deploying, add `futurvion.in` as a **Domain property** in [Google Search C
 
 ## Known gaps
 
-- No Playwright end-to-end or axe accessibility tests yet (the tracked unit tests cover validation schemas).
+- No committed Playwright end-to-end or axe accessibility tests yet; a local no-database browser smoke check covered jobs/admin routes and mobile navigation.
 - No authenticated analytics dashboard (intentionally, rather than an unprotected one).
 - Rate limiting is DB-backed and keyed on `x-forwarded-for`; confirm your host sets it trustworthily.
 

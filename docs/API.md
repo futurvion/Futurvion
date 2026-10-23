@@ -1,10 +1,20 @@
 # API surface
 
-Both custom endpoints are public `POST` Route Handlers using the Node.js runtime. There is no login, role check, Server Action, or authenticated read API. The current source of truth is `app/api/contact/route.ts`, `app/api/analytics/route.ts`, `lib/validation.ts`, `lib/security.ts`, `lib/db.ts`, and `lib/email.ts`. Unsupported methods are handled by Next.js. `app/robots.ts` and `app/sitemap.ts` generate public metadata routes (`/robots.txt`, `/sitemap.xml`), not application JSON endpoints.
+The contact and analytics endpoints remain public `POST` Route Handlers. Jobs adds public read and protected admin APIs. Unsupported methods are handled by Next.js.
+
+## Jobs API
+
+`POST /api/jobs` is used by the `/jobs` page. It accepts a JSON object with bounded `q`, `company`, `location`, `workMode`, `employmentType`, `category`, `experienceLevel`, `source`, `postedWithin`, `salaryMin`/`salaryMax` with `salaryCurrency`, and `page` filters. Bodies over 4,096 bytes return 413. `GET /api/jobs` continues to accept the same filters as query parameters for existing API callers. Both return 12 records per page with `{ jobs, total, page, pages, configured }`; invalid filters return 400. `GET /api/jobs/[slug]` returns public job details or 404. Internal IDs, hashes, and raw provider payloads are excluded.
+
+Job descriptions are plain text with paragraph breaks, `## ` heading markers, and `- ` list markers. The site converts those markers to safe headings and lists; API callers can use the same structure without rendering provider HTML.
+
+`POST /api/admin/auth/login` verifies credentials and sets an HttpOnly session cookie. `POST /api/admin/auth/logout` revokes it; `GET /api/admin/auth/session` returns the signed-in email. Login has a five-attempt per-email limit over 15 minutes. `GET` and `POST /api/admin/providers`, `PATCH /api/admin/providers/[id]`, `GET` and `PATCH /api/admin/schedule`, and `GET` and `POST /api/admin/sync-runs` require an active admin session. Mutations also require a matching Origin. Provider creation/configuration changes require `permissionConfirmed: true`; the confirmation time is stored with non-secret configuration. Manual sync accepts an optional `providerId` UUID.
+
+`POST /api/admin/sync-runs` processes a manual run during the request and returns its result with HTTP 200, or 409 if a run is already active; `GET /api/admin/sync-runs/[id]` returns stored run status. `POST /api/internal/jobs/sync` requires `Authorization: Bearer <JOB_SYNC_SECRET>` and processes a due scheduled run or any older queued run. No anonymous management endpoint is exposed.
 
 ## `POST /api/contact`
 
-Purpose: accept a prospective client's enquiry and notify the configured inbox. Called by `components/contact-form.tsx`. No query parameters. Request body is JSON:
+Purpose: accept a prospective client's enquiry and notify the configured inbox. Called by `features/contact/components/contact-form.tsx`. No query parameters. Request body is JSON:
 
 ```json
 {
@@ -35,7 +45,7 @@ The route requires `DATABASE_URL`, `ABUSE_HASH_SECRET`, `RESEND_API_KEY`, `CONTA
 
 ## `POST /api/analytics`
 
-Purpose: store opt-in interaction events. Called by `components/analytics-consent.tsx`. No query parameters. Example request:
+Purpose: store opt-in interaction events. Called by `features/analytics/components/analytics-consent.tsx`. No query parameters. Example request:
 
 ```json
 {

@@ -8,12 +8,12 @@ Futurvion is a public site for a digital solutions studio. Its stated goal is to
 
 | User | Current workflow | Evidence |
 | --- | --- | --- |
-| Prospective visitor | Browse eight services, sector examples, process, FAQs, and illustrative work; open a service detail page and follow its contact link. | `data/services.ts`, `app/`, `components/faq.tsx` |
-| Enquirer | Enter contact details, service and project description, agree to contact, submit the form, or use the public email link. | `components/contact-form.tsx`, `app/api/contact/route.ts` |
-| Analytics participant | Allow or decline optional analytics in the banner; allowed interactions submit coarse events. | `components/analytics-consent.tsx`, `app/api/analytics/route.ts` |
-| Site operator | Configure database/email, review leads and analytics in external tools or direct SQL. | `README.md`, `prisma/schema.prisma`; no repository admin UI exists |
+| Prospective visitor | Browse eight services, sector examples, process, FAQs, and illustrative work; open a service detail page and follow its contact link. | `data/services.ts`, `app/`, `components/home/faq.tsx` |
+| Enquirer | Enter contact details, service and project description, agree to contact, submit the form, or use the public email link. | `features/contact/components/contact-form.tsx`, `app/api/contact/route.ts` |
+| Analytics participant | Allow or decline optional analytics in the banner; allowed interactions submit coarse events. | `features/analytics/components/analytics-consent.tsx`, `app/api/analytics/route.ts` |
+| Site operator | Configure database/email, review leads and analytics in external tools or direct SQL. | `README.md`, `prisma/schema.prisma`; the admin UI currently covers jobs only |
 
-There are no in-app user roles or account workflows.
+The jobs portal adds a single administrator role. `/admin/login` signs in, `/admin` opens the protected workspace overview, and `/admin/jobs` contains job operations. Public visitors still have no account workflow.
 
 ## Verified functional requirements from code
 
@@ -30,4 +30,4 @@ There are no in-app user roles or account workflows.
 
 ## Boundaries and unresolved requirements
 
-The marketing copy mentions customer software, mobile applications, and AI services the studio could provide; this repository implements the marketing site itself, not those products or an AI agent runtime. There is no client portal, login, analytics dashboard, payment system, CMS, or background worker in the current code. None is treated as an approved future requirement. Real client proof, jurisdiction-specific legal review, retention period, operational monitoring, and live deployment state need operator confirmation. Current actionable work is tracked in [TASKS.md](../TASKS.md).
+The marketing copy mentions customer software, mobile applications, and AI services the studio could provide; this repository implements the marketing site and jobs portal, not those products or an AI agent runtime. There is no client portal, analytics dashboard, payment system, CMS, or background worker. Real client proof, jurisdiction-specific legal review, retention period, operational monitoring, and live deployment state need operator confirmation. Current actionable work is tracked in [TASKS.md](../TASKS.md).

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { motion, useReducedMotion, type Variants } from "framer-motion";
 import { ArrowDown, ArrowRight, ArrowUpRight } from "lucide-react";
+import { siteStyles } from "@/config/styles";
 
 const ease = [0.2, 0.8, 0.2, 1] as const;
 const container: Variants = { hidden: {}, show: { transition: { staggerChildren: 0.07, delayChildren: 0.1 } } };
@@ -16,7 +17,7 @@ const accent = ["every", "business"];
 export function HeroCopy() {
   const reduced = useReducedMotion();
   return <motion.div className="hero-copy" variants={container} initial={reduced ? "show" : "hidden"} animate="show">
-    <motion.div variants={rise} className="eyebrow eyebrow-line"><span className="pulse-dot" />FUTURVION · DIGITAL STUDIO</motion.div>
+    <motion.div variants={rise} className={`${siteStyles.eyebrow} eyebrow eyebrow-line`}><span className="pulse-dot" />FUTURVION · DIGITAL STUDIO</motion.div>
     <h1 aria-label="Digital solution for every business">
       <span aria-hidden="true">
         {lead.map(w => <span key={w}><span className="word"><motion.span variants={word}>{w}</motion.span></span>{" "}</span>)}
@@ -27,8 +28,8 @@ export function HeroCopy() {
     </h1>
     <motion.p variants={rise}>From the first brand idea to the software behind it, Futurvion builds websites, tools and everyday processes that fit businesses of every size and every industry.</motion.p>
     <motion.div variants={rise} className="hero-actions">
-      <Link className="button button-primary" href="/contact">Let’s build your future <ArrowUpRight size={18} /></Link>
-      <Link className="button button-ghost" href="/#services">Explore our services <ArrowRight size={18} /></Link>
+      <Link className={`${siteStyles.button} button button-primary ${siteStyles.buttonPrimary}`} href="/contact">Let’s build your future <ArrowUpRight size={18} /></Link>
+      <Link className={`${siteStyles.button} button button-ghost ${siteStyles.buttonGhost}`} href="/#services">Explore our services <ArrowRight size={18} /></Link>
     </motion.div>
     <motion.div variants={rise} className="hero-scroll"><ArrowDown size={14} /> SCROLL — THE POINTS OF LIGHT BECOME A WAVE</motion.div>
   </motion.div>;
