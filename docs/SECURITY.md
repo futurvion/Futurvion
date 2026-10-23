@@ -13,7 +13,7 @@ This describes implemented protections and known review items in the repository;
 
 ## Review items and limitations
 
-- Jobs admin mutations use server-side session checks plus an Origin check against `APP_URL`; the admin cookie is HttpOnly, SameSite Strict, and Secure in production. Tokens are hashed in PostgreSQL. Login has a per-email attempt limit. Configure `APP_URL` precisely and use HTTPS in production. No live authentication penetration or browser test has been performed.
+- `/admin` and `/admin/jobs` redirect to `/admin/login` without a valid database-backed session. Each admin page checks the session before reading private data; admin APIs keep their own checks. Mutations also check Origin against `APP_URL`. The admin cookie is HttpOnly, SameSite Strict, and Secure in production. Tokens are hashed in PostgreSQL. Login has a per-email attempt limit. Configure `APP_URL` precisely and use HTTPS in production. Local request checks covered login, protected routes, and sign-out; deployed authentication and browser testing remain open.
 - Provider job HTML, including entity-escaped Greenhouse markup, is parsed into heading, paragraph, and list text before storage. The detail page renders those blocks as React text, without inserting source HTML. Application links require HTTP(S) and disallow embedded credentials. Provider identifiers are validated; URL hosts are fixed by adapter. The scheduler endpoint compares a bearer secret. Long sync requests require adequate hosting timeouts or a durable worker before high-volume deployment.
 
 - The analytics endpoint trusts the caller's `consent: true` field; the server cannot confirm a browser choice from that field alone. Admin authorization does not grant analytics or lead reads.

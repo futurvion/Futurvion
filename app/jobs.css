@@ -100,6 +100,36 @@
 .job-detail-loading-facts > div .jobs-skeleton-line:last-child { width: 75%; height: 15px; }
 @keyframes jobs-shimmer { to { background-position-x: -200%; } }
 .admin-page { background: #f7f8f6; }
+body:has(.admin-workspace) { --admin-header-height: 78px; display: flex; flex-direction: column; height: 100dvh; overflow: hidden; }
+body:has(.admin-workspace) #main-content { flex: none; height: calc(100dvh - var(--admin-header-height)); min-height: 0; overflow: hidden; }
+body:has(.admin-workspace, .admin-login-page) > .footer { display: none; }
+.admin-workspace { height: calc(100dvh - var(--admin-header-height)); min-height: 0; padding: clamp(28px,4vw,54px) 0 0; background: #f7f8f6; overflow: hidden; }
+.admin-workspace-grid { display: grid; grid-template-columns: 230px minmax(0,1fr); gap: clamp(24px,4vw,60px); align-items: stretch; height: 100%; min-height: 0; }
+.admin-workspace-content { min-width: 0; min-height: 0; padding-bottom: clamp(28px,4vw,54px); overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; }
+.admin-workspace-content .admin-page { min-width: 0; }
+.admin-workspace-content .admin-page h1 { font-size: clamp(2.4rem,4vw,3.7rem); }
+.admin-intro { max-width: 660px; color: var(--muted); }
+.admin-workspace-content .admin-stats { grid-template-columns: repeat(auto-fit,minmax(160px,1fr)); }
+.admin-sidebar { display: flex; flex-direction: column; min-height: 0; padding: 24px; background: #19384a; color: #fff; overflow-y: auto; }
+.admin-sidebar-brand { display: grid; gap: 7px; padding-bottom: 26px; border-bottom: 1px solid rgba(255,255,255,.2); }
+.admin-sidebar-brand .eyebrow { color: #a8cbd1; }
+.admin-sidebar-brand strong { font-size: 18px; line-height: 1.2; }
+.admin-sidebar nav { display: grid; gap: 5px; margin-top: 26px; }
+.admin-sidebar-label { margin-bottom: 8px; color: #a8cbd1; font-size: 11px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; }
+.admin-sidebar nav a { display: flex; justify-content: space-between; gap: 10px; padding: 12px 13px; border-radius: 3px; color: #d9e7e8; font-size: 14px; font-weight: 700; }
+.admin-sidebar nav a:hover,.admin-sidebar nav a:focus-visible,.admin-sidebar nav a[aria-current="page"] { background: #d8eaea; color: #19384a; }
+.admin-sidebar nav a span { opacity: .7; }
+.admin-sidebar-account { display: grid; gap: 8px; margin-top: auto; padding-top: 24px; border-top: 1px solid rgba(255,255,255,.2); font-size: 12px; }
+.admin-sidebar-account > span { color: #a8cbd1; }
+.admin-sidebar-account strong { overflow-wrap: anywhere; }
+.admin-sidebar-account button { width: fit-content; margin-top: 10px; color: #fff; font-weight: 700; text-decoration: underline; text-underline-offset: 4px; }
+.admin-sidebar-account button:disabled { opacity: .6; }
+.admin-sidebar-account p { color: #ffd5cf; }
+.admin-overview-card { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 25px; padding: clamp(24px,4vw,38px); background: #fff; border: 1px solid var(--line); }
+.admin-overview-card h2 { margin: 10px 0; font-size: clamp(1.5rem,2.5vw,2.2rem); }
+.admin-overview-card p { color: var(--muted); }
+.admin-overview-meta { margin-top: 22px; font-size: 13px; }
+.admin-login-page { min-height: 70vh; }
 .admin-page h1 { font-size: clamp(2.7rem,5vw,4.5rem); margin: 15px 0; }
 .admin-login { width: min(100%,480px); margin: 20px auto; padding: clamp(25px,4vw,50px); display: grid; gap: 19px; background: #fff; border: 1px solid var(--line); box-shadow: 15px 15px 0 #e1edef; }
 .admin-login h1 { margin: 0; font-size: 2.8rem; }
@@ -133,4 +163,6 @@
 .admin-schedule input[type=checkbox] { width: 20px; min-height: 20px; }
 @media(max-width:1000px) { .jobs-layout { grid-template-columns: 1fr; } .jobs-search { grid-template-columns: repeat(2,minmax(0,1fr)); } .jobs-more-filters,.jobs-search-actions { grid-column: 1/-1; } .jobs-more-fields { grid-template-columns: repeat(2,minmax(0,1fr)); } }
 @media(max-width:700px) { .jobs-grid,.job-detail-layout,.admin-stats { grid-template-columns: 1fr; } .jobs-search,.jobs-more-fields,.admin-provider-form,.admin-schedule { grid-template-columns: 1fr; } .jobs-hero-line { margin-top: 40px; } .jobs-results-heading { align-items: start; flex-direction: column; } }
+@media(max-width:850px) { body:has(.admin-workspace) { --admin-header-height: 70px; } }
+@media(max-width:800px) { .admin-workspace { padding-top: 16px; } .admin-workspace-grid { grid-template-columns: 1fr; grid-template-rows: auto minmax(0,1fr); gap: 16px; } .admin-sidebar { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 12px 20px; padding: 16px; } .admin-sidebar-brand { padding-bottom: 0; border: 0; } .admin-sidebar nav { grid-column: 1/-1; grid-row: 2; grid-template-columns: repeat(2,minmax(0,1fr)); margin: 0; } .admin-sidebar-label { display: none; } .admin-sidebar-account { align-content: start; margin: 0; padding: 0; border: 0; } .admin-sidebar-account > span,.admin-sidebar-account strong { display: none; } .admin-sidebar-account button { margin: 0; } .admin-sidebar-account p { max-width: 150px; } }
 @media(prefers-reduced-motion:reduce) { .job-card,.jobs-skeleton,.jobs-skeleton-line { transition: none; animation: none; } }

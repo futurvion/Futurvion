@@ -1,7 +1,9 @@
 import "server-only";
 import { createHash, randomBytes, scrypt as scryptCallback, timingSafeEqual } from "node:crypto";
 import { promisify } from "node:util";
+import { cache } from "react";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { getDb } from "@/lib/db";
 
 const scrypt = promisify(scryptCallback);
@@ -20,6 +22,11 @@ export async function adminSession() {
   if (!session || session.expiresAt <= new Date() || !session.adminUser.isActive || session.adminUser.role !== "admin") return null;
   return session;
 }
+export const requireAdminSession = cache(async () => {
+  const session = await adminSession();
+  if (!session) redirect("/admin/login");
+  return session;
+});
 export async function createSession(userId: string) {
   const db = getDb(); if (!db) throw new Error("Database unavailable");
   const token = randomBytes(32).toString("hex");
