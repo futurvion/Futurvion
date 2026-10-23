@@ -60,6 +60,12 @@ No authenticated analytics dashboard or AI agent feature is a confirmed requirem
 
 ## Recent progress and validation
 
+- 2026-10-23: Fixed the job detail View original posting button's low-contrast label by setting the shared light button text explicitly to the ink token instead of inheriting pale hero text. Chrome on a live job detail at 1440px and 390px verified dark label/arrow across normal, hover, and keyboard-focus states, no horizontal overflow, and preserved external-link attributes. Screenshot reviewed; lint and targeted diff whitespace checks passed. Broader checks skipped for this CSS color-only fix.
+
+
+- 2026-10-23: Resolved jobs module-not-found errors by restoring the existing lockfile dependencies with npm install --ignore-scripts --no-audit --no-fund --prefer-offline. Confirmed entities@8.1.0 and htmlparser2@12.0.0 resolve locally; no package manifest, lockfile, or application code changes were needed. /jobs and /api/jobs returned 200 without module errors. Typecheck, lint, all 33 tests across 10 files, and production build passed, clearing the previously recorded missing-dependency blockers.
+
+
 - 2026-10-23: Applied the explicit on-accent text color to shared primary buttons, including the admin Open jobs CTA, so labels and inherited arrows remain white despite base anchor styles. Authenticated Chrome verification confirmed white label/arrow in normal, hover, and keyboard-focus states and the /admin/jobs destination. Lint and targeted diff whitespace checks passed; broader checks skipped for this CSS color-only change.
 
 
