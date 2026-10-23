@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("server-only", () => ({}));
 vi.mock("@/lib/db", () => ({ getDb: vi.fn() }));
-vi.mock("@/lib/jobs/providers", () => ({ fetchProvider: vi.fn() }));
+vi.mock("@/features/jobs/server/providers", () => ({ fetchProvider: vi.fn() }));
 import { getDb } from "@/lib/db";
-import { fetchProvider } from "@/lib/jobs/providers";
-import { syncJobs } from "@/lib/jobs/sync";
+import { fetchProvider } from "@/features/jobs/server/providers";
+import { syncJobs } from "@/features/jobs/server/sync";
 
 const provider = { id: "provider-1", slug: "acme", name: "Acme", providerType: "greenhouse", configuration: { board: "acme" }, enabled: true, lastSyncAt: null, lastSuccessAt: null };
 function mockDb() {

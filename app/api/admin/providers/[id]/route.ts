@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { authorizedMutation } from "@/lib/admin-auth";
+import { authorizedMutation } from "@/features/jobs/server/admin-auth";
 import { getDb } from "@/lib/db";
-import { providerConfig } from "@/lib/jobs/core";
+import { providerConfig } from "@/features/jobs/server/core";
 import { readJson } from "@/lib/read-json";
 export const runtime = "nodejs";
 const schema = z.object({ name: z.string().trim().min(2).max(100).optional(), enabled: z.boolean().optional(), config: providerConfig.optional(), permissionConfirmed: z.literal(true).optional() }).refine(value => !value.config || value.permissionConfirmed === true);

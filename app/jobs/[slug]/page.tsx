@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { getJob } from "@/lib/jobs/queries";
-import { safeUrl, sourceLabel } from "@/lib/jobs/core";
+import { getJob } from "@/features/jobs/server/queries";
+import { safeUrl, sourceLabel } from "@/features/jobs/server/core";
 import { site } from "@/config/site";
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params; const job = await getJob(slug);

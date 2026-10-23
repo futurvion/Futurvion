@@ -1,8 +1,8 @@
 import { ArrowUpRight } from "lucide-react";
-import { ContactForm } from "@/components/contact-form";
+import { ContactForm } from "@/features/contact/components/contact-form";
 import { site } from "@/config/site";
 import { services } from "@/data/services";
-import { PageHero } from "@/components/page-hero";
+import { PageHero } from "@/components/shared/page-hero";
 import { pageMetadata } from "@/lib/seo";
 
 export const metadata = pageMetadata("Contact", "Tell Futurvion about your brand, website, software, or automation project.", "/contact");

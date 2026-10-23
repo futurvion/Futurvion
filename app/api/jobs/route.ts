@@ -1,5 +1,5 @@
 import { ZodError } from "zod";
-import { listJobs } from "@/lib/jobs/queries";
+import { listJobs } from "@/features/jobs/server/queries";
 export const runtime = "nodejs";
 export async function GET(request: Request) {
   try {

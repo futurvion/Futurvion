@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
-import { PageHero } from "@/components/page-hero";
+import { PageHero } from "@/components/shared/page-hero";
 import { pageMetadata } from "@/lib/seo";
 
 export const metadata = pageMetadata("About", "Learn how Futurvion connects brand strategy, digital experiences, and technology around business goals.", "/about");

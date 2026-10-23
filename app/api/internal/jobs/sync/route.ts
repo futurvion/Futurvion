@@ -1,5 +1,5 @@
 import { timingSafeEqual } from "node:crypto";
-import { runNextQueuedOrScheduled } from "@/lib/jobs/sync";
+import { runNextQueuedOrScheduled } from "@/features/jobs/server/sync";
 export const runtime = "nodejs";
 export const maxDuration = 300;
 export async function POST(request: Request) {

@@ -1,6 +1,6 @@
-import { AdminLogin } from "@/components/admin-login";
-import { AdminControls } from "@/components/admin-controls";
-import { adminSession } from "@/lib/admin-auth";
+import { AdminLogin } from "@/features/jobs/components/admin-login";
+import { AdminControls } from "@/features/jobs/components/admin-controls";
+import { adminSession } from "@/features/jobs/server/admin-auth";
 import { getDb } from "@/lib/db";
 export const metadata = { title: "Admin | Futurvion", robots: { index: false, follow: false } };
 export default async function AdminPage() {

@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-vi.mock("@/lib/jobs/sync", () => ({ runNextQueuedOrScheduled: vi.fn(async () => ({ status: "not_due" })) }));
+vi.mock("@/features/jobs/server/sync", () => ({ runNextQueuedOrScheduled: vi.fn(async () => ({ status: "not_due" })) }));
 import { POST } from "@/app/api/internal/jobs/sync/route";
-import { runNextQueuedOrScheduled } from "@/lib/jobs/sync";
+import { runNextQueuedOrScheduled } from "@/features/jobs/server/sync";
 afterEach(() => { vi.unstubAllEnvs(); vi.clearAllMocks(); });
 describe("scheduler authorization", () => {
   it("rejects requests without a configured strong secret", async () => {

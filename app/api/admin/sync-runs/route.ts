@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { adminSession, authorizedMutation } from "@/lib/admin-auth";
+import { adminSession, authorizedMutation } from "@/features/jobs/server/admin-auth";
 import { getDb } from "@/lib/db";
-import { syncJobs } from "@/lib/jobs/sync";
+import { syncJobs } from "@/features/jobs/server/sync";
 import { readJson } from "@/lib/read-json";
 export const runtime = "nodejs";
 export const maxDuration = 300;

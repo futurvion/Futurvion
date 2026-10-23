@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
-import { PageHero } from "@/components/page-hero";
+import { PageHero } from "@/components/shared/page-hero";
 import { pageMetadata } from "@/lib/seo";
 
 export const metadata = pageMetadata("Solutions by business type", "Explore practical brand, website, software, and automation opportunities for different businesses.", "/solutions");

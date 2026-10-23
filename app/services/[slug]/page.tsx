@@ -3,8 +3,8 @@ import { notFound } from "next/navigation";
 import { ArrowUpRight } from "lucide-react";
 import { services, serviceBySlug } from "@/data/services";
 import { pageMetadata, breadcrumbJsonLd, serviceJsonLd } from "@/lib/seo";
-import { PageHero } from "@/components/page-hero";
-import { JsonLd } from "@/components/json-ld";
+import { PageHero } from "@/components/shared/page-hero";
+import { JsonLd } from "@/components/shared/json-ld";
 export const dynamicParams = false;
 export function generateStaticParams() { return services.map(s => ({ slug: s.slug })); }
 export async function generateMetadata({ params }: PageProps<"/services/[slug]">) { const { slug } = await params; const s = serviceBySlug(slug); return s ? pageMetadata(s.title, s.intro, `/services/${slug}`) : {}; }

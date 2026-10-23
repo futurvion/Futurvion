@@ -8,9 +8,9 @@ Futurvion is a public site for a digital solutions studio. Its stated goal is to
 
 | User | Current workflow | Evidence |
 | --- | --- | --- |
-| Prospective visitor | Browse eight services, sector examples, process, FAQs, and illustrative work; open a service detail page and follow its contact link. | `data/services.ts`, `app/`, `components/faq.tsx` |
-| Enquirer | Enter contact details, service and project description, agree to contact, submit the form, or use the public email link. | `components/contact-form.tsx`, `app/api/contact/route.ts` |
-| Analytics participant | Allow or decline optional analytics in the banner; allowed interactions submit coarse events. | `components/analytics-consent.tsx`, `app/api/analytics/route.ts` |
+| Prospective visitor | Browse eight services, sector examples, process, FAQs, and illustrative work; open a service detail page and follow its contact link. | `data/services.ts`, `app/`, `components/home/faq.tsx` |
+| Enquirer | Enter contact details, service and project description, agree to contact, submit the form, or use the public email link. | `features/contact/components/contact-form.tsx`, `app/api/contact/route.ts` |
+| Analytics participant | Allow or decline optional analytics in the banner; allowed interactions submit coarse events. | `features/analytics/components/analytics-consent.tsx`, `app/api/analytics/route.ts` |
 | Site operator | Configure database/email, review leads and analytics in external tools or direct SQL. | `README.md`, `prisma/schema.prisma`; no repository admin UI exists |
 
 The jobs portal adds a single administrator role and a direct `/admin` login for job operations. Public visitors still have no account workflow.

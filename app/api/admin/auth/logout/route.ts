@@ -1,4 +1,4 @@
-import { authorizedMutation, revokeSession } from "@/lib/admin-auth";
+import { authorizedMutation, revokeSession } from "@/features/jobs/server/admin-auth";
 export const runtime = "nodejs";
 export async function POST(request: Request) {
   if (!await authorizedMutation(request)) return Response.json({ error: "Unauthorized" }, { status: 401 });

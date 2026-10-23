@@ -1,13 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("server-only", () => ({}));
-vi.mock("@/lib/admin-auth", () => ({ adminSession: vi.fn(), authorizedMutation: vi.fn() }));
+vi.mock("@/features/jobs/server/admin-auth", () => ({ adminSession: vi.fn(), authorizedMutation: vi.fn() }));
 vi.mock("@/lib/db", () => ({ getDb: vi.fn() }));
-vi.mock("@/lib/jobs/sync", () => ({ syncJobs: vi.fn() }));
+vi.mock("@/features/jobs/server/sync", () => ({ syncJobs: vi.fn() }));
 
-import { authorizedMutation } from "@/lib/admin-auth";
+import { authorizedMutation } from "@/features/jobs/server/admin-auth";
 import { getDb } from "@/lib/db";
-import { syncJobs } from "@/lib/jobs/sync";
+import { syncJobs } from "@/features/jobs/server/sync";
 import { POST } from "@/app/api/admin/sync-runs/route";
 
 const db = { jobProvider: { count: vi.fn(), findFirst: vi.fn() } };

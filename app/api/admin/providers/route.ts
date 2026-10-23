@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { adminSession, authorizedMutation } from "@/lib/admin-auth";
+import { adminSession, authorizedMutation } from "@/features/jobs/server/admin-auth";
 import { getDb } from "@/lib/db";
-import { identifier, providerConfig } from "@/lib/jobs/core";
+import { identifier, providerConfig } from "@/features/jobs/server/core";
 import { readJson } from "@/lib/read-json";
 export const runtime = "nodejs";
 const schema = z.object({ name: z.string().trim().min(2).max(100), slug: identifier, enabled: z.boolean(), config: providerConfig, permissionConfirmed: z.literal(true) });

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowUpRight } from "lucide-react";
 import { portfolio } from "@/data/portfolio";
-import { PageHero } from "@/components/page-hero";
+import { PageHero } from "@/components/shared/page-hero";
 import { pageMetadata } from "@/lib/seo";
 export const dynamicParams = false;
 export function generateStaticParams() { return portfolio.map(p => ({ slug: p.slug })); }

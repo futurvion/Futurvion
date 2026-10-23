@@ -1,4 +1,4 @@
-import { adminSession } from "@/lib/admin-auth";
+import { adminSession } from "@/features/jobs/server/admin-auth";
 import { getDb } from "@/lib/db";
 export const runtime = "nodejs";
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {

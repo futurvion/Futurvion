@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("server-only", () => ({}));
-import { fetchProvider } from "@/lib/jobs/providers";
+import { fetchProvider } from "@/features/jobs/server/providers";
 
 beforeEach(() => { vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 describe("provider adapters", () => {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { contentHash, date, listQuery, plainText, providerConfig, safeUrl, scheduleSchema, slugFor } from "@/lib/jobs/core";
+import { contentHash, date, listQuery, plainText, providerConfig, safeUrl, scheduleSchema, slugFor } from "@/features/jobs/server/core";
 
 describe("jobs input and normalization", () => {
   it("rejects unsafe outbound URLs and provider identifiers", () => {

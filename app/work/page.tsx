@@ -1,5 +1,5 @@
-import { WorkFilter } from "@/components/work-filter";
-import { PageHero } from "@/components/page-hero";
+import { WorkFilter } from "@/components/shared/work-filter";
+import { PageHero } from "@/components/shared/page-hero";
 import { pageMetadata } from "@/lib/seo";
 
 export const metadata = pageMetadata("Illustrative work concepts", "Explore clearly labeled sample concepts across branding, websites, software, automation, and growth.", "/work");

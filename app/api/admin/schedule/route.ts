@@ -1,6 +1,6 @@
-import { adminSession, authorizedMutation } from "@/lib/admin-auth";
+import { adminSession, authorizedMutation } from "@/features/jobs/server/admin-auth";
 import { getDb } from "@/lib/db";
-import { scheduleSchema } from "@/lib/jobs/core";
+import { scheduleSchema } from "@/features/jobs/server/core";
 import { readJson } from "@/lib/read-json";
 export const runtime = "nodejs";
 export async function GET() {

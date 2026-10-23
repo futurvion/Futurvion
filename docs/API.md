@@ -12,7 +12,7 @@ The contact and analytics endpoints remain public `POST` Route Handlers. Jobs ad
 
 ## `POST /api/contact`
 
-Purpose: accept a prospective client's enquiry and notify the configured inbox. Called by `components/contact-form.tsx`. No query parameters. Request body is JSON:
+Purpose: accept a prospective client's enquiry and notify the configured inbox. Called by `features/contact/components/contact-form.tsx`. No query parameters. Request body is JSON:
 
 ```json
 {
@@ -43,7 +43,7 @@ The route requires `DATABASE_URL`, `ABUSE_HASH_SECRET`, `RESEND_API_KEY`, `CONTA
 
 ## `POST /api/analytics`
 
-Purpose: store opt-in interaction events. Called by `components/analytics-consent.tsx`. No query parameters. Example request:
+Purpose: store opt-in interaction events. Called by `features/analytics/components/analytics-consent.tsx`. No query parameters. Example request:
 
 ```json
 {

@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { Suspense } from "react";
-import { JobsSearch } from "@/components/jobs-search";
-import { listJobs } from "@/lib/jobs/queries";
-import { sourceLabel } from "@/lib/jobs/core";
+import { JobsSearch } from "@/features/jobs/components/jobs-search";
+import { listJobs } from "@/features/jobs/server/queries";
+import { sourceLabel } from "@/features/jobs/server/core";
 import { pageMetadata } from "@/lib/seo";
 export const metadata = pageMetadata("Jobs", "Discover opportunities in technology, design, marketing, product and business.", "/jobs");
 export default async function JobsPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {

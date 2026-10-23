@@ -1,7 +1,7 @@
 import { createHmac } from "node:crypto";
 import { z } from "zod";
 import { getDb } from "@/lib/db";
-import { createSession, validOrigin, verifyPassword } from "@/lib/admin-auth";
+import { createSession, validOrigin, verifyPassword } from "@/features/jobs/server/admin-auth";
 import { readJson } from "@/lib/read-json";
 
 export const runtime = "nodejs";

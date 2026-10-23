@@ -1,7 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { ProviderEditor } from "@/components/provider-editor";
+import { ProviderEditor } from "./provider-editor";
 type Provider = { id: string; name: string; slug: string; providerType: string; enabled: boolean; configuration: unknown; lastSuccessAt: Date | null; lastErrorSummary: string | null; runs: { status: string; jobsFetched: number; jobsInserted: number; jobsUpdated: number }[] };
 type Schedule = { enabled: boolean; frequencyMinutes: number; timezone: string; batchSize: number; maxConcurrency: number; retryLimit: number; retryDelaySeconds: number; expireAfterDays: number };
 export function AdminControls({ providers, schedule }: { providers: Provider[]; schedule: Schedule }) {

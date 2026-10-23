@@ -1,4 +1,4 @@
-import { getJob } from "@/lib/jobs/queries";
+import { getJob } from "@/features/jobs/server/queries";
 export const runtime = "nodejs";
 export async function GET(_request: Request, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;

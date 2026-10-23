@@ -29,9 +29,9 @@ Manual runs process during the authenticated admin request; the external schedul
 
 | Status | Capability and dependencies | Acceptance criteria / next check |
 | --- | --- | --- |
-| NEEDS_VERIFICATION | Contact submission: `components/contact-form.tsx`, `app/api/contact/route.ts`, Prisma `Lead`, Resend (`DATABASE_URL`, `ABUSE_HASH_SECRET`, `RESEND_API_KEY`, `CONTACT_TO_EMAIL`, `CONTACT_FROM_EMAIL`). | With a migrated test database and verified sending domain, submit valid/invalid requests; confirm the lead row, notification delivery, and error behavior. |
-| NEEDS_VERIFICATION | Opt-in analytics: `components/analytics-consent.tsx`, `app/api/analytics/route.ts`, `AnalyticsEvent` (`DATABASE_URL`, `ABUSE_HASH_SECRET`). | In a browser against a migrated test database, accept and decline consent; verify event rows only after acceptance, duplicate handling, and session renewal. |
-| NEEDS_VERIFICATION | WebGL and reduced-motion fallback, scroll effects, responsive navigation (`components/hero-scene.tsx`, `components/reveal.tsx`, `components/header.tsx`). | Manual browser check on mobile, reduced-motion, and WebGL-disabled contexts; no browser automation is configured. |
+| NEEDS_VERIFICATION | Contact submission: `features/contact/components/contact-form.tsx`, `app/api/contact/route.ts`, Prisma `Lead`, Resend (`DATABASE_URL`, `ABUSE_HASH_SECRET`, `RESEND_API_KEY`, `CONTACT_TO_EMAIL`, `CONTACT_FROM_EMAIL`). | With a migrated test database and verified sending domain, submit valid/invalid requests; confirm the lead row, notification delivery, and error behavior. |
+| NEEDS_VERIFICATION | Opt-in analytics: `features/analytics/components/analytics-consent.tsx`, `app/api/analytics/route.ts`, `AnalyticsEvent` (`DATABASE_URL`, `ABUSE_HASH_SECRET`). | In a browser against a migrated test database, accept and decline consent; verify event rows only after acceptance, duplicate handling, and session renewal. |
+| NEEDS_VERIFICATION | WebGL and reduced-motion fallback, scroll effects, responsive navigation (`components/home/hero-scene.tsx`, `components/effects/reveal.tsx`, `components/layout/header.tsx`). | Manual browser check on mobile, reduced-motion, and WebGL-disabled contexts; no browser automation is configured. |
 | NEEDS_VERIFICATION | Production deployment and search metadata (`README.md`, `app/layout.tsx`, `app/sitemap.ts`, `app/robots.ts`). | Confirm host configuration, domain/canonical URLs, migrations, headers, robots output, and API integration on the deployed site. |
 
 ## Partially implemented features
@@ -59,6 +59,8 @@ No authenticated analytics dashboard or AI agent feature is a confirmed requirem
 4. **PLANNED** — Add focused API and browser tests for the highest-risk flows. Dependency: test environment and desired browser coverage. Acceptance: critical success and failure paths run automatically.
 
 ## Recent progress and validation
+
+- 2026-10-22: Reorganized UI into layout, home, effects, shared, and feature-owned folders; moved jobs UI, domain logic, provider adapters, and admin authentication under `features/jobs/` while keeping Next.js routes and APIs in `app/`. Updated source imports and architecture/product/API/security documentation. `npm run typecheck`, `npm run lint`, `npm test` (8 files, 26 tests), and `npm run build` passed. No database or deployment changes were made.
 
 - 2026-10-22: Added an idempotent provider seed script for Remotive, Figma and Twilio Greenhouse boards, and APPLY Digital Lever; enabled them in the configured Neon database. Changed sync to read existing job hashes once per batch and corrected Greenhouse date handling. A first protected sync succeeded with 297 fetched and inserted, zero provider errors. Local production-server `/api/jobs` reported 297 rows (10 Remotive, 270 Greenhouse, 17 Lever); `/jobs` and a job detail page returned 200, displayed source attribution and original links, and kept `/admin` off public navigation. `npm run typecheck`, `npm run lint`, `npm test` (8 files, 26 tests), and `npm run build` passed. Automatic deployed cron and admin login remain unverified.
 

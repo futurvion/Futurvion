@@ -1,4 +1,4 @@
-import { adminSession } from "@/lib/admin-auth";
+import { adminSession } from "@/features/jobs/server/admin-auth";
 export const runtime = "nodejs";
 export async function GET() {
   const session = await adminSession();

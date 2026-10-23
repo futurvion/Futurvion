@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { services } from "@/data/services";
-import { ServiceIcon } from "@/components/service-icon";
-import { PageHero } from "@/components/page-hero";
+import { ServiceIcon } from "@/components/shared/service-icon";
+import { PageHero } from "@/components/shared/page-hero";
 import { pageMetadata } from "@/lib/seo";
 
 export const metadata = pageMetadata("Services", "Explore branding, websites, custom software, automation, and digital growth services shaped around your business goals.", "/services");

@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
-import { FAQ } from "@/components/faq";
-import { HeroVisual } from "@/components/hero-visual";
-import { ScrollStory } from "@/components/scroll-story";
-import { ServiceIcon } from "@/components/service-icon";
+import { FAQ } from "@/components/home/faq";
+import { HeroVisual } from "@/components/home/hero-visual";
+import { ScrollStory } from "@/components/home/scroll-story";
+import { ServiceIcon } from "@/components/shared/service-icon";
 import { services } from "@/data/services";
 import { portfolio } from "@/data/portfolio";
 import { site } from "@/config/site";

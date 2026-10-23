@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { scryptSync } from "node:crypto";
 vi.mock("server-only", () => ({}));
-import { validOrigin, verifyPassword } from "@/lib/admin-auth";
+import { validOrigin, verifyPassword } from "@/features/jobs/server/admin-auth";
 
 describe("admin authentication helpers", () => {
   it("verifies a scrypt hash and rejects a wrong password", async () => {

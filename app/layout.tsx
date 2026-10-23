@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono, Space_Grotesk } from "next/font/google";
-import { Header } from "@/components/header";
-import { Footer } from "@/components/footer";
-import { ScrollProgress } from "@/components/scroll-progress";
-import { ScrollReveal } from "@/components/reveal";
-import { AnalyticsConsent } from "@/components/analytics-consent";
-import { JsonLd } from "@/components/json-ld";
+import { Header } from "@/components/layout/header";
+import { Footer } from "@/components/layout/footer";
+import { ScrollProgress } from "@/components/effects/scroll-progress";
+import { ScrollReveal } from "@/components/effects/reveal";
+import { AnalyticsConsent } from "@/features/analytics/components/analytics-consent";
+import { JsonLd } from "@/components/shared/json-ld";
 import { organizationJsonLd } from "@/lib/seo";
 import { site } from "@/config/site";
 import { paletteCss } from "@/config/palette";
