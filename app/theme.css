@@ -44,6 +44,7 @@ h3 { font-size: 1.45rem; }
 .header-inner { height: 100%; display: flex; align-items: center; justify-content: space-between; gap: 28px; }
 .brand, .footer-brand { display: inline-flex; align-items: center; gap: 11px; font-family: var(--display); font-size: 18px; font-weight: 750; letter-spacing: .14em; white-space: nowrap; }
 .brand-mark-img { width: 36px; height: auto; }
+.brand-wordmark { display: block; width: 156px; height: 17px; background: var(--ink); mask: url("/logo-wordmark.png") center / contain no-repeat; }
 .desktop-nav { display: flex; align-items: center; justify-content: center; gap: clamp(17px,2vw,34px); margin-left: auto; }
 .desktop-nav a { color: var(--muted); font-size: 13px; font-weight: 600; transition: color .2s; }
 .desktop-nav a:hover, .desktop-nav a.active { color: var(--accent); }
@@ -359,6 +360,7 @@ h3 { font-size: 1.45rem; }
   .page-section { padding: 66px 0; }
   .brand { font-size: 16px; }
   .brand-mark-img { width: 32px; }
+  .brand-wordmark { width: 138px; height: 15px; }
   .hero-grid { gap: 48px; padding-top: 68px; padding-bottom: 65px; }
   .hero-copy h1 { font-size: clamp(3rem,10vw,4.3rem); }
   .hero-copy p { font-size: 16px; }

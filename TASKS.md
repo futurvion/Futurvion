@@ -60,6 +60,16 @@ No authenticated analytics dashboard or AI agent feature is a confirmed requirem
 
 ## Recent progress and validation
 
+- 2026-10-23: Replaced the header's typed brand name with the existing designed wordmark, rendered in dark ink beside the colored logo symbol for contrast on the light header. Chrome checks at 1440px and 390px confirmed the wordmark, accessible home link, and no horizontal overflow; desktop header screenshot visually reviewed. Lint and targeted diff whitespace checks passed. Typecheck, three test suites, and build were blocked by locally missing declared entities/htmlparser2 packages (seven suites and 21 tests passed). A dependency restore was stopped after prolonged dependency resolution; package manifests and lockfile were not changed by this task.
+
+
+- 2026-10-23: Cleared only the configured admin account's failed-login attempt records at the owner's request and verified none remain. The existing five-attempt rolling 15-minute limit remains enabled. No application code changed; application checks were skipped for this targeted operational reset.
+
+
+- 2026-10-23: Updated the configured admin password at the owner's request using the existing rotation script. Verified the stored scrypt hash accepts the requested password, the account is active with the admin role, and existing sessions are revoked. Synchronized the ignored local environment hash. No application code changed; typecheck, lint, unit tests, and build were skipped for this credentials-only operation.
+
+
+- 2026-10-23: Reworked the protected admin area into a distinct operations dashboard with a dark workspace sidebar, overview health/metrics panels, quick actions, provider cards, sync history, and a more structured Jobs operations page. Replaced admin-native `<select>` controls with an accessible custom listbox-style selector for provider type and Lever region. `npx --no-install next typegen`, `npm run typecheck`, `npm run lint`, `npm test` (10 files, 33 tests), and `npm run build` passed. Local HTTP returned 200 for `/admin/login`; an authenticated visual browser pass was not available in the CLI sandbox and database access from that sandbox timed out.
 - 2026-10-23: Hid the public footer on every admin route, including the login page. The protected dashboard keeps its fixed sidebar and independently scrolling content. Local Chrome confirmed the footer is hidden on `/admin/login`, `/admin`, and `/admin/jobs`. `npm run typecheck`, `npm run lint`, `npm test` (10 files, 33 tests), and `npm run build` passed.
 - 2026-10-23: Kept the protected admin sidebar stationary within the viewport while only the content pane scrolls; the narrow layout keeps compact navigation above the scrolling content. A local Chrome check at 1440×900 and 390×844 confirmed an 800px content scroll with unchanged sidebar position, no document or horizontal overflow, and a reset to the top when switching tabs. `npm run typecheck`, `npm run lint`, `npm test` (10 files, 33 tests), and `npm run build` passed. Updated the admin layout CSS; deployed browser behavior remains unverified.
 
