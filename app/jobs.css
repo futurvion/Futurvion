@@ -179,8 +179,8 @@ body:has(.admin-login-page) #main-content { min-height: 100dvh; }
 .admin-sidebar { position: relative; display: flex; flex-direction: column; min-height: 100%; padding: 32px 22px 22px; background: #102d3b; color: #fff; overflow: hidden; }
 .admin-sidebar::before { content: ""; position: absolute; width: 260px; height: 260px; right: -170px; top: 22%; border: 1px solid rgba(164, 225, 224, .17); border-radius: 50%; box-shadow: 0 0 0 35px rgba(164, 225, 224, .03), 0 0 0 70px rgba(164, 225, 224, .025); pointer-events: none; }
 .admin-sidebar-brand { position: relative; z-index: 1; display: grid; gap: 15px; padding: 0 8px 34px; border-bottom: 1px solid rgba(255,255,255,.15); }
-.admin-sidebar-logo { display: inline-flex; align-items: center; gap: 12px; color: #fff; font-family: var(--display); font-size: 18px; font-weight: 700; letter-spacing: .08em; }
-.admin-sidebar-logo span { display: grid; place-items: center; width: 32px; height: 32px; border: 1px solid rgba(177, 231, 228, .6); color: #b1e7e4; font-family: Georgia, serif; font-size: 19px; font-style: italic; }
+.admin-sidebar-logo { display: block; width: 190px; color: #fff; }
+.admin-sidebar-logo-image { display: block; width: 100%; height: auto; }
 .admin-sidebar-kicker { color: #91b8bf; font-size: 10px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
 .admin-sidebar-nav-heading { position: relative; z-index: 1; display: flex; justify-content: space-between; gap: 10px; margin: 30px 8px 12px; color: #87aeb6; font-size: 10px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; }
 .admin-sidebar nav { position: relative; z-index: 1; display: grid; gap: 7px; margin: 0; }
@@ -395,6 +395,7 @@ body:has(.admin-login-page) #main-content { min-height: 100dvh; }
   .admin-sidebar { min-height: 0; padding: 18px 22px; }
   .admin-sidebar::before { display: none; }
   .admin-sidebar-brand { display: flex; align-items: center; justify-content: space-between; gap: 15px; padding: 0 0 16px; }
+  .admin-sidebar-kicker { display: none; }
   .admin-sidebar-nav-heading { display: none; }
   .admin-sidebar nav { grid-template-columns: repeat(2, minmax(0,1fr)); margin-top: 14px; }
   .admin-sidebar-bottom { position: absolute; top: 19px; right: 22px; display: flex; align-items: center; gap: 15px; margin: 0; }

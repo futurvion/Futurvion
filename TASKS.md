@@ -60,6 +60,18 @@ No authenticated analytics dashboard or AI agent feature is a confirmed requirem
 
 ## Recent progress and validation
 
+- 2026-10-23: Changed the public header and mobile menu surface to charcoal (#242936), sharing one CSS color variable. The full logo retains its transparent wrapper so its background matches the header seamlessly. Chrome confirmed the charcoal computed header color and transparent logo background; screenshot reviewed. Lint passed. Full application checks were skipped for this color-only change; prior dependency blockers remain recorded.
+
+
+- 2026-10-23: Removed the public logo badge background and padding; switched the complete header and mobile menu to a continuous dark navy surface so the original full logo's white lettering remains legible. Updated navigation, CTA, menu button, separators, and focus colors. Lint and diff whitespace checks passed. Chrome checks at 1440px and 390px confirmed a transparent logo wrapper, dark header, no horizontal overflow, and a working readable mobile menu; desktop screenshot reviewed. Restarted the Linux development server to pick up host CSS edits. Typecheck/tests/build were not repeated for this CSS-only change; the previously recorded local dependency blockers remain.
+
+
+- 2026-10-23: Resolved stale admin branding in the running development server by restarting the Linux-hosted instance serving localhost. Authenticated login and admin requests succeeded; the admin HTML now includes the full-logo image and the logo asset returns 200. Browser image decode also succeeded. No application logic changed; prior dependency-related check blockers remain.
+
+
+- 2026-10-23: Adopted the exact supplied logo-full.png, including its tagline, for the public header and admin sidebar. Kept a dark header backing for the original white lettering; hid the secondary sidebar kicker on narrow screens to avoid crowding the logo and account controls. Added image size hints/preloading and removed obsolete header wordmark CSS. Lint and diff whitespace checks passed. Typecheck, three test suites, and build remain blocked by locally missing declared entities/htmlparser2 packages; seven suites and 21 tests passed.
+
+
 - 2026-10-23: Replaced the header's typed brand name with the existing designed wordmark, rendered in dark ink beside the colored logo symbol for contrast on the light header. Chrome checks at 1440px and 390px confirmed the wordmark, accessible home link, and no horizontal overflow; desktop header screenshot visually reviewed. Lint and targeted diff whitespace checks passed. Typecheck, three test suites, and build were blocked by locally missing declared entities/htmlparser2 packages (seven suites and 21 tests passed). A dependency restore was stopped after prolonged dependency resolution; package manifests and lockfile were not changed by this task.
 
 

@@ -22,7 +22,7 @@ export function Header() {
   }, [open]);
   return <header className="site-header">
     <div className="container header-inner">
-      <Link className="brand" href="/" aria-label="Futurvion home" onClick={() => setOpen(false)}><Image className="brand-mark-img" src="/logo-mark.png" alt="" width={512} height={451} priority /><span className="brand-wordmark" aria-hidden="true" /></Link>
+      <Link className="brand" href="/" aria-label="Futurvion home" onClick={() => setOpen(false)}><Image className="brand-full-logo" src="/logo-full.png" alt="Futurvion" width={1600} height={379} sizes="182px" preload /></Link>
       <nav className="desktop-nav" aria-label="Main navigation">{site.navigation.filter(item => item.href !== "/" && item.href !== "/contact").map(item => <Link key={item.href} href={item.href} aria-current={pathname === item.href ? "page" : undefined} className={pathname === item.href || (!item.href.includes("#") && pathname.startsWith(`${item.href}/`)) ? "active" : ""}>{item.label}</Link>)}</nav>
       <Link className="header-cta" href={site.bookingUrl || "/contact"} target={site.bookingUrl ? "_blank" : undefined} rel={site.bookingUrl ? "noopener noreferrer" : undefined}>{site.bookingUrl ? "Book a consultation" : "Let's talk"} <ArrowUpRight size={16} /></Link>
       <button className="menu-toggle" type="button" aria-label={open ? "Close menu" : "Open menu"} aria-expanded={open} aria-controls="mobile-navigation" onClick={() => setOpen(!open)}>{open ? <X /> : <Menu />}</button>
