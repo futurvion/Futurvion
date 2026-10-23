@@ -60,6 +60,15 @@ No authenticated analytics dashboard or AI agent feature is a confirmed requirem
 
 ## Recent progress and validation
 
+- 2026-10-23: Matched the header and mobile menu to the existing site accent via --header-surface: var(--accent) (#175d78), with cool pale-blue interaction accents. Preserved the transparent full logo and white navigation. Targeted diff whitespace check passed; broader checks skipped for this CSS palette-only change.
+
+
+- 2026-10-23: Changed the header/mobile-menu surface to warm tan (#896b57), with white navigation and warm cream interaction accents to complement the requested skin-tone palette. Kept the full logo transparent. White text contrast is 4.88:1 (calculated from sRGB); targeted whitespace check passed. Broader application checks skipped for this CSS palette-only change.
+
+
+- 2026-10-23: Lightened --header-surface from charcoal to slate (#526778), preserving readable white logo lettering and the shared header/mobile-menu background. Targeted diff whitespace check passed; broader checks skipped for this single CSS color change.
+
+
 - 2026-10-23: Changed the public header and mobile menu surface to charcoal (#242936), sharing one CSS color variable. The full logo retains its transparent wrapper so its background matches the header seamlessly. Chrome confirmed the charcoal computed header color and transparent logo background; screenshot reviewed. Lint passed. Full application checks were skipped for this color-only change; prior dependency blockers remain recorded.
 
 
