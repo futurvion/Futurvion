@@ -1,1 +1,0 @@
-export default function Loading() { return <section className="page-section"><div className="container"><div className="jobs-skeleton" aria-label="Loading jobs"/><div className="jobs-skeleton"/><div className="jobs-skeleton"/></div></section>; }

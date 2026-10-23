@@ -6,6 +6,8 @@ The schema in `prisma/schema.prisma` and committed SQL migrations define Postgre
 
 `prisma/migrations/20261022090000_jobs_portal/migration.sql` adds `JobProvider`, `Job`, `JobSyncRun`, `JobSyncSettings`, `AdminUser`, and `AdminSession`. It includes source identity and slug uniqueness, filter indexes, valid status/work mode and salary checks, and a partial unique index permitting only one running sync. Admin sessions store hashes of random tokens. The migration creates no admin credentials; `scripts/bootstrap-admin.mjs` provisions one separately when explicitly run.
 
+On 2026-10-23, 124 existing Twilio job descriptions in the configured database were updated from their current Greenhouse feed after entity-escaped HTML was found in the stored text. Seven older Twilio rows were absent from that feed; their stored legacy text was cleaned into readable sections and lists after a reviewed preview, with a local backup retained for rollback. All 131 Twilio descriptions now use the structured text format. These targeted backfills did not update job content hashes, so the next provider sync will reconcile hashes and other source fields for jobs still in the feed. The seven unavailable postings remain under the normal sync/expiration policy.
+
 Prisma `String` maps to `TEXT`, `DateTime` to `TIMESTAMP(3)`, and `Boolean` to `BOOLEAN` in the migration. IDs are generated with `cuid()` by Prisma; database default for ID is not in the SQL migration.
 
 ## Tables and columns

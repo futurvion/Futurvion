@@ -1,5 +1,5 @@
 import "server-only";
-import { date, plainText, safeUrl, type NormalizedJob, type ProviderConfig } from "./core";
+import { date, jobDescriptionText, plainText, safeUrl, type NormalizedJob, type ProviderConfig } from "./core";
 
 type FetchResult = { jobs: NormalizedJob[]; complete: boolean };
 class ProviderHttpError extends Error { constructor(public status: number) { super(`Provider HTTP ${status}`); } }
@@ -23,7 +23,7 @@ export async function fetchProvider(config: ProviderConfig, name: string, retrie
     const jobs = valid(payload.jobs.map(row => ({
       externalJobId: String(row.id ?? ""), title: String(row.title ?? ""), companyName: String(row.company_name ?? ""),
       companyLogoUrl: safeUrl(row.company_logo), location: plainText(row.candidate_required_location), workMode: "remote",
-      employmentType: plainText(row.job_type)?.replaceAll("_", "-"), category: plainText(row.category), descriptionText: plainText(row.description),
+      employmentType: plainText(row.job_type)?.replaceAll("_", "-"), category: plainText(row.category), descriptionText: jobDescriptionText(row.description),
       applicationUrl: safeUrl(row.url) ?? "", publishedAt: date(row.publication_date),
     })));
     if (payload.jobs.length && !jobs.length) throw new Error("No valid Remotive jobs");
@@ -35,7 +35,7 @@ export async function fetchProvider(config: ProviderConfig, name: string, retrie
     const jobs = valid(payload.jobs.map(row => ({
       externalJobId: String(row.id ?? ""), title: String(row.title ?? ""), companyName: name,
       location: plainText((row.location as { name?: string } | undefined)?.name), workMode: "unknown",
-      descriptionText: plainText(row.content), applicationUrl: safeUrl(row.absolute_url) ?? "",
+      descriptionText: jobDescriptionText(row.content), applicationUrl: safeUrl(row.absolute_url) ?? "",
     })));
     if (payload.jobs.length && !jobs.length) throw new Error("No valid Greenhouse jobs");
     return { complete: jobs.length === payload.jobs.length, jobs };
@@ -53,7 +53,7 @@ export async function fetchProvider(config: ProviderConfig, name: string, retrie
       return { externalJobId: String(row.id ?? ""), title: String(row.text ?? ""), companyName: name,
         location: plainText(categories.location), workMode: row.workplaceType === "on-site" ? "onsite" : ["remote", "hybrid"].includes(String(row.workplaceType)) ? String(row.workplaceType) : "unknown",
         employmentType: plainText(categories.commitment), category: plainText(categories.department ?? categories.team),
-        descriptionText: plainText(row.descriptionPlain ?? row.description),
+        descriptionText: jobDescriptionText(row.descriptionPlain ?? row.description),
         salaryMin: typeof salary.min === "number" ? Math.round(salary.min) : undefined,
         salaryMax: typeof salary.max === "number" ? Math.round(salary.max) : undefined,
         salaryCurrency: plainText(salary.currency), salaryPeriod: plainText(salary.interval),

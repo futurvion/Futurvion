@@ -1,4 +1,6 @@
 import { createHash } from "node:crypto";
+import { decodeHTML } from "entities";
+import { parseDocument } from "htmlparser2";
 import { z } from "zod";
 
 export const identifier = z.string().regex(/^[a-z0-9][a-z0-9_-]{0,62}$/);
@@ -42,6 +44,55 @@ export function safeUrl(value: unknown): string | undefined {
 export function plainText(value: unknown): string | undefined {
   if (typeof value !== "string") return;
   return value.replace(/<[^>]*>/g, " ").replace(/&(?:nbsp|amp|lt|gt|quot|#39);/g, " ").replace(/\s+/g, " ").trim().slice(0, 30000) || undefined;
+}
+export function jobDescriptionText(value: unknown): string | undefined {
+  if (typeof value !== "string") return;
+  const html = /&lt;\s*\/?[a-z]/i.test(value) ? decodeHTML(value) : value;
+  if (!/<\/?[a-z][\s>]/i.test(html)) {
+    return decodeHTML(html).replace(/\r\n?/g, "\n").replace(/\u00a0/g, " ").replace(/[\t ]+/g, " ").replace(/\n{3,}/g, "\n\n").trim().slice(0, 30000) || undefined;
+  }
+
+  type Node = ReturnType<typeof parseDocument>["children"][number];
+  const blocks: string[] = [];
+  const blockTags = new Set(["p", "div", "section", "article", "blockquote", "ul", "ol", "li", "table", "tr", "h1", "h2", "h3", "h4", "h5", "h6"]);
+  const normalize = (text: string) => text.replace(/\u00a0/g, " ").replace(/\s+/g, " ").replace(/\s+([,.!?;:])/g, "$1").trim();
+  function textOf(nodes: Node[]): string {
+    return nodes.map(node => {
+      if (node.type === "text") return node.data;
+      if (node.type === "script" || node.type === "style") return "";
+      if ("name" in node && node.name === "span" && "attribs" in node && /color:\s*rgb\(\s*255\s*,\s*255\s*,\s*255\s*\)/i.test(node.attribs.style ?? "") && textOf(node.children).trim() === ".") return "";
+      if ("name" in node && node.name === "br") return " ";
+      return "children" in node ? textOf(node.children) : "";
+    }).join("");
+  }
+  function visit(node: Node) {
+    if (node.type === "script" || node.type === "style") return;
+    if (node.type === "text") {
+      const text = normalize(node.data);
+      if (text) blocks.push(text);
+      return;
+    }
+    if (!("children" in node)) return;
+    const name = "name" in node ? node.name : "";
+    if (["script", "style", "noscript", "iframe", "svg"].includes(name)) return;
+    if (name === "p" || name === "li" || /^h[1-6]$/.test(name)) {
+      const text = normalize(textOf(node.children));
+      if (!text) return;
+      const meaningful = node.children.filter(child => child.type !== "text" || child.data.trim());
+      const strongOnly = name === "p" && meaningful.length === 1 && "name" in meaningful[0] && ["strong", "b", "em", "i"].includes(meaningful[0].name);
+      blocks.push(name === "li" ? `- ${text}` : strongOnly || /^h[1-6]$/.test(name) ? `## ${text}` : text);
+      return;
+    }
+    if (!node.children.some(child => "name" in child && blockTags.has(child.name))) {
+      const text = normalize(textOf(node.children));
+      if (text) blocks.push(text);
+      return;
+    }
+    node.children.forEach(visit);
+  }
+  parseDocument(html, { decodeEntities: true }).children.forEach(visit);
+  const output = blocks.reduce((text, block, index) => text + (index ? block.startsWith("- ") && blocks[index - 1].startsWith("- ") ? "\n" : "\n\n" : "") + block, "");
+  return output.slice(0, 30000) || undefined;
 }
 export function date(value: unknown): Date | undefined {
   if (typeof value !== "string" && typeof value !== "number") return;

@@ -4,7 +4,9 @@ The contact and analytics endpoints remain public `POST` Route Handlers. Jobs ad
 
 ## Jobs API
 
-`GET /api/jobs` accepts bounded `q`, `company`, `location`, `workMode`, `employmentType`, `category`, `experienceLevel`, `source`, `postedWithin`, `salaryMin`/`salaryMax` with `salaryCurrency`, and `page` filters. It returns 12 records per page with `{ jobs, total, page, pages, configured }`; invalid filters return 400. `GET /api/jobs/[slug]` returns public job details or 404. Internal IDs, hashes, and raw provider payloads are excluded.
+`POST /api/jobs` is used by the `/jobs` page. It accepts a JSON object with bounded `q`, `company`, `location`, `workMode`, `employmentType`, `category`, `experienceLevel`, `source`, `postedWithin`, `salaryMin`/`salaryMax` with `salaryCurrency`, and `page` filters. Bodies over 4,096 bytes return 413. `GET /api/jobs` continues to accept the same filters as query parameters for existing API callers. Both return 12 records per page with `{ jobs, total, page, pages, configured }`; invalid filters return 400. `GET /api/jobs/[slug]` returns public job details or 404. Internal IDs, hashes, and raw provider payloads are excluded.
+
+Job descriptions are plain text with paragraph breaks, `## ` heading markers, and `- ` list markers. The site converts those markers to safe headings and lists; API callers can use the same structure without rendering provider HTML.
 
 `POST /api/admin/auth/login` verifies credentials and sets an HttpOnly session cookie. `POST /api/admin/auth/logout` revokes it; `GET /api/admin/auth/session` returns the signed-in email. Login has a five-attempt per-email limit over 15 minutes. `GET` and `POST /api/admin/providers`, `PATCH /api/admin/providers/[id]`, `GET` and `PATCH /api/admin/schedule`, and `GET` and `POST /api/admin/sync-runs` require an active admin session. Mutations also require a matching Origin. Provider creation/configuration changes require `permissionConfirmed: true`; the confirmation time is stored with non-secret configuration. Manual sync accepts an optional `providerId` UUID.
 

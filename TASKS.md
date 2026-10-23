@@ -1,6 +1,6 @@
 # Project tasks and status
 
-Status is based on the current repository and local checks on 2026-10-22. `DONE` means implementation plus relevant local verification; `NEEDS_VERIFICATION` means code is present but a live integration or browser behavior has not been confirmed. The source files named below are the acceptance evidence, not proof of production operation.
+Status is based on the current repository and local checks on 2026-10-23. `DONE` means implementation plus relevant local verification; `NEEDS_VERIFICATION` means code is present but a live integration or browser behavior has not been confirmed. The source files named below are the acceptance evidence, not proof of production operation.
 
 ## Project status summary
 
@@ -53,12 +53,22 @@ No authenticated analytics dashboard or AI agent feature is a confirmed requirem
 
 ## Current focus and next tasks
 
-1. **NEEDS_VERIFICATION** — Set a unique admin password hash, bootstrap the first admin credential, verify admin sessions against Neon, and configure/verify deployed external scheduling. The first provider feeds and `/jobs` filters were exercised locally; review source reuse terms and host timeout before production cron.
+1. **NEEDS_VERIFICATION** — Verify post-fix admin browser hydration and deployed session behavior, then configure/verify external scheduling. The first admin credential has been bootstrapped and its password verified against the stored hash; user-provided logs show a successful local login and dashboard response. The first provider feeds and `/jobs` filters were exercised locally; review source reuse terms and host timeout before production cron.
 2. **NEEDS_VERIFICATION** — Run a live integration pass with a test database and Resend account. Dependency: environment setup. Acceptance: contact success/failure and analytics consent checks above pass, with actual results recorded here.
 3. **PLANNED** — Set and enforce a data-retention policy. Dependency: operator policy decision. Acceptance: live deletion schedule and matching privacy notice.
 4. **PLANNED** — Add focused API and browser tests for the highest-risk flows. Dependency: test environment and desired browser coverage. Acceptance: critical success and failure paths run automatically.
 
 ## Recent progress and validation
+
+- 2026-10-23: Fixed the `/admin` hydration mismatch caused by formatting a provider timestamp separately in the server and browser locales. The server now passes a stable UTC label to the interactive dashboard. User-provided logs showed a successful admin login and dashboard response; the earlier jobs import error was transient and the current `/jobs` module compiled in the production build. `npm run typecheck`, `npm run lint`, `npm test` (10 files, 33 tests), and `npm run build` passed. A post-fix browser hydration check and deployed authentication checks remain open.
+
+- 2026-10-23: Bootstrapped the first admin account in the configured Neon database using the user-selected password. Stored only its scrypt hash in the ignored local `.env`; verified that the configured admin row accepts the password using a read-only database check. Admin login, cookie/session behavior, and deployed scheduling remain unverified. No application code changed.
+
+- 2026-10-23: Fixed entity-escaped Greenhouse job descriptions, using the pasted Twilio sample and current provider feed to verify headings, paragraphs, lists, and safe text rendering. Updated the single-job hero, back link, and loading skeleton. Targeted backfill updated 124 Twilio descriptions from the feed and recovered seven older postings from reviewed stored text; all 131 now have readable structured descriptions. The seven older postings remain absent from the live feed and subject to normal expiration. `npm run typecheck`, `npm run lint`, `npm test` (10 files, 33 tests), and `npm run build` passed. A local browser check against the configured database confirmed 19 visible bullets, no markup fragments, the `/jobs` back link, a compact desktop hero, and no mobile horizontal overflow; the streamed response included the detail skeleton. Updated API, architecture, security, database, and changelog docs.
+
+- 2026-10-23: Kept the `/jobs` hero and section headings visible while the first jobs API request loads. Search controls and four card-shaped job placeholders now occupy only their own areas; later searches keep the form visible while job cards load. Grouped secondary filters under an accessible “More filters” control and scoped the route loading fallback to job details. `npm run typecheck`, `npm run lint`, `npm test` (9 files, 29 tests), and `npm run build` passed. A local browser check with delayed mocked API responses confirmed first-load and refetch states, filter behavior, unchanged `/jobs` URL, and no horizontal overflow at 390px. Live database behavior was not exercised.
+
+- 2026-10-23: Moved `/jobs` search, filters, and pagination into client-held state backed by JSON `POST /api/jobs` calls, leaving the page URL unchanged. Kept `GET /api/jobs` for existing API callers. Added bounded body handling and focused POST route tests; updated API and architecture docs. `npm run typecheck`, `npm run lint`, `npm test` (9 files, 29 tests), and `npm run build` passed. A local browser smoke check with mocked jobs responses confirmed initial load, next-page and company-filter POST bodies while the address stayed `/jobs`; browser behavior against a live database remains to be checked.
 
 - 2026-10-22: Reorganized UI into layout, home, effects, shared, and feature-owned folders; moved jobs UI, domain logic, provider adapters, and admin authentication under `features/jobs/` while keeping Next.js routes and APIs in `app/`. Updated source imports and architecture/product/API/security documentation. `npm run typecheck`, `npm run lint`, `npm test` (8 files, 26 tests), and `npm run build` passed. No database or deployment changes were made.
 

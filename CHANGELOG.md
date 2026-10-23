@@ -1,11 +1,12 @@
 # Changelog
 
-Only changes supported by the repository or Git history are listed. Unreleased entries describe working-tree documentation changes.
+Only changes supported by the repository or Git history are listed. Unreleased entries describe working-tree changes.
 
 ## Unreleased
 
 - Established shared agent instructions, a progress tracker, and implementation-based project documentation. No application code was changed.
-- Added public jobs search and details, a protected URL-only admin dashboard, Remotive/Greenhouse/Lever adapters, sync logic, and a Prisma SQL migration. The migration and live provider sync were not run.
+- Added public jobs search and details, a protected URL-only admin dashboard, Remotive/Greenhouse/Lever adapters, sync logic, and a Prisma SQL migration. The migrations were applied and a first provider sync imported 297 jobs on 2026-10-22.
+- Parsed entity-escaped provider descriptions into safe headings, paragraphs, and lists; compacted the single-job header and matched its loading skeleton to the page. Repaired all 131 Twilio descriptions in the configured database, including seven older postings recovered from stored text.
 
 ## 2026-10-21
 
