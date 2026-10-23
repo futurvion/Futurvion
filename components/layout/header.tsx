@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { Menu, X, ArrowUpRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { site } from "@/config/site";
+import { siteStyles } from "@/config/styles";
 
 export function Header() {
   const [open, setOpen] = useState(false);
@@ -21,7 +22,7 @@ export function Header() {
     return () => { document.body.style.overflow = previous; window.removeEventListener("keydown", onKey); window.removeEventListener("resize", onResize); };
   }, [open]);
   return <header className="site-header">
-    <div className="container header-inner">
+     <div className={`${siteStyles.container} header-inner`}>
       <Link className="brand" href="/" aria-label="Futurvion home" onClick={() => setOpen(false)}><Image className="brand-full-logo" src="/logo-full.png" alt="Futurvion" width={1600} height={379} sizes="182px" preload /></Link>
       <nav className="desktop-nav" aria-label="Main navigation">{site.navigation.filter(item => item.href !== "/" && item.href !== "/contact").map(item => <Link key={item.href} href={item.href} aria-current={pathname === item.href ? "page" : undefined} className={pathname === item.href || (!item.href.includes("#") && pathname.startsWith(`${item.href}/`)) ? "active" : ""}>{item.label}</Link>)}</nav>
       <Link className="header-cta" href={site.bookingUrl || "/contact"} target={site.bookingUrl ? "_blank" : undefined} rel={site.bookingUrl ? "noopener noreferrer" : undefined}>{site.bookingUrl ? "Book a consultation" : "Let's talk"} <ArrowUpRight size={16} /></Link>

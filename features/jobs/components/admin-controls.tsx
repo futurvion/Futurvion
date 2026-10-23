@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { AdminSelect } from "@/components/admin/admin-select";
 import { ProviderEditor } from "./provider-editor";
+import { siteStyles } from "@/config/styles";
 
 type Provider = {
   id: string;
@@ -74,16 +75,16 @@ export function AdminControls({ providers, schedule }: { providers: Provider[]; 
 
   return <div className="admin-controls">
     <div className="admin-control-toolbar">
-      <div className="admin-control-toolbar-copy"><span className="eyebrow">Operations</span><strong>Keep your job index fresh</strong><p>Run an on-demand sync or fine-tune the feeds that power the public jobs board.</p></div>
+       <div className="admin-control-toolbar-copy"><span className={`${siteStyles.eyebrow} eyebrow`}>Operations</span><strong>Keep your job index fresh</strong><p>Run an on-demand sync or fine-tune the feeds that power the public jobs board.</p></div>
       <div className="admin-control-toolbar-actions">
         <p aria-live="polite" className="admin-message">{message}</p>
-        <button className="button button-primary" disabled={busy} onClick={() => { if (window.confirm("Synchronize all enabled providers now?")) void request("/api/admin/sync-runs", "POST"); }}><span className="admin-button-icon" aria-hidden="true">↻</span>{busy ? "Syncing…" : "Sync all now"}</button>
+        <button className={`${siteStyles.button} button button-primary ${siteStyles.buttonPrimary}`} disabled={busy} onClick={() => { if (window.confirm("Synchronize all enabled providers now?")) void request("/api/admin/sync-runs", "POST"); }}><span className="admin-button-icon" aria-hidden="true">↻</span>{busy ? "Syncing…" : "Sync all now"}</button>
       </div>
     </div>
 
     <section className="admin-control-section" id="providers" aria-labelledby="providers-heading">
       <div className="admin-section-heading">
-        <div><span className="eyebrow">Connected feeds</span><h2 id="providers-heading">Provider control room</h2><p>Only configured, enabled boards are synchronized. Remotive is limited to one request every six hours.</p></div>
+         <div><span className={`${siteStyles.eyebrow} eyebrow`}>Connected feeds</span><h2 id="providers-heading">Provider control room</h2><p>Only configured, enabled boards are synchronized. Remotive is limited to one request every six hours.</p></div>
         <span className="admin-section-count">{providers.length.toString().padStart(2, "0")} sources</span>
       </div>
       <div className="admin-provider-grid">
@@ -113,7 +114,7 @@ export function AdminControls({ providers, schedule }: { providers: Provider[]; 
 
     <div className="admin-control-grid">
       <section className="admin-panel admin-form-panel" aria-labelledby="add-provider-heading">
-        <div className="admin-panel-heading"><div><span className="eyebrow">Source library</span><h2 id="add-provider-heading">Add a provider</h2></div><span className="admin-panel-index">01</span></div>
+         <div className="admin-panel-heading"><div><span className={`${siteStyles.eyebrow} eyebrow`}>Source library</span><h2 id="add-provider-heading">Add a provider</h2></div><span className="admin-panel-index">01</span></div>
         <p className="admin-panel-intro">Add a disabled source first, verify its identifier, then enable it when the feed is ready.</p>
         <form className="admin-provider-form" onSubmit={event => {
           event.preventDefault();
@@ -133,12 +134,12 @@ export function AdminControls({ providers, schedule }: { providers: Provider[]; 
           <label className="admin-field"><span className="admin-field-label">Board or site identifier</span><input name="identifier" pattern="[a-z0-9][a-z0-9_-]*" placeholder="company-board"/></label>
           <AdminSelect name="region" label="Lever region" options={leverRegions} defaultValue="global"/>
           <label className="admin-permission"><input name="permissionConfirmed" type="checkbox" required/> <span>I have permission to display jobs from this source.</span></label>
-          <button className="button button-ghost" disabled={busy}>Add disabled provider <span aria-hidden="true">+</span></button>
+           <button className={`${siteStyles.button} button button-ghost ${siteStyles.buttonGhost}`} disabled={busy}>Add disabled provider <span aria-hidden="true">+</span></button>
         </form>
       </section>
 
       <section className="admin-panel admin-form-panel" id="schedule" aria-labelledby="schedule-heading">
-        <div className="admin-panel-heading"><div><span className="eyebrow">Automation</span><h2 id="schedule-heading">Sync schedule</h2></div><span className="admin-panel-index">02</span></div>
+         <div className="admin-panel-heading"><div><span className={`${siteStyles.eyebrow} eyebrow`}>Automation</span><h2 id="schedule-heading">Sync schedule</h2></div><span className="admin-panel-index">02</span></div>
         <p className="admin-panel-intro">An external scheduler calls the protected endpoint. These settings control when a run becomes due.</p>
         <form className="admin-schedule" onSubmit={event => {
           event.preventDefault();
@@ -158,7 +159,7 @@ export function AdminControls({ providers, schedule }: { providers: Provider[]; 
           <div className="admin-form-divider"/>
           {([ ["frequencyMinutes", "Frequency (minutes)", 60, 10080], ["batchSize", "Batch size", 1, 500], ["maxConcurrency", "Max concurrency", 1, 4], ["retryLimit", "Retry limit", 0, 3], ["retryDelaySeconds", "Retry delay (seconds)", 1, 60], ["expireAfterDays", "Expire after (days)", 1, 90] ] as const).map(([key, label, min, max]) => <label className="admin-field" key={key}><span className="admin-field-label">{label}</span><input name={key} type="number" min={min} max={max} defaultValue={schedule[key]} required/></label>)}
           <label className="admin-field admin-field-wide"><span className="admin-field-label">Timezone</span><input name="timezone" defaultValue={schedule.timezone} required/></label>
-          <div className="admin-form-actions"><button className="button button-primary" disabled={busy}>Save settings <span aria-hidden="true">↗</span></button><button className="button button-ghost" type="button" disabled={busy} onClick={() => void request("/api/admin/schedule", "PATCH", { enabled: false, frequencyMinutes: 360, timezone: "UTC", batchSize: 100, maxConcurrency: 2, retryLimit: 2, retryDelaySeconds: 5, expireAfterDays: 14 })}>Reset defaults</button></div>
+           <div className="admin-form-actions"><button className={`${siteStyles.button} button button-primary ${siteStyles.buttonPrimary}`} disabled={busy}>Save settings <span aria-hidden="true">↗</span></button><button className={`${siteStyles.button} button button-ghost ${siteStyles.buttonGhost}`} type="button" disabled={busy} onClick={() => void request("/api/admin/schedule", "PATCH", { enabled: false, frequencyMinutes: 360, timezone: "UTC", batchSize: 100, maxConcurrency: 2, retryLimit: 2, retryDelaySeconds: 5, expireAfterDays: 14 })}>Reset defaults</button></div>
         </form>
       </section>
     </div>

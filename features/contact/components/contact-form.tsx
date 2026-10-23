@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { ArrowUpRight } from "lucide-react";
 import { services } from "@/data/services";
 import { site } from "@/config/site";
+import { siteStyles } from "@/config/styles";
 
 export function ContactForm({ initialService = "" }: { initialService?: string }) {
   const [state, setState] = useState<"idle" | "sending" | "success" | "error" | "unavailable">("idle");
@@ -41,7 +42,7 @@ export function ContactForm({ initialService = "" }: { initialService?: string }
     <label>Tell us about your project <span>*</span><textarea name="description" required minLength={20} maxLength={5000} rows={5} placeholder="What are you building or trying to improve?" /></label>
     <label className="consent-line"><input name="consent" type="checkbox" value="yes" required /><span>I agree to be contacted about my enquiry and have read the <a href="/privacy-policy">privacy policy</a>.</span></label>
     <div className="honeypot" aria-hidden="true"><label>Leave this field empty<input name="website" tabIndex={-1} autoComplete="off" /></label></div>
-    <div className="form-bottom"><button className="button button-primary" type="submit" disabled={state === "sending"}>{state === "sending" ? "Sending…" : "Send your enquiry"}<ArrowUpRight size={18}/></button><span>We&apos;ll use your details only to respond to this enquiry.</span></div>
+    <div className="form-bottom"><button className={`${siteStyles.button} button button-primary ${siteStyles.buttonPrimary}`} type="submit" disabled={state === "sending"}>{state === "sending" ? "Sending…" : "Send your enquiry"}<ArrowUpRight size={18}/></button><span>We&apos;ll use your details only to respond to this enquiry.</span></div>
     {state === "success" && <p role="status" className="form-status success">Your enquiry was received. Thank you for reaching out.</p>}
     {(state === "error" || state === "unavailable") && <p role="alert" className="form-status error">{message} {state === "unavailable" && <>You can <a href={`mailto:${site.email}`}>open your email app</a> instead.</>}</p>}
   </form>;

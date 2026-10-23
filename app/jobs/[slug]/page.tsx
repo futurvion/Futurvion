@@ -5,6 +5,7 @@ import { site } from "@/config/site";
 import { JobDescription } from "@/features/jobs/components/job-description";
 import { safeUrl, sourceLabel } from "@/features/jobs/server/core";
 import { getJob } from "@/features/jobs/server/queries";
+import { siteStyles } from "@/config/styles";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
@@ -20,16 +21,16 @@ export default async function JobPage({ params }: { params: Promise<{ slug: stri
   const sections = [["Responsibilities", job.responsibilities], ["Requirements", job.requirements], ["Benefits", job.benefits]].filter((item): item is [string, string] => Boolean(item[1]));
 
   return <>
-    <section className="jobs-hero job-detail-hero"><div className="container">
+    <section className="jobs-hero job-detail-hero"><div className={siteStyles.container}>
       <Link className="job-back" href="/jobs"><span aria-hidden="true">←</span> Back to all jobs</Link>
-      <span className="eyebrow">{sourceLabel(job.sourceProvider)} / {job.category ?? "Opportunity"}</span>
+      <span className={`${siteStyles.eyebrow} eyebrow`}>{sourceLabel(job.sourceProvider)} / {job.category ?? "Opportunity"}</span>
       <h1>{job.title}</h1>
       <p className="job-detail-company">{job.companyName}</p>
       <div className="job-tags">{[job.location, job.workMode !== "unknown" ? job.workMode : null, job.employmentType, job.experienceLevel].filter(Boolean).map(value => <span key={value}>{value}</span>)}</div>
-      {apply ? <a className="button button-light" href={apply} target="_blank" rel="noopener noreferrer">View original posting ↗</a> : <p>This opportunity is no longer accepting applications.</p>}
+      {apply ? <a className={`${siteStyles.button} button button-light ${siteStyles.buttonLight}`} href={apply} target="_blank" rel="noopener noreferrer">View original posting ↗</a> : <p>This opportunity is no longer accepting applications.</p>}
     </div></section>
-    <section className="page-section"><div className="container job-detail-layout">
-      <article><span className="eyebrow">The opportunity</span><h2>About this role</h2>
+    <section className={`${siteStyles.pageSection} page-section`}><div className={`${siteStyles.container} job-detail-layout`}>
+      <article><span className={`${siteStyles.eyebrow} eyebrow`}>The opportunity</span><h2>About this role</h2>
         <JobDescription text={job.descriptionText ?? "The source has not provided a description. Visit the original posting for details."}/>
         {sections.map(([title, value]) => <section key={title}><h3>{title}</h3><JobDescription text={value}/></section>)}
       </article>
@@ -42,7 +43,7 @@ export default async function JobPage({ params }: { params: Promise<{ slug: stri
         <dt>Posted</dt><dd>{job.publishedAt?.toLocaleDateString() ?? "Not specified"}</dd>
         <dt>Last verified</dt><dd>{job.lastVerifiedAt?.toLocaleDateString() ?? "Not yet verified"}</dd>
         <dt>Source</dt><dd>{sourceLabel(job.sourceProvider)}</dd>
-      </dl>{apply && <a className="button button-primary" href={apply} target="_blank" rel="noopener noreferrer">Apply now ↗</a>}</aside>
+      </dl>{apply && <a className={`${siteStyles.button} button button-primary ${siteStyles.buttonPrimary}`} href={apply} target="_blank" rel="noopener noreferrer">Apply now ↗</a>}</aside>
     </div></section>
   </>;
 }

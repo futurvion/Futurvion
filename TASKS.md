@@ -60,6 +60,20 @@ No authenticated analytics dashboard or AI agent feature is a confirmed requirem
 
 ## Recent progress and validation
 
+- 2026-10-23: Applied the explicit on-accent text color to shared primary buttons, including the admin Open jobs CTA, so labels and inherited arrows remain white despite base anchor styles. Authenticated Chrome verification confirmed white label/arrow in normal, hover, and keyboard-focus states and the /admin/jobs destination. Lint and targeted diff whitespace checks passed; broader checks skipped for this CSS color-only change.
+
+
+- 2026-10-23: Set the hero primary CTA label and inherited arrow color explicitly to the on-accent white token, fixing the dark Explore our services text. Chrome at 1440px and 390px confirmed white text and arrow in normal, hover, and keyboard-focus states, retaining /services. Lint and targeted diff whitespace checks passed; broader checks skipped for this scoped CSS color fix.
+
+
+- 2026-10-23: Fixed the footer Let's talk CTA inheriting white text on its white background after the utility-style migration. Added a scoped dark text rule for the light footer button and excluded buttons from the footer link hover rule. Chrome at 1440px and 390px verified dark label/arrow in normal, hover, and keyboard-focus states and the /contact destination; screenshot reviewed. Lint and targeted diff whitespace checks passed. Broader application checks skipped for this scoped CSS color fix.
+
+
+- 2026-10-23: Fixed the white strip below the public footer by clipping reveal-animation overflow at the footer boundary. A browser reproduction translating the bottom row by 24px extended the document beyond the footer before the fix; the fixed footer stays flush within subpixel rounding at 1440px and 390px, including the translated state. Mobile screenshot reviewed; lint and targeted diff whitespace checks passed. Broader application checks skipped for this isolated CSS overflow fix.
+
+
+- 2026-10-23: Refactored shared public layout primitives to Tailwind utility compositions in `config/styles.ts` and applied them across public, jobs, admin, forms, and shared components. Kept the existing semantic classes for scoped component rules and preserved the existing responsive values, colors, spacing, and interactions; component-specific CSS remains in `app/theme.css` and `app/jobs.css`. `npm run typecheck`, `npm run lint`, `npm test` (10 files, 33 tests), `npm run build`, and local HTTP smoke checks for `/`, `/services`, and `/jobs` passed. Browser screenshot verification was unavailable in the CLI sandbox; no intentional visual change was made.
+
 - 2026-10-23: Matched the header and mobile menu to the existing site accent via --header-surface: var(--accent) (#175d78), with cool pale-blue interaction accents. Preserved the transparent full logo and white navigation. Targeted diff whitespace check passed; broader checks skipped for this CSS palette-only change.
 
 

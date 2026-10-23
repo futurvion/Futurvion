@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useIsPresent, useMotionValueEvent, useReducedMotion, useScroll } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
+import { siteStyles } from "@/config/styles";
 import { palette } from "@/config/palette";
 import { StoryArtwork, type StoryArtworkKind } from "./story-artwork";
 
@@ -38,7 +39,7 @@ function StoryPanel({ index, direction, artwork = false, reduced }: { index: num
     </> : <>
       <h2>{stage.word}<span>.</span></h2>
       <p>{stage.text}</p>
-      <Link className="text-link" href={stage.href}>{stage.cta} <ArrowUpRight size={17} /></Link>
+      <Link className={`${siteStyles.textLink} text-link`} href={stage.href}>{stage.cta} <ArrowUpRight size={17} /></Link>
     </>}
   </motion.div>;
 }
@@ -80,9 +81,9 @@ export function ScrollStory() {
   return <section ref={ref} className="story" style={{ height: `${stages.length * 60 + 100}svh` }} aria-labelledby="story-title">
     <h2 className="story-static-title" id="story-title">Connected capabilities from idea to growth</h2>
     <div className="story-pin">
-      <div className="container story-layout">
+      <div className={`${siteStyles.container} story-layout`}>
         <div className="story-copy">
-          <span className="eyebrow">Connected capabilities / From idea to growth</span>
+          <span className={`${siteStyles.eyebrow} eyebrow`}>Connected capabilities / From idea to growth</span>
           <div className="story-stage">
             <AnimatePresence mode="wait" initial={false} custom={direction}>
             <StoryPanel key={active} index={active} direction={direction} reduced={Boolean(reduced)} />

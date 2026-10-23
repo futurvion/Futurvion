@@ -1,9 +1,10 @@
 import Link from "next/link";
+import { siteStyles } from "@/config/styles";
 
 export default function Loading() {
   return <>
     <span className="sr-only" role="status">Loading job details</span>
-    <section className="jobs-hero job-detail-hero"><div className="container">
+    <section className="jobs-hero job-detail-hero"><div className={siteStyles.container}>
       <Link className="job-back" href="/jobs"><span aria-hidden="true">←</span> Back to all jobs</Link>
       <div className="job-detail-loading-hero" aria-hidden="true">
         <span className="jobs-skeleton-line job-detail-skeleton-source"/>
@@ -13,7 +14,7 @@ export default function Loading() {
         <span className="jobs-skeleton-line job-detail-skeleton-button"/>
       </div>
     </div></section>
-    <section className="page-section"><div className="container job-detail-layout" aria-hidden="true">
+    <section className={`${siteStyles.pageSection} page-section`}><div className={`${siteStyles.container} job-detail-layout`} aria-hidden="true">
       <article className="job-detail-loading-copy">
         <span className="jobs-skeleton-line job-detail-skeleton-source"/>
         <span className="jobs-skeleton-line job-detail-skeleton-heading"/>

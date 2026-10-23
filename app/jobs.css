@@ -2,7 +2,7 @@
 .desktop-nav a.active { box-shadow: 0 2px 0 var(--accent); padding-bottom: 5px; }
 .mobile-nav a[aria-current="page"] { color: var(--accent); }
 .jobs-hero::after { content: ""; position: absolute; width: 52vw; height: 52vw; right: -16vw; top: -29vw; border: 1px solid rgba(185,218,222,.2); border-radius: 50%; box-shadow: 0 0 0 7vw rgba(185,218,222,.035), 0 0 0 14vw rgba(185,218,222,.025); pointer-events: none; }
-.jobs-hero .container { position: relative; z-index: 1; }
+.jobs-hero .site-container { position: relative; z-index: 1; }
 .jobs-hero .eyebrow { color: #a8cbd1; }
 .jobs-hero h1 { color: #fff; max-width: 800px; font-size: clamp(3.25rem, 7vw, 6.5rem); margin: 22px 0; }
 .jobs-hero h1 em { color: #a8cbd1; }

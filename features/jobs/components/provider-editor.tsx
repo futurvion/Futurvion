@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { AdminSelect } from "@/components/admin/admin-select";
+import { siteStyles } from "@/config/styles";
 
 type Provider = { id: string; name: string; providerType: string; configuration: unknown };
 
@@ -54,7 +55,7 @@ export function ProviderEditor({ provider }: { provider: Provider }) {
       {open ? "Close editor" : "Edit source"}
     </button>
     {open && <form className="admin-editor-popover" onSubmit={save}>
-      <div className="admin-editor-heading"><span className="eyebrow">Source settings</span><strong>Update provider</strong></div>
+       <div className="admin-editor-heading"><span className={`${siteStyles.eyebrow} eyebrow`}>Source settings</span><strong>Update provider</strong></div>
       <label className="admin-field"><span className="admin-field-label">Name</span><input name="name" defaultValue={provider.name} required maxLength={100}/></label>
       {typeNeedsIdentifier(provider.providerType) && <label className="admin-field"><span className="admin-field-label">Board token or site identifier</span><input name="identifier" defaultValue={config.board ?? config.site ?? ""} required pattern="[a-z0-9][a-z0-9_-]*"/></label>}
       {provider.providerType === "lever" && <AdminSelect
@@ -65,7 +66,7 @@ export function ProviderEditor({ provider }: { provider: Provider }) {
       />}
       <label className="admin-permission"><input name="permissionConfirmed" type="checkbox" required/> <span>I have permission to display jobs from this source.</span></label>
       {error && <span role="alert" className="admin-form-error">{error}</span>}
-      <button className="button button-primary" disabled={busy}>{busy ? "Saving…" : "Save provider"}</button>
+       <button className={`${siteStyles.button} button button-primary ${siteStyles.buttonPrimary}`} disabled={busy}>{busy ? "Saving…" : "Save provider"}</button>
     </form>}
   </div>;
 }

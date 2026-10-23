@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { siteStyles } from "@/config/styles";
 
 export type JobFilters = Record<string, string>;
 
@@ -50,6 +51,6 @@ export function JobsSearch({ onSearch }: { onSearch: (filters: JobFilters) => vo
       <label>Salary currency<select name="salaryCurrency"><option value="">Choose currency</option>{["USD", "EUR", "GBP", "INR", "CAD", "AUD"].map(value => <option key={value}>{value}</option>)}</select></label>
       <label>Source<select name="source"><option value="">All sources</option><option value="remotive">Remotive</option><option value="greenhouse">Greenhouse</option><option value="lever">Lever</option></select></label>
     </div></details>
-    <div className="jobs-search-actions"><button className="button button-primary" type="submit">Search jobs ↗</button><button className="button button-ghost" type="button" onClick={() => { if (pendingSearch.current) clearTimeout(pendingSearch.current); pendingSearch.current = null; formRef.current?.reset(); setKeyword(""); setRevision(0); onSearch({}); }}>Clear filters</button></div>
+     <div className="jobs-search-actions"><button className={`${siteStyles.button} button button-primary ${siteStyles.buttonPrimary}`} type="submit">Search jobs ↗</button><button className={`${siteStyles.button} button button-ghost ${siteStyles.buttonGhost}`} type="button" onClick={() => { if (pendingSearch.current) clearTimeout(pendingSearch.current); pendingSearch.current = null; formRef.current?.reset(); setKeyword(""); setRevision(0); onSearch({}); }}>Clear filters</button></div>
   </form>;
 }

@@ -1,13 +1,14 @@
 import { AdminControls } from "@/features/jobs/components/admin-controls";
 import { requireAdminSession } from "@/features/jobs/server/admin-auth";
 import { getDb } from "@/lib/db";
+import { siteStyles } from "@/config/styles";
 
 export const metadata = { title: "Jobs | Futurvion Admin" };
 
 export default async function AdminJobsPage() {
   await requireAdminSession();
   const db = getDb();
-  if (!db) return <div className="admin-page admin-empty-state"><span className="eyebrow">Workspace / Jobs</span><h1>Jobs are offline</h1><p>Connect the database to manage providers and synchronization.</p></div>;
+  if (!db) return <div className="admin-page admin-empty-state"><span className={`${siteStyles.eyebrow} eyebrow`}>Workspace / Jobs</span><h1>Jobs are offline</h1><p>Connect the database to manage providers and synchronization.</p></div>;
 
   const [active, inactive, providers, runs, settings] = await Promise.all([
     db.job.count({ where: { status: "active" } }),
@@ -27,15 +28,15 @@ export default async function AdminJobsPage() {
   return <div className="admin-page admin-jobs-page">
     <header className="admin-page-header">
       <div>
-        <span className="eyebrow">Workspace / Jobs</span>
+        <span className={`${siteStyles.eyebrow} eyebrow`}>Workspace / Jobs</span>
         <h1>Jobs operations.</h1>
         <p className="admin-intro">Shape the sources, schedules, and sync rhythm behind your public opportunities board.</p>
       </div>
-      <div className="admin-page-header-actions"><span className={`admin-live-indicator ${schedule.enabled ? "is-active" : "is-paused"}`}><i aria-hidden="true"/> {schedule.enabled ? "Schedule active" : "Schedule paused"}</span><a className="button button-ghost" href="/jobs" target="_blank" rel="noreferrer">View public board <span aria-hidden="true">↗</span></a></div>
+      <div className="admin-page-header-actions"><span className={`admin-live-indicator ${schedule.enabled ? "is-active" : "is-paused"}`}><i aria-hidden="true"/> {schedule.enabled ? "Schedule active" : "Schedule paused"}</span><a className={`${siteStyles.button} button button-ghost ${siteStyles.buttonGhost}`} href="/jobs" target="_blank" rel="noreferrer">View public board <span aria-hidden="true">↗</span></a></div>
     </header>
 
     <section className="admin-jobs-hero" aria-label="Jobs operations summary">
-      <div><span className="eyebrow">Publishing pipeline</span><h2>One calm place to keep every source moving.</h2><p>{enabledProviders ? `${enabledProviders} ${enabledProviders === 1 ? "source is" : "sources are"} live. The latest run ${latestRun ? `reported ${latestRun.jobsFetched} fetched jobs` : "is waiting to be started"}.` : "No providers are live yet. Add and review a source to start your pipeline."}</p></div>
+      <div><span className={`${siteStyles.eyebrow} eyebrow`}>Publishing pipeline</span><h2>One calm place to keep every source moving.</h2><p>{enabledProviders ? `${enabledProviders} ${enabledProviders === 1 ? "source is" : "sources are"} live. The latest run ${latestRun ? `reported ${latestRun.jobsFetched} fetched jobs` : "is waiting to be started"}.` : "No providers are live yet. Add and review a source to start your pipeline."}</p></div>
       <div className="admin-jobs-hero-stat"><span>Public inventory</span><strong>{active}</strong><small>active roles</small></div>
     </section>
 
@@ -49,7 +50,7 @@ export default async function AdminJobsPage() {
     <AdminControls providers={providerRows} schedule={schedule}/>
 
     <section className="admin-panel admin-history-panel" id="history" aria-labelledby="history-heading">
-      <div className="admin-panel-heading"><div><span className="eyebrow">Audit trail</span><h2 id="history-heading">Recent syncs</h2></div><span className="admin-section-count">{runs.length.toString().padStart(2, "0")} runs</span></div>
+       <div className="admin-panel-heading"><div><span className={`${siteStyles.eyebrow} eyebrow`}>Audit trail</span><h2 id="history-heading">Recent syncs</h2></div><span className="admin-section-count">{runs.length.toString().padStart(2, "0")} runs</span></div>
       {runs.length ? <div className="admin-history-list">{runs.map(run => <div className="admin-history-row" key={run.id}><span className={`admin-activity-status status-${run.status}`} aria-hidden="true"/><div><strong>{run.status}</strong><span>{run.startedAt.toISOString().slice(0, 16).replace("T", " ")} UTC · {run.triggerType}</span></div><span className="admin-history-numbers"><b>{run.jobsFetched}</b> fetched <i>·</i> <b>{run.jobsInserted}</b> new <i>·</i> <b>{run.jobsUpdated}</b> updated <i>·</i> <b>{run.errorCount}</b> errors</span></div>)}</div> : <div className="admin-empty-panel"><span className="admin-empty-icon" aria-hidden="true">⌁</span><h3>No syncs have run yet</h3><p>Your first run will appear here with fetched, inserted, updated, and error counts.</p></div>}
     </section>
   </div>;
