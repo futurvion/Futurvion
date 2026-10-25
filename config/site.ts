@@ -25,7 +25,7 @@ export const site: SiteConfig = {
   email: process.env.NEXT_PUBLIC_BUSINESS_EMAIL || "hello@futurvion.example",
   logo: "/logo-mark.png",
   bookingUrl: process.env.NEXT_PUBLIC_BOOKING_URL || undefined,
-  socials: [],
+  socials: [{ label: "Instagram", url: "https://www.instagram.com/futurvion/" }],
   navigation: [
     { label: "Home", href: "/" },
     { label: "Services", href: "/services" },

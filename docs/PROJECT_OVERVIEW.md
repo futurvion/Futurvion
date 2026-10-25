@@ -24,7 +24,7 @@ The jobs portal adds a single administrator role. `/admin/login` signs in, `/adm
 
 ## Quality constraints evidenced by implementation
 
-- Strict TypeScript, schema validation, server-only database/email modules, responsive styles, reduced-motion handling, and a static hero fallback are present. These indicate intended type safety, data boundaries, and accessibility support; full browser and accessibility quality are **not verified**.
+- Strict TypeScript, schema validation, server-only database/email modules, responsive styles, reduced-motion handling, and a client-loaded 3D hero with static fallback are present. These indicate intended type safety, data boundaries, and accessibility support; representative desktop/mobile browser checks are recorded in TASKS.md; a comprehensive accessibility audit is **not verified**.
 - The site needs PostgreSQL plus Resend for a complete contact flow. It can render public content without those services. Analytics is hidden/disabled without database and HMAC configuration.
 - Contact and analytics data retention is **not implemented** as a scheduled process. The privacy page requests a policy before production use.
 
