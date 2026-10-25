@@ -4,6 +4,8 @@ Only changes supported by the repository or Git history are listed. Unreleased e
 
 ## Unreleased
 
+- Grouped public job listings by normalized company, title and location before pagination, with deterministic representatives and correct unique totals. Added and applied a database-maintained grouping-key migration, preserving all source postings and deep links; added query/filter/privacy regression tests.
+
 - Redesigned the public studio site with a typography-led homepage, capability index, business-priority selector, reusable illustrative concept artwork, coherent secondary pages/jobs styling, native enquiry validation, and improved mobile menu focus behavior. Preserved APIs, database, authentication and integrations. Added DESIGN.md.
 
 - Established shared agent instructions, a progress tracker, and implementation-based project documentation. No application code was changed.

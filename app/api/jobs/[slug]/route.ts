@@ -6,8 +6,8 @@ export async function GET(_request: Request, { params }: { params: Promise<{ slu
   try {
     const job = await getJob(slug);
     if (!job) return Response.json({ error: "Not found" }, { status: 404 });
-    const { id: _id, sourceProviderId: _providerId, externalJobId: _externalId, contentHash: _hash, ...publicJob } = job;
-    void _id; void _providerId; void _externalId; void _hash;
+    const { id: _id, sourceProviderId: _providerId, externalJobId: _externalId, contentHash: _hash, listingKey: _listingKey, ...publicJob } = job;
+    void _id; void _providerId; void _externalId; void _hash; void _listingKey;
     return Response.json(publicJob, { headers: { "Cache-Control": "public, max-age=0, s-maxage=60" } });
   } catch (error) { console.error("Job details failed", error); return Response.json({ error: "Jobs unavailable" }, { status: 503 }); }
 }

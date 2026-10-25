@@ -49,3 +49,11 @@ This record separates current code choices from historical approval. Dates and a
 - **Alternatives considered:** A separate testing document was explicitly excluded by the project owner.
 - **Consequences/trade-offs:** Future work must update only affected documents and keep status claims tied to verification; documentation can still drift if this workflow is skipped.
 - **Status:** Accepted.
+
+## Group matching listings without deleting source requisitions
+
+- **Date:** 2026-10-25.
+- **Decision:** At the owner's confirmed preference, public discovery shows one card per normalized company/title/location, while all source records and URLs remain intact.
+- **Evidence:** The six repeated-title/location groups in the initial 297-row database contain different Greenhouse requisition IDs. Deleting by title would remove real openings. Grouping produces 287 cards without deleting those records.
+- **Implementation:** Database-triggered grouping key, parameterized filtered/ranked listing queries and a stable ID tie-breaker. Filters apply before grouping so a matching provider/salary/employment variant is still discoverable.
+- **Trade-off:** Only the chosen matching source posting appears as the card; other requisitions remain available through their original detail URLs. Different location wording is not semantically inferred. Existing source-expiry policy is unchanged.
