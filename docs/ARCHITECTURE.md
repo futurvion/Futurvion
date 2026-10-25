@@ -39,7 +39,7 @@ The jobs feature contains validated provider adapters, queries, synchronization,
 
 | Module | Responsibility |
 | --- | --- |
-| `app/`, `components/`, `features/` | Public routes, shared UI, and feature-owned UI; `components/home/hero-visual.tsx` loads a WebGL scene only in the browser with a static/reduced-motion fallback. |
+| `app/`, `components/`, `features/` | Public routes, shared UI, and feature-owned UI; the homepage retains its original client-loaded WebGL particle-logo hero with static/reduced-motion fallback, reusable concept title studies, and a client business-priority selector that links into the existing service/contact routes. |
 | `config/site.ts`, `config/palette.ts` | Public site config, metadata defaults, navigation, and CSS/visual colors. |
 | `data/services.ts`, `data/portfolio.ts` | Typed, code-owned marketing content. Portfolio data is illustrative. |
 | `lib/seo.ts` | Page metadata and structured-data helpers. |
@@ -75,3 +75,11 @@ The consent banner stores an allow/deny choice in `localStorage`. On allow, clie
 ## Errors and operations
 
 The original contact and analytics handlers return generic client errors and call `console.error` for processing failures. Jobs has a route-level error boundary and loading UI. There is no structured tracing, health endpoint, or monitoring configuration. Security headers are configured in `next.config.ts`. The first local production-server import and public reads were verified against Neon; deployed scheduling and ongoing provider availability remain unverified.
+
+## Public design system
+
+See [DESIGN.md](../DESIGN.md) for public visual rules. Palette tokens live in `config/palette.ts`, shared utility compositions in `config/styles.ts`, and the incremental public redesign layer in `app/redesign.css` after the existing theme/jobs styles. `ConceptArtwork` is shared by the homepage, filtered work list and concept details; `ProjectStartingPoint` uses the existing typed service data. The older `ScrollStory` component remains available but is not mounted. Public details use one-time full side entrances, with static/reduced-motion/print visibility. No API, schema, authentication, or provider behavior changed.
+
+Public content entrances are classified by content type in `components/effects/reveal.tsx`; its observer also handles newly mounted portfolio/job results after navigation or filtering. CSS uses individual translate/scale properties, viewport-relative side distances measured before animation, and bounded stagger delays. Only JS-prepared pending items are hidden; reduced-motion and print CSS expose all content. Horizontal clipping on main preserves the story's sticky layout. Each unit runs once, excludes nested units and admin/hero scenes, and cancels on focus or reduced-motion changes.
+
+Jobs pages scope the shared reveal CSS to a 200ms vertical settle of 6px via their existing `.jobs-hero` marker. The exception also applies to their shared footer and keeps pending results visible; it does not alter jobs fetching, filters or pagination.

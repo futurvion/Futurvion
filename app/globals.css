@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "./theme.css";
 @import "./jobs.css";
+@import "./redesign.css";
 
 @theme inline {
   --color-background: var(--bg);

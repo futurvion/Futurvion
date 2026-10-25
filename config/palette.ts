@@ -18,10 +18,10 @@ export const palette = {
   onAccent: "#ffffff", // text on top of accent-coloured buttons
 
   // Page surfaces and text
-  background: "#f7f8f6",
+  background: "#f4f6f3",
   surface: "#ffffff", // cards and panels
   surfaceRaised: "#ffffff", // nav pills, popovers
-  surfaceDeep: "#132b3b", // footer and dark calls to action
+  surfaceDeep: "#102e3b", // footer and dark calls to action
   ink: "#172b38", // main text
   muted: "#536572", // body copy
   dim: "#60717c", // labels and captions
@@ -80,7 +80,7 @@ export function paletteCss() {
   const vars = Object.entries(flat).flatMap(([k, v]) => [`--${k}:${v}`, `--${k}-rgb:${hexToRgbTriplet(v)}`]);
   vars.push(
     "--accent-2:var(--accent-soft)",
-    "--panel:#eef2f2",
+    "--panel:#e2eae7",
     "--card:var(--surface)",
     "--line:rgb(var(--line-base-rgb) / .2)",
     "--line-strong:rgb(var(--accent-rgb) / .45)",

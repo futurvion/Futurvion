@@ -18,7 +18,7 @@ const sectors = [
 ];
 
 export default function SolutionsPage() {
-  return <><PageHero eyebrow="Solutions" title={<>Shaped by your <em>business.</em></>}><p>These examples show ways brand, technology, and growth can support different needs. Each is a starting point for a tailored conversation.</p></PageHero>
-    <section className={`${siteStyles.pageSection} page-section`}><div className={siteStyles.container}><div className="section-heading split"><div><span className={`${siteStyles.eyebrow} eyebrow`}>Where we can help</span><h2>Different needs. One considered approach.</h2></div><p>We look at your customers, operations, and priorities before recommending what to build.</p></div><div className="sector-grid">{sectors.map(([id,title,description],i) => <article className="sector-card" id={id} key={id}><span>{String(i+1).padStart(2,"0")} / Business type</span><h2>{title}</h2><p>{description}</p><Link className={`${siteStyles.textLink} text-link`} href="/contact">Discuss your needs <ArrowUpRight size={16}/></Link></article>)}</div></div></section>
+  return <><PageHero eyebrow="Solutions" title={<>Built around you.</>}><p>These examples show ways brand, technology, and growth can support different needs. Each is a starting point for a tailored conversation.</p></PageHero>
+    <section className={`${siteStyles.pageSection} page-section`}><div className={siteStyles.container}><div className="section-heading split"><div><h2>Different needs. One considered approach.</h2></div><p>We look at your customers, operations, and priorities before recommending what to build.</p></div><div className="sector-grid">{sectors.map(([id,title,description]) => <article className="sector-card" id={id} key={id}><h2>{title}</h2><p>{description}</p><Link className={`${siteStyles.textLink} text-link`} href="/contact">Discuss your needs <ArrowUpRight size={16} aria-hidden="true"/></Link></article>)}</div></div></section>
   </>;
 }

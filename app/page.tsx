@@ -1,19 +1,19 @@
 import Link from "next/link";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
-import { FAQ } from "@/components/home/faq";
 import { HeroVisual } from "@/components/home/hero-visual";
-import { ScrollStory } from "@/components/home/scroll-story";
-import { ServiceIcon } from "@/components/shared/service-icon";
+import { site } from "@/config/site";
+import { FAQ } from "@/components/home/faq";
+import { ProjectStartingPoint } from "@/components/home/project-starting-point";
+import { ConceptArtwork } from "@/components/shared/concept-artwork";
 import { services } from "@/data/services";
 import { portfolio } from "@/data/portfolio";
-import { site } from "@/config/site";
 import { siteStyles } from "@/config/styles";
 
 const approach = [
-  ["01", "Understand", "We learn about your business, customers, goals, and the systems you already use."],
-  ["02", "Define", "Together we set priorities, agree a practical scope, and make the next decisions clear."],
-  ["03", "Make", "We design, build, and refine the agreed solution with your business in view."],
-  ["04", "Evolve", "After launch, we can review what is working and plan further improvements."],
+  ["Understand", "We learn about your business, your customers, and the tools you already use."],
+  ["Define", "Together we agree on priorities, a practical scope, and what progress means."],
+  ["Make", "We design, build, and refine with your business in view at every stage."],
+  ["Evolve", "After launch, we can review what works and plan the next improvement."],
 ];
 
 export default function Home() {
@@ -40,30 +40,18 @@ export default function Home() {
       <div className={`${siteStyles.container} hero-foot`}><span>{site.tagline}</span><span>Explore what&apos;s possible <ArrowRight size={16}/></span></div>
     </section>
 
-    <section className={`intro-band section ${siteStyles.section}`} aria-labelledby="intro-title">
-      <div className={`${siteStyles.container} intro-grid`}>
-        <span className={`${siteStyles.eyebrow} eyebrow`}>What we believe</span>
-        <div><h2 id="intro-title">The strongest digital work starts with the business behind it.</h2><p>Whether you are establishing your presence, improving a customer journey, or connecting the tools your team relies on, we begin with the same question: what will make a meaningful difference for you?</p></div>
-      </div>
-    </section>
+    <section className={`studio-intro ${siteStyles.section}`} aria-labelledby="intro-title"><div className={`${siteStyles.container} studio-intro-grid`}><h2 id="intro-title">One business.<br/>Connected thinking.</h2><div><p>Your identity, customer experience, and day-to-day tools should support the same goals. We bring these conversations together, so your next investment makes sense for the whole business.</p><Link className={`${siteStyles.textLink} text-link`} href="/about">Meet Futurvion <ArrowUpRight size={18} aria-hidden="true"/></Link></div></div></section>
 
-    <section className={`section services-section ${siteStyles.section}`} id="services" aria-labelledby="services-title">
-      <div className={siteStyles.container}>
-        <div className="section-heading split"><div><span className={`${siteStyles.eyebrow} eyebrow`}>Our services</span><h2 id="services-title">Expertise that works <em>together.</em></h2></div><div><p>From a clear identity to a useful website and the technology behind your operations, we shape the right combination around your goals.</p><Link className={`${siteStyles.textLink} text-link`} href="/services">Explore all services <ArrowUpRight size={18}/></Link></div></div>
-        <div className="service-grid">{services.map(service => <article className="service-card" key={service.slug}><div className="service-card-top"><span>{service.number} / 08</span><span className="service-icon"><ServiceIcon name={service.icon}/></span></div><h3>{service.title}</h3><p>{service.short}</p><Link href={`/services/${service.slug}`} aria-label={`Explore ${service.title}`}>Explore service <ArrowUpRight size={18}/></Link></article>)}</div>
-      </div>
-    </section>
+    <section className={`studio-services ${siteStyles.section}`} id="services" aria-labelledby="services-title"><div className={siteStyles.container}><div className="section-heading split"><h2 id="services-title">What can we<br/>move forward?</h2><p>Start with one challenge or connect several capabilities. We shape the work around what your business needs.</p></div><div className="capability-index">{services.map(service => <Link href={`/services/${service.slug}`} key={service.slug}><h3>{service.title}</h3><p>{service.short}</p><ArrowUpRight size={24} aria-hidden="true"/></Link>)}</div></div></section>
 
-    <ScrollStory/>
+    <section className={`studio-work ${siteStyles.section}`} aria-labelledby="work-title"><div className={siteStyles.container}><div className="section-heading split"><h2 id="work-title">Ideas made tangible.</h2><div><p>Illustrative concepts that explore business challenges. These are design explorations, not completed client projects.</p><Link className={`${siteStyles.textLink} text-link`} href="/work">Explore all concepts <ArrowUpRight size={18} aria-hidden="true"/></Link></div></div><div className="studio-work-grid">{portfolio.slice(0, 2).map(concept => <Link className="studio-project" href={`/work/${concept.slug}`} key={concept.slug}><ConceptArtwork project={concept}/><div className="studio-project-caption"><div><h3>{concept.title}</h3><p>{concept.category} · Illustrative concept</p></div><ArrowUpRight aria-hidden="true"/></div></Link>)}</div></div></section>
 
-    <section className={`section solutions-preview ${siteStyles.section}`} aria-labelledby="solutions-title"><div className={siteStyles.container}><div className="section-heading split"><div><span className={`${siteStyles.eyebrow} eyebrow`}>Who we help</span><h2 id="solutions-title">Built around your <em>business.</em></h2></div><p>Different organizations need different starting points. We adapt the work to your customers, team, and stage of growth.</p></div><div className="solution-tiles"><Link href="/solutions#retail"><span>01 / Commerce</span><h3>Retail & e-commerce</h3><p>Make it easier for people to discover, choose, and buy.</p><ArrowUpRight size={20}/></Link><Link href="/solutions#services"><span>02 / Expertise</span><h3>Professional services</h3><p>Present your expertise clearly and turn interest into enquiries.</p><ArrowUpRight size={20}/></Link><Link href="/solutions#operations"><span>03 / Operations</span><h3>Growing teams</h3><p>Connect daily work with tools designed for the way you operate.</p><ArrowUpRight size={20}/></Link></div><Link className={`${siteStyles.textLink} text-link`} href="/solutions">See more business solutions <ArrowUpRight size={18}/></Link></div></section>
+    <ProjectStartingPoint/>
 
-    <section className={`section process-section ${siteStyles.section}`} id="process" aria-labelledby="process-title"><div className={siteStyles.container}><div className="section-heading split"><div><span className={`${siteStyles.eyebrow} eyebrow`}>How we work</span><h2 id="process-title">A considered path <em>forward.</em></h2></div><p>Each engagement is shaped by its scope. Our process keeps the work grounded in what your business needs and gives every stage a clear purpose.</p></div><div className="process-grid">{approach.map(([number, title, description]) => <div className="process-step" key={number}><span className="process-number">{number}</span><h3>{title}</h3><p>{description}</p></div>)}</div></div></section>
+    <section className={`studio-process ${siteStyles.section}`} id="process" aria-labelledby="process-title"><div className={siteStyles.container}><div className="section-heading split"><h2 id="process-title">Clear at every stage.</h2><p>A practical process, shaped by the scope. You know what we are working toward and what comes next.</p></div><ol className="studio-process-list">{approach.map(([title, description]) => <li key={title}><h3>{title}</h3><p>{description}</p></li>)}</ol></div></section>
 
-    <section className={`section work-section ${siteStyles.section}`} aria-labelledby="work-title"><div className={siteStyles.container}><div className="section-heading split"><div><span className={`${siteStyles.eyebrow} eyebrow`}>Thinking in practice</span><h2 id="work-title">An idea of what&apos;s <em>possible.</em></h2></div><div><p>These explorations are illustrative concepts, not completed client projects. They show how we think about real business challenges.</p><Link className={`${siteStyles.textLink} text-link`} href="/work">View all concepts <ArrowUpRight size={18}/></Link></div></div><div className="work-preview">{portfolio.slice(0, 2).map((concept, index) => <Link className="work-preview-item" href={`/work/${concept.slug}`} key={concept.slug}><span className="work-preview-number">0{index + 1}</span><div><span className={`${siteStyles.eyebrow} eyebrow`}>Illustrative concept / {concept.category}</span><h3>{concept.title}</h3><p>{concept.summary}</p></div><ArrowUpRight size={22}/></Link>)}</div></div></section>
+    <section className={`faq-section ${siteStyles.section}`} aria-labelledby="faq-title"><div className={`${siteStyles.container} faq-layout`}><div><h2 id="faq-title">Before we begin.</h2><p>A few things you might want to know. Have a different question?</p><Link className={`${siteStyles.textLink} text-link`} href="/contact">Ask us directly <ArrowUpRight size={18} aria-hidden="true"/></Link></div><FAQ limit={5}/></div></section>
 
-    <section className={`section faq-section ${siteStyles.section}`} aria-labelledby="faq-title"><div className={`${siteStyles.container} faq-layout`}><div><span className={`${siteStyles.eyebrow} eyebrow`}>Good to know</span><h2 id="faq-title">A few common <em>questions.</em></h2><p>If you have something more specific in mind, we would be glad to hear it.</p><Link className={`${siteStyles.textLink} text-link`} href="/contact">Ask us directly <ArrowUpRight size={18}/></Link></div><FAQ limit={5}/></div></section>
-
-    <section className={`final-cta section ${siteStyles.section}`}><div className={`${siteStyles.container} final-cta-layout`}><div><span className={`${siteStyles.eyebrow} eyebrow`}>Start a conversation</span><h2>Let&apos;s make the next step <em>clear.</em></h2></div><div><p>Tell us where your business is today and what you want to change. We can help define a practical way forward.</p><Link className={`${siteStyles.button} button button-light ${siteStyles.buttonLight}`} href="/contact">Let&apos;s talk <ArrowUpRight size={18}/></Link></div></div></section>
+    <section className={`final-cta ${siteStyles.section}`} aria-labelledby="next-title"><div className={`${siteStyles.container} final-cta-layout`}><h2 id="next-title">Your next chapter<br/>starts here.</h2><div><p>Tell us where your business is today and what you want to change. We will help define a practical way forward.</p><Link className={`${siteStyles.button} button button-primary ${siteStyles.buttonPrimary}`} href="/contact">Let&apos;s talk <ArrowUpRight size={18} aria-hidden="true"/></Link></div></div></section>
   </>;
 }
