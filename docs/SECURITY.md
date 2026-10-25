@@ -25,3 +25,9 @@ This describes implemented protections and known review items in the repository;
 ## Operational handling
 
 Provide real secrets through deployment environment settings, keep them server-only, and rotate them through the provider if exposed. Apply migrations with separate deployment privileges and use a limited runtime database role where feasible. Agree on retention before launch and align the privacy policy and actual deletion process. Do not log full enquiry payloads or place private data in public analytics responses.
+
+## Public toolbox boundary
+
+The developer toolbox is public without authentication. No accounts, sessions, payments, login secrets, user tables, or database changes were added for it. Existing jobs/admin authorization remains enforced independently on the main site. The hostname proxy is an allowlist for toolbox pages, not a bypass around main-site session checks: admin and every API are denied on the utility hostname. Main-site internal toolbox paths are denied as well. Platform ingress must preserve and validate the actual Host header and must not expose alternate direct origins that bypass Next.js Proxy.
+
+Tool content stays in React state and a short-lived regex worker; it is not sent to an endpoint, logged, or stored in URLs/cookies/browser storage. Page lifecycle reset also clears content on back-forward cache restoration. Copy is an explicit system clipboard write, whose retention is outside the app. JWT decoding never verifies signatures. Regex runs in a terminable worker with bounded sizes and matches. JSON parse errors use generic guidance to avoid echoing sensitive snippets. Ordinary hosting metadata remains subject to infrastructure policies; no absolute anonymity is promised. No analytics or ad scripts are mounted in the utility shell.

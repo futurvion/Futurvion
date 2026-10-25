@@ -2,7 +2,7 @@
 
 ## Purpose and scope
 
-Futurvion is a public site for a digital solutions studio. Its stated goal is to explain services and possible approaches in plain language and turn interested visitors into enquiries. This purpose is evidenced by `app/page.tsx`, `app/services/`, `app/solutions/`, `app/work/`, and `app/contact/`. Whether any listed service or concept has been delivered for a real client is **not verified** by this repository. All five work entries in `data/portfolio.ts` explicitly describe illustrative concepts without verified results.
+Futurvion is a public site for a digital solutions studio. Its stated goal is to explain services and possible approaches in plain language and turn interested visitors into enquiries. This purpose is evidenced by `app/(studio)/page.tsx`, `app/(studio)/services/`, `app/(studio)/solutions/`, `app/(studio)/work/`, and `app/(studio)/contact/`. Whether any listed service or concept has been delivered for a real client is **not verified** by this repository. All five work entries in `data/portfolio.ts` explicitly describe illustrative concepts without verified results.
 
 ## Users and workflows
 
@@ -31,3 +31,5 @@ The jobs portal adds a single administrator role. `/admin/login` signs in, `/adm
 ## Boundaries and unresolved requirements
 
 The marketing copy mentions customer software, mobile applications, and AI services the studio could provide; this repository implements the marketing site and jobs portal, not those products or an AI agent runtime. There is no client portal, analytics dashboard, payment system, CMS, or background worker. Real client proof, jurisdiction-specific legal review, retention period, operational monitoring, and live deployment state need operator confirmation. Current actionable work is tracked in [TASKS.md](../TASKS.md).
+
+The developer toolbox is an owned Futurvion product, separate from the five illustrative client concepts. It is implemented under `app/toolbox-internal/` and served only on the utility hostname through `proxy.ts`. Six free browser-local utilities require no login or payment. The Works page links to its intended public origin in a new tab. Custom-domain activation remains a deployment task.

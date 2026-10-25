@@ -31,3 +31,7 @@ Only changes supported by the repository or Git history are listed. Unreleased e
 ## 2026-10-19
 
 - Fixed a mobile responsiveness issue (`fd334e3`).
+
+## 2026-10-25 - Free developer utility toolbox
+
+Added an anonymous browser-only dashboard and six tools (JSON, JWT, cron, regex, Base64, API response formatting), exact-host routing for `utility.futurvion.in`, isolated layouts, search/category navigation, privacy information, canonical metadata, host-specific discovery, and a new-tab Works product link. No tool storage, authentication, payments, database changes, external processing, or ads. Existing site routes and admin checks are preserved under a URL-neutral route group. Domain/DNS/TLS activation remains a deployment task.
