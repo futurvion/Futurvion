@@ -4,6 +4,12 @@ Status is based on the current repository and local checks on 2026-10-23. `DONE`
 
 ## Project status summary
 
+- 2026-10-25: Redesigned the homepage Process section as one connected composition: dark introduction and enquiry link alongside four numbered stages with their explanations. Removed the duplicate stage preview from this section and retained existing side entrances. Browser-reviewed desktop/mobile screenshots and checked 1440, 768, 390 and 320px layouts without horizontal overflow. Typecheck, scoped ESLint, 39 tests and production build passed; corrected a source-file encoding issue before the successful build. Updated DESIGN.md and changelog.
+
+- 2026-10-25: Added accessible back links above Services and Work headings: overview pages return home, detail pages return to their respective overview. Reused the shared PageHero with an optional destination. Typecheck, scoped ESLint, all 39 tests and production build passed. Browser checks confirmed visible links and no horizontal overflow at 1440px and 390px, and navigation from a work detail to the Work overview. Full repository lint retains the previously documented skill-bundle errors.
+
+- 2026-10-25: Added relevant right-side visuals to every header destination: Services, Solutions, Work, About, Contact and Jobs, plus the homepage Process section. Preserved the original 3D homepage hero and simpler jobs motion. Typecheck, scoped application ESLint, all 39 tests across 12 files and production build passed. Production-browser checks covered six pages at 1440, 768, 390 and 320px with no horizontal overflow or page errors; checked screenshots, contact/jobs anchors, Process stages and reduced motion. Full repository lint retains the previously recorded skill-bundle hook errors. Updated DESIGN.md, architecture and changelog. No deployment performed.
+
 The public marketing pages and content are implemented. The contact and analytics backends are implemented behind environment configuration. The jobs portal has public discovery, a URL-only admin login/dashboard, provider adapters, synchronization, and a migration applied to the configured Neon database. A first live provider sync inserted 297 real jobs into Neon and public listing/detail reads work; Resend and deployed-site flows have not been exercised. There is no AI agent runtime or durable background worker. The tracked automated suite includes validation and jobs-core tests.
 
 ## Jobs portal status

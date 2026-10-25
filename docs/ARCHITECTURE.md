@@ -78,6 +78,10 @@ The original contact and analytics handlers return generic client errors and cal
 
 ## Public design system
 
+The homepage Process section uses its own `.process-layout` composition with one ordered list of explained stages, rather than mounting the compact `HeroAside` Process variant.
+
+`HeroAside` supplies page-specific visual panels through the optional `PageHero.visual` prop, the jobs hero and the homepage Process section. Its links use existing routes or section anchors. CSS handles responsive stacking and reduced-motion-aware entrances; panels are excluded from generic reveal observation. Jobs keeps a static hero panel and its existing simpler content motion.
+
 See [DESIGN.md](../DESIGN.md) for public visual rules. Palette tokens live in `config/palette.ts`, shared utility compositions in `config/styles.ts`, and the incremental public redesign layer in `app/redesign.css` after the existing theme/jobs styles. `ConceptArtwork` is shared by the homepage, filtered work list and concept details; `ProjectStartingPoint` uses the existing typed service data. The older `ScrollStory` component remains available but is not mounted. Public details use one-time full side entrances, with static/reduced-motion/print visibility. No API, schema, authentication, or provider behavior changed.
 
 Public content entrances are classified by content type in `components/effects/reveal.tsx`; its observer also handles newly mounted portfolio/job results after navigation or filtering. CSS uses individual translate/scale properties, viewport-relative side distances measured before animation, and bounded stagger delays. Only JS-prepared pending items are hidden; reduced-motion and print CSS expose all content. Horizontal clipping on main preserves the story's sticky layout. Each unit runs once, excludes nested units and admin/hero scenes, and cancels on focus or reduced-motion changes.

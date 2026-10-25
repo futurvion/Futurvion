@@ -12,7 +12,7 @@ const blockSelector = [
 ].join(", ");
 const textSelector = "main :is(h2, h3, p, .text-link, .button, .filter-row), .footer-bottom, .footer-wordmark";
 const targetSelector = `${blockSelector}, ${textSelector}`;
-const animatedElsewhere = ".hero, .inner-hero, .story, .jobs-hero, .admin-workspace, .admin-login-page";
+const animatedElsewhere = ".hero, .inner-hero, .story, .jobs-hero, .hero-aside, .admin-workspace, .admin-login-page";
 
 function entranceFor(element: HTMLElement) {
   if (element.matches(".studio-project, .work-card")) return "artwork";
