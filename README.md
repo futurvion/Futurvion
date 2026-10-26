@@ -115,3 +115,15 @@ After deploying, add `futurvion.in` as a **Domain property** in [Google Search C
 - No authenticated analytics dashboard (intentionally, rather than an unprotected one).
 - Rate limiting is DB-backed and keyed on `x-forwarded-for`; confirm your host sets it trustworthily.
 
+
+## Free developer toolbox
+
+The same Next.js deployment serves `utility.futurvion.in` using the exact Host header in `proxy.ts`. No toolbox account, secret, database setup, payment, API key, or input persistence is required. All six tools process content in browser memory. The existing studio and jobs admin retain their own routes and authorization.
+
+Run `npm run dev`, then open `http://utility.localhost:3000/` (the main site remains `http://localhost:3000/`). If your browser does not resolve the `.localhost` name, add `127.0.0.1 utility.localhost` to your operating system hosts file. Use the same port printed by Next.js. Toolbox routes are `/tools/json-formatter`, `/tools/jwt-decoder`, `/tools/cron-generator`, `/tools/regex-tester`, `/tools/base64`, `/tools/api-response-formatter`, and `/privacy`. Production custom-domain/DNS steps are in [deployment](docs/DEPLOYMENT.md). Preview URLs continue to show the main site; use a local Host mapping to inspect the toolbox rather than redirecting preview visitors.
+
+### Test on plain localhost
+
+Stop any existing `next dev` process for this checkout, then run `npm run dev:tools` and open `http://localhost:3001`. The dashboard, `/privacy`, and all six `/tools/*` URLs work directly there, with no hosts-file changes. `127.0.0.1:3001` and `[::1]:3001` are also supported. Use `npm run dev` for the main website on its usual port. Run one development server per checkout because these commands share Next.js build output.
+
+Port 3001 on these exact loopback hosts selects the toolbox **only in development**. Production and preview routing remain hostname-isolated; no environment variables, cookies, or persisted mode settings are added. Production-build testing can still use `utility.localhost:<port>` as documented above.

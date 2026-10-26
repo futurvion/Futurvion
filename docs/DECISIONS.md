@@ -57,3 +57,11 @@ This record separates current code choices from historical approval. Dates and a
 - **Evidence:** The six repeated-title/location groups in the initial 297-row database contain different Greenhouse requisition IDs. Deleting by title would remove real openings. Grouping produces 287 cards without deleting those records.
 - **Implementation:** Database-triggered grouping key, parameterized filtered/ranked listing queries and a stable ID tie-breaker. Filters apply before grouping so a matching provider/salary/employment variant is still discoverable.
 - **Trade-off:** Only the chosen matching source posting appears as the card; other requisitions remain available through their original detail URLs. Different location wording is not semantically inferred. Existing source-expiry policy is unchanged.
+
+## Isolate the free toolbox by hostname and layout
+
+- **Date:** 2026-10-25.
+- **Decision:** Serve the public, browser-only toolbox from the exact utility hostname with a narrow proxy rewrite and an isolated layout. Keep existing pages in a URL-neutral route group, with their analytics and admin checks unchanged.
+- **Reason:** A folder does not create a subdomain, and a shared public layout would mount the studio's persistent consent/analytics behavior in anonymous tool workspaces. Separate layouts preserve static page rendering without a request-time host lookup in every root render.
+- **Trade-offs:** Hosting must map the custom domain to the same deployment. The internal route namespace is intentionally blocked externally. Cron validation covers a documented numeric five-field subset and makes no next-run/calendar feasibility claims. Regex safety uses worker termination rather than restricting legitimate JavaScript pattern syntax.
+- **Status:** Implemented and verified locally; DNS, TLS, custom-domain assignment, and deployed checks remain manual.
