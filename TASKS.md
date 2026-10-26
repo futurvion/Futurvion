@@ -5,6 +5,8 @@ Status is based on the current repository and local checks on 2026-10-23. `DONE`
 ## Project status summary
 
 - 2026-10-26: Completed nearby job discovery on `/jobs`. All five migrations are applied. Backfill indexed 224 city entries for 139 jobs; all 297 source jobs were preserved. Manual city selection and explicit browser location work with radius, nearest-first order, filters and pagination. Typecheck, scoped lint, unit/API checks, live PostgreSQL checks and production-browser verification passed; production deployment remains unverified.
+- 2026-10-26: Resolved the reported `cities.json` module-not-found build error by restoring the already-declared npm dependencies. `npm run build` passed and nearby API/job tests passed (21 tests; four opt-in SQL tests skipped). This environment is on Node 20.20.2 rather than the required Node 22.13+, so use the supported runtime for deployment verification.
+- 2026-10-26: Moved the resume-matching upload and filters into a native modal dialog on `/jobs`; the form now opens from “Match jobs with your resume.” Escape, backdrop, and Close dismiss the dialog, and focus returns to the opener. Upload, results, and clear behavior stay inside the dialog. Explicitly centered the dialog and locked page scrolling while it is open; the dialog itself scrolls when needed. Production browser confirmed viewport-centred geometry and `body` overflow locked while open. Typecheck, scoped lint and production build passed.
 
 ## Nearby jobs — 2026-10-26 implementation report
 

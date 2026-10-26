@@ -10,10 +10,15 @@
 .jobs-hero-line { display: flex; gap: 25px; align-items: center; margin-top: 65px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,.25); font-size: 12px; text-transform: uppercase; letter-spacing: .15em; }
 .jobs-hero-line strong { margin-left: auto; color: #fff; }
 .jobs-section { background: #f7f8f6; }
-.resume-match { margin-bottom: 72px; padding-bottom: 48px; border-bottom: 1px solid var(--line-strong); }
+.resume-match { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin-bottom: 72px; padding-bottom: 48px; border-bottom: 1px solid var(--line-strong); }
 .resume-match-intro { max-width: 690px; }
 .resume-match h2 { font-size: clamp(1.8rem,3vw,2.8rem); margin-bottom: 15px; }
 .resume-match-intro p { font-size: 15px; line-height: 1.65; }
+.resume-match-dialog { position: fixed; inset: 50% auto auto 50%; width: min(920px,calc(100vw - 32px)); max-width: none; max-height: min(calc(100dvh - 48px),900px); margin: 0; overflow-y: auto; overscroll-behavior: contain; transform: translate(-50%,-50%); padding: clamp(22px,4vw,48px); border: 0; background: #f7f8f6; color: var(--ink); }
+.resume-match-dialog::backdrop { background: rgb(8 20 26 / 72%); }
+.resume-match-dialog-content { max-width: 820px; margin-inline: auto; }
+.resume-match-dialog-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; }
+.resume-match-close { flex: none; min-height: 44px; padding: 8px 14px; border: 1px solid var(--line-strong); background: #fff; color: var(--ink); cursor: pointer; }
 .resume-match-form { display: grid; gap: 12px; margin-top: 24px; max-width: 740px; }
 .resume-match-form > label { font-size: 14px; font-weight: 700; color: var(--ink); }
 .resume-match-form input[type=file] { display: block; width: 100%; min-width: 0; padding: 15px; border: 1px solid var(--line-strong); background: #fff; font-size: 14px; }
@@ -34,8 +39,8 @@
 .resume-caution,.resume-experience { font-size: 13px; margin-bottom: 13px; line-height: 1.5; }
 .resume-job-card { min-width: 0; overflow-wrap: anywhere; }
 .resume-job-card:hover { transform: none; box-shadow: none; }
-.resume-match :focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
-@media(max-width:620px) { .resume-match { margin-bottom: 48px; padding-bottom: 35px; } .resume-match-actions { flex-direction: column; } .resume-match-actions button { white-space: normal; } }
+.resume-match :focus-visible,.resume-match-dialog :focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+@media(max-width:620px) { .resume-match { align-items: flex-start; flex-direction: column; margin-bottom: 48px; padding-bottom: 35px; } .resume-match-actions { flex-direction: column; } .resume-match-actions button { white-space: normal; } .resume-match-dialog { width: calc(100vw - 20px); max-height: calc(100dvh - 24px); padding: 20px 16px; } .resume-match-dialog-heading { flex-direction: column-reverse; gap: 8px; } .resume-match-close { align-self: flex-end; } }
 .jobs-layout { display: grid; grid-template-columns: 280px minmax(0,1fr); gap: clamp(38px, 5vw, 84px); }
 .jobs-layout aside h2 { font-size: 1.8rem; }
 .jobs-layout aside > p { font-size: 14px; margin: 12px 0 26px; }
