@@ -65,3 +65,12 @@ This record separates current code choices from historical approval. Dates and a
 - **Reason:** A folder does not create a subdomain, and a shared public layout would mount the studio's persistent consent/analytics behavior in anonymous tool workspaces. Separate layouts preserve static page rendering without a request-time host lookup in every root render.
 - **Trade-offs:** Hosting must map the custom domain to the same deployment. The internal route namespace is intentionally blocked externally. Cron validation covers a documented numeric five-field subset and makes no next-run/calendar feasibility claims. Regex safety uses worker termination rather than restricting legitimate JavaScript pattern syntax.
 - **Status:** Implemented and verified locally; DNS, TLS, custom-domain assignment, and deployed checks remain manual.
+
+
+## Temporary, deterministic resume matching
+
+- Date: 2026-10-26.
+- Decision: Parse PDF/DOCX in a terminated Node worker, extract conservative typed evidence without an LLM, retrieve a bounded PostgreSQL full-text shortlist, and rank deterministically with the requested 30/10/20/20/15/5 skill/role/experience/description/qualification weights.
+- Reason: The repository has a unified job catalogue and no configured AI/embedding provider with reviewed retention settings. This approach works without transmitting resumes to another service or introducing candidate persistence.
+- Trade-offs: Skill vocabulary, role aliases, employment-date interpretation, and explicit requirement parsing have limited coverage. Unknowns remain unknown; estimates are not calibrated hiring probabilities. Semantic matching/pgvector is deferred behind the CandidateRetriever boundary, with no unused vector columns or provider secrets.
+- Status: Implemented; additive migration applied; synthetic parsing/API/browser checks and local production build verified. Deployment controls and large-catalogue quality/load verification remain open.

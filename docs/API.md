@@ -73,3 +73,16 @@ Required: UUID `eventId`, `visitorId`, and `sessionId`; `type` in `page_view`, `
 ## Server Actions
 
 None are defined in the current repository.
+
+
+## POST /api/jobs/match-resume
+
+Public guest search, independent of admin authentication. Requires DATABASE_URL and ABUSE_HASH_SECRET (32+ characters). Accept multipart/form-data with exactly one resume File (PDF or DOCX), plus optional location (max 100 characters) and workMode (empty, remote, hybrid, onsite). Upload begins only on explicit user action. Both browser and server cap files at 2 MiB; the actual streamed multipart body is capped at that limit plus 64 KiB overhead.
+
+Success: { jobs, total }. At most 100 ranked, deduplicated jobs are returned; total describes that bounded result set. The browser displays 20 per page without re-uploading. Each job includes ID/slug/title/company, location/mode/employment, available salary/posting information, attribution, original application URL, estimated matchScore, matched/missing skills, experienceFit, eligibility (review or stretch), explanation, and six score components. No full resume text or candidate profile is returned. All responses use private, no-store caching.
+
+400: missing/invalid/empty/mismatched file, malformed/unreadable/encrypted/scanned document, invalid filters, or parsing failure. 408: upload or parser deadline/cancellation. 413: oversized upload. 415: unsupported request content type. 429: guest rate limit or process concurrency limit. 503: configuration/database/transient processing failure. Errors contain no submitted data or parser diagnostics.
+
+Limits: 30 PDF pages, 1,000 DOCX archive entries, 10 MiB declared and streamed archive expansion, 100,000 text characters, 8-second streamed upload deadline, 12-second terminated parser worker, 128 MiB worker old-generation heap limit, and database statement/transaction deadlines. The host duration declaration is 45 seconds; verify support on the selected host. The browser also aborts after 45 seconds.
+
+Existing GET/POST /api/jobs and GET /api/jobs/[slug] remain the ordinary search/detail interfaces; no duplicate search catalogue or detail endpoint was introduced.

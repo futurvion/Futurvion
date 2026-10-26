@@ -45,8 +45,8 @@ export function ResumeMatch() {
     clear(false);
     if (!next) return;
     if (!/\.(pdf|docx)$/i.test(next.name)) { clear(); setError("Choose a PDF or DOCX file."); return; }
-    if (!next.size) { setError("Choose a nonempty resume."); return; }
-    if (next.size > MAX_RESUME_BYTES) { setError("The resume must be 2 MB or smaller."); return; }
+    if (!next.size) { clear(); setError("Choose a nonempty resume."); return; }
+    if (next.size > MAX_RESUME_BYTES) { clear(); setError("The resume must be 2 MB or smaller."); return; }
     setFile(next);
   }
   async function submit(event: React.FormEvent<HTMLFormElement>) {

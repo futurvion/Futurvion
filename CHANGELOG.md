@@ -4,6 +4,8 @@ Only changes supported by the repository or Git history are listed. Unreleased e
 
 ## Unreleased
 
+- Added temporary PDF/DOCX resume matching on `/jobs`: bounded in-memory parsing, indexed PostgreSQL retrieval, deterministic weighted recommendations, stretch explanations, and clear/refresh cleanup. Applied a public-job metadata/search migration without candidate persistence; retained ordinary discovery and employer application links. Added synthetic parsing, privacy, ranking, retrieval, and API tests, runtime limits, and deployment/privacy documentation.
+
 - Refined the homepage Process section into a cohesive split layout with numbered stages, clearer hierarchy and a direct project enquiry link.
 
 - Added page-specific right-side hero visuals for Services, Solutions, Work, About, Contact and Jobs, plus a compact Process stages panel. Included responsive layouts, useful destination links and reduced-motion support while preserving the original homepage 3D scene and simple jobs motion.

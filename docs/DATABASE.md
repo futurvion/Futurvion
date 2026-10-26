@@ -38,3 +38,14 @@ There is no relation between the original three tables. The accepted event types
 The connected database migration was applied and verified on 2026-10-25: all 297 source rows and existing fields/deep links were preserved by a JSON row fingerprint check (excluding the new key). They produce 287 active listing groups, removing ten repeated cards across six groups. A transaction preview additionally verified equivalent case/spacing, key correction on update and separate locations, then rolled back without changing stored data.
 
 Public queries filter active source records first, group before pagination, and select the most recently verified matching posting, then publication/creation time and ID for deterministic ties. Listing totals count groups. Every old slug continues to resolve to its own source record, and internal keys are excluded from both listing and detail APIs. Provider identity uniqueness, sync permissions, the 14-day default missing-posting grace period and source retention remain unchanged. Apply the migration before releasing the new backend query code.
+
+
+## Resume matching uses public job data only
+
+Migration 20261026100000_job_full_text was applied to the configured Neon database on 2026-10-26. It adds Job.requiredSkills/preferredSkills/qualifications arrays, nullable experienceMinMonths/experienceMaxMonths, experienceMandatory, and a tsvector searchDocument. No candidate, resume, embedding, or match-result table is added.
+
+A BEFORE INSERT/content-update trigger builds the weighted document: A for title and required skills, B for company/category/preferred skills, D for requirements and description. The migration populates the existing catalogue and creates a GIN searchDocument index, GIN requiredSkills array index, and B-tree status/expiry and status/minimum-experience indexes. Existing listingKey grouping and source/external-ID upserts remain in use. Structured metadata is refreshed by normal ingestion, including unchanged provider records.
+
+Matching uses websearch_to_tsquery and ts_rank_cd with parameterized values, active/nonexpired predicates, optional location/mode filters, canonical grouping before LIMIT, and a 100-job shortlist. No candidate embeddings exist. Only pseudonymous key/kind/time abuse attempts are written by a matching request, using a transaction advisory lock to serialize per-caller rate limits.
+
+Validation found all 297 existing jobs indexed and all four new indexes present. A representative broad full-text query on that small catalogue took 1.873 ms server execution (EXPLAIN ANALYZE BUFFERS); PostgreSQL chose a sequential scan for its broad selectivity. This does not establish performance at 100,000 jobs. Network/cold-start time is separate from database execution.
