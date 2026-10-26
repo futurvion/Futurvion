@@ -21,8 +21,15 @@ export default function Home() {
     <section className="hero" id="home">
       <div className={`${siteStyles.container} hero-grid`}>
         <div className="hero-copy">
-          <span className={`${siteStyles.eyebrow} eyebrow`}>Futurvion / Digital solutions</span>
-          <h1 aria-label={site.tagline}>Digital solution<br/><em>for every</em><br/>business</h1>
+          <span className={`${siteStyles.eyebrow} eyebrow`}>
+          Futurvion / AI, Software & Digital Solutions
+        </span>
+
+        <h1>
+          Futurvion<br />
+          <em>Digital solutions</em><br />
+          for business
+        </h1>
           <p>Futurvion brings brand, digital experiences, and technology together to help businesses show up clearly, work more effectively, and grow with purpose.</p>
           <div className="hero-actions">
             <Link className={`${siteStyles.button} button button-primary ${siteStyles.buttonPrimary}`} href="/services">Explore our services <ArrowUpRight size={18}/></Link>

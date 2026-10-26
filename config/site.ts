@@ -15,34 +15,52 @@ export interface SiteConfig {
 }
 
 // Match the primary domain configured in Vercel even when the optional env var is unset.
-const configuredUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://futurvion.in";
 
 export const site: SiteConfig = {
   name: "Futurvion",
-  tagline: "Digital solution for every business",
-  description: "Digital solution for every business: branding, websites, custom software, and smarter workflows that fit businesses of every size.",
-  url: configuredUrl.replace(/\/$/, ""),
-  email: process.env.NEXT_PUBLIC_BUSINESS_EMAIL || "hello@futurvion.example",
+  tagline: "AI, Software & Digital Solutions",
+  description:
+    "Futurvion helps businesses grow through AI automation, custom software development, website development, branding, and digital marketing.",
+
+  url: (process.env.NEXT_PUBLIC_SITE_URL || "https://futurvion.in").replace(
+    /\/+$/,
+    "",
+  ),
+
+  email: process.env.NEXT_PUBLIC_BUSINESS_EMAIL || "futurvion@gmail.com",
+
   logo: "/logo-mark.png",
+
   bookingUrl: process.env.NEXT_PUBLIC_BOOKING_URL || undefined,
-  socials: [{ label: "Instagram", url: "https://www.instagram.com/futurvion/" }],
+
+  socials: [
+    {
+      label: "Instagram",
+      url: "https://www.instagram.com/futurvion/",
+    },
+  ],
+
   navigation: [
     { label: "Home", href: "/" },
     { label: "Services", href: "/services" },
     { label: "Solutions", href: "/solutions" },
     { label: "Process", href: "/#process" },
     { label: "Work", href: "/work" },
+    { label: "Blogs", href: "/blog" },
     { label: "Jobs", href: "/jobs" },
     { label: "About", href: "/about" },
     { label: "Contact", href: "/contact" },
   ],
+
   footerLinks: [
     { label: "Privacy policy", href: "/privacy-policy" },
     { label: "Terms", href: "/terms" },
   ],
+
   seo: {
-    title: "Futurvion | Digital solution for every business",
-    description: "Futurvion is a digital solutions studio: brand strategy, modern websites, custom software, and automation for businesses of every size and industry.",
+    title: "Futurvion | AI, Software & Digital Solutions",
+    description:
+      "Discover Futurvion's AI automation, software development, website development, branding, and digital marketing services.",
     image: "/og-image.svg",
   },
 };
