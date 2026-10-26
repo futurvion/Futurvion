@@ -82,6 +82,14 @@ model Job {
   category String?
   descriptionText String?
   requirements String?
+  requiredSkills String[] @default([])
+  preferredSkills String[] @default([])
+  experienceMinMonths Int?
+  experienceMaxMonths Int?
+  experienceMandatory Boolean @default(false)
+  qualifications String[] @default([])
+  // Weighted document maintained by the SQL migration's trigger; never candidate data.
+  searchDocument Unsupported("tsvector")?
   responsibilities String?
   benefits String?
   salaryMin Int?
@@ -105,6 +113,10 @@ model Job {
   @@unique([sourceProviderId, externalJobId])
   @@index([status, publishedAt])
   @@index([status, listingKey])
+  @@index([status, expiresAt])
+  @@index([status, experienceMinMonths])
+  @@index([requiredSkills], type: Gin)
+  @@index([searchDocument], type: Gin, map: "Job_searchDocument_gin")
   @@index([companyName])
   @@index([location])
   @@index([workMode, employmentType])

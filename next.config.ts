@@ -9,6 +9,10 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  serverExternalPackages: ["pdfjs-dist", "mammoth", "yauzl"],
+  outputFileTracingIncludes: {
+    "/api/jobs/match-resume": ["./features/jobs/server/resume-parser-worker.mjs", "./node_modules/pdfjs-dist/legacy/build/*.mjs", "./node_modules/mammoth/**/*", "./node_modules/yauzl/**/*"],
+  },
   poweredByHeader: false,
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];

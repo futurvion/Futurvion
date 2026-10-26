@@ -3,6 +3,7 @@ import type { Prisma } from "@/generated/prisma/client";
 import { getDb } from "@/lib/db";
 import { contentHash, providerConfig, slugFor } from "./core";
 import { fetchProvider } from "./providers";
+import { jobMatchEvidence } from "./job-match-evidence";
 
 export async function syncJobs(triggerType: "manual" | "scheduled", selectedProvider?: string, queuedRunId?: string) {
   const db = getDb(); if (!db) throw new Error("Database unavailable");
@@ -54,12 +55,13 @@ export async function syncJobs(triggerType: "manual" | "scheduled", selectedProv
           });
           const previousById = new Map(previousJobs.map(job => [job.externalJobId, job]));
           for (const job of batch) {
+            const matchEvidence = jobMatchEvidence(job);
             const hash = contentHash(job);
             const previous = previousById.get(job.externalJobId);
             changes.push(!previous ? "inserted" : previous.contentHash === hash ? "unchanged" : "updated");
             operations.push(db.job.upsert({ where: { sourceProviderId_externalJobId: { sourceProviderId: provider.id, externalJobId: job.externalJobId } },
-              create: { ...job, slug: slugFor(job, provider.slug), sourceProviderId: provider.id, contentHash: hash, lastSeenAt: started, lastVerifiedAt: started, status: "active" },
-              update: previous?.contentHash === hash ? { lastSeenAt: started, lastVerifiedAt: started, status: "active" } : { ...Object.fromEntries(Object.entries(job).filter(([, value]) => value !== undefined)), contentHash: hash, lastSeenAt: started, lastVerifiedAt: started, status: "active" },
+              create: { ...job, ...matchEvidence, slug: slugFor(job, provider.slug), sourceProviderId: provider.id, contentHash: hash, lastSeenAt: started, lastVerifiedAt: started, status: "active" },
+              update: previous?.contentHash === hash ? { ...matchEvidence, lastSeenAt: started, lastVerifiedAt: started, status: "active" } : { ...Object.fromEntries(Object.entries(job).filter(([, value]) => value !== undefined)), ...matchEvidence, contentHash: hash, lastSeenAt: started, lastVerifiedAt: started, status: "active" },
             }));
           }
           if (operations.length) await db.$transaction(operations, { maxWait: 15000, timeout: 30000 });
