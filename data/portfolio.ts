@@ -19,3 +19,9 @@ export const portfolio: ProjectConcept[] = [
   { slug: "fieldwork-flow", title: "Fieldwork Flow", industry: "Local services", category: "Automation", summary: "An illustrative workflow for enquiry intake and scheduling.", challenge: "A local service team manually moves enquiries between inboxes and calendars.", approach: "Define a reviewed handoff from enquiry to appointment and follow-up.", deliverables: ["Process map", "Automation concept", "Plan for when things go off-script"], implementation: "Illustrative concept only. No client implementation is claimed.", results: "No verified results are available for this concept." },
   { slug: "lumen-growth", title: "Lumen Growth", industry: "Education", category: "Growth", summary: "An illustrative set of pages and content that help people find and choose a course.", challenge: "A training provider needs clearer routes from search interest to course enquiry.", approach: "Match page content to what people search for, and track the enquiries that matter.", deliverables: ["Content structure", "Course page concept", "Plan for measuring results"], implementation: "Illustrative concept only. No client implementation is claimed.", results: "No verified results are available for this concept." },
 ];
+
+// Owned product links are distinct from illustrative client concepts.
+export const studioProducts = [{
+ title: "Futurvion Developer Tools", category: "Software", url: "https://utility.futurvion.in",
+ summary: "Free, privacy-focused online utilities for developers. Format JSON, decode JWTs, build cron expressions, test regex patterns, and more."
+}] as const;

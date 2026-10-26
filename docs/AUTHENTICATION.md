@@ -1,0 +1,13 @@
+# Authentication and authorization
+
+The jobs portal uses `/admin/login` for sign-in. A valid session opens `/admin` as the workspace overview; `/admin/jobs` holds job operations. Without a valid session, both protected pages redirect to `/admin/login`. The shared sidebar includes route navigation and sign-out. Each admin page checks the session before fetching data, and each admin API checks authorization independently. `AdminUser` stores a scrypt password hash; `AdminSession` stores the SHA-256 hash of a random 32-byte opaque cookie token. Login applies a keyed per-email database attempt limit. Protected operations recheck the session, active account, and admin role. Mutations require a matching Origin. Logout revokes the session. No public admin registration exists; `scripts/bootstrap-admin.mjs` creates the first account only when explicitly run after migration. `scripts/rotate-admin-password.mjs` replaces its hash and revokes active sessions. Local request checks on 2026-10-23 confirmed redirects without a session, login to the overview, access to both protected pages, and loss of access after sign-out. Browser hydration and deployed session behavior remain unverified.
+
+The original contact and analytics POST APIs remain anonymous and protected by validation and rate limits, not admin authorization. Admin sessions do not expose lead or analytics records.
+
+`features/analytics/components/analytics-consent.tsx` stores an `allow`/`deny` preference in browser `localStorage`. It also creates a random browser visitor ID and a short-lived session ID for analytics grouping. These values are not user identities, login sessions, or proof of consent to the server. The analytics API trusts a client-supplied `consent: true` field.
+
+The contact form requires a contact-consent checkbox and persists `privacyConsent: true` after validation. This records an enquiry preference, not an authenticated account. No dashboard or API exposes stored leads or events to a visitor; operators must use external database tooling. Any future lead or analytics read API needs explicit authorization and tests before exposing that data.
+
+## Free developer toolbox
+
+`utility.futurvion.in` is intentionally public: all six tool pages work directly with no login, email, API key, or subscription. No toolbox authentication provider, middleware session logic, account API, or database model exists. Host routing rewrites only public toolbox paths, denies all APIs/admin paths on this host, and leaves main-site authentication unchanged. The existing admin route files moved into a URL-neutral `(studio)` group without changes to session or authorization behavior.
