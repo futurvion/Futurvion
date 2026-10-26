@@ -101,3 +101,22 @@ The root layout owns fonts, global CSS, and base metadata. Existing page routes 
 `features/toolbox/` owns the typed directory, metadata helpers, shared shell, interactive workspace, and pure transformations. `public/toolbox-regex-worker.js` isolates user regular expressions; the UI terminates execution after 750 ms and caps input and matches. There are no tool APIs, server actions, database imports, persistence, or third-party processing. Workspaces reset on navigation/remount and page lifecycle events. A disabled `AdSlot` returns null and loads no scripts. Owned products in `data/portfolio.ts` are rendered separately from illustrative concepts through the existing Works grid and styles.
 
 For plain-localhost development, `npm run dev:tools` reserves port 3001. Proxy recognizes exact loopback host-and-port pairs only when `NODE_ENV` is development; production requests to localhost never enable that exception. The normal development command still serves the studio on port 3000.
+
+
+## Temporary resume matching (2026-10-26)
+
+The jobs page mounts features/jobs/components/resume-match.tsx alongside ordinary discovery. File, request controller, and recommendation state live only in that component. Leaving the route aborts the browser request; pagehide clears state for browser history caching. A multipart POST to /api/jobs/match-resume uses the same canonical Job rows and application links as ordinary discovery.
+
+The route enforces actual streamed byte limits and delegates document extraction to resume-document.ts and the native resume-parser-worker.mjs. The worker parses PDF.js/Mammoth buffers, validates DOCX archive expansion, and is terminated on completion, cancellation, deadline, or failure. Next output tracing includes its source and parser dependencies. No temporary document files or processing queue are used.
+
+resume-profile.ts builds temporary deterministic evidence. resume-retrieval.ts exposes a CandidateRetriever boundary and an indexed, parameterized PostgreSQL implementation. resume-ranking.ts scores the bounded shortlist. resume-match.ts orchestrates these steps and releases profile references in finally. A future semantic retriever can use this boundary; none is configured today. Matching never fetches external job feeds.
+
+The existing provider sync now derives conservative required/preferred skills, qualifications, and experience metadata from public job content. A database trigger maintains the weighted search document whenever matching content changes. Existing descriptions remain searchable immediately after migration, and ranking derives fallback metadata for rows not yet resynchronized.
+
+## Nearby job discovery
+
+NearbySearch is a component inside the existing JobsSearch form. It provides explicit city lookup, an optional browser-geolocation action, a radius, cancellation, errors, and live status. The surrounding form owns the selected origin in memory and sends it with the same POST /api/jobs filters/pagination. Manual location text is disabled while a radius is active so it does not accidentally exclude neighboring cities. Nearby origin and city lookup never enter URLs or browser storage.
+
+city-search.ts is a server-only boundary around city-data.mjs, an offline gazetteer shared with the native backfill CLI. The data is loaded/indexed once per process and never imported by client components. Requirement-free manual city selection and permission-based device location use the same radius query. The device origin is rounded before transmission.
+
+Provider sync derives JobLocation children in the same job upsert. nearby-query.ts builds bounded, parameterized PostgreSQL distance/grouping CTEs; geo.ts computes bounding boxes at the date line and poles. Existing ordinary list queries and resume matching remain separate. Nearby discovery does not send resumes or perform live provider crawling.

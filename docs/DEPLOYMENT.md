@@ -50,3 +50,18 @@ Local testing uses `http://utility.localhost:<port>`, with a hosts-file entry if
 Stop any existing `next dev` process for this checkout, then run `npm run dev:tools` and open `http://localhost:3001`. The dashboard, `/privacy`, and all six `/tools/*` URLs work directly there, with no hosts-file changes. `127.0.0.1:3001` and `[::1]:3001` are also supported. Use `npm run dev` for the main website on its usual port. Run one development server per checkout because these commands share Next.js build output.
 
 Port 3001 on these exact loopback hosts selects the toolbox **only in development**. Production and preview routing remain hostname-isolated; no environment variables, cookies, or persisted mode settings are added. Production-build testing can still use `utility.localhost:<port>` as documented above.
+
+
+## Resume matching runtime requirements
+
+This release requires Node >=22.13.0 for PDF.js (verified locally on Node 24.12.0). Configure the existing server-only DATABASE_URL and ABUSE_HASH_SECRET, apply all four migrations, and use a host that supports Node worker_threads and at least the declared 45-second route duration. The missing local abuse secret was generated without printing its value; configure a separate real production secret through deployment settings.
+
+next.config.ts includes the native parser worker and PDF/DOCX dependencies in the match route trace. Verify the deployment's packaged trace and an actual PDF/DOCX upload on the host. The application stores no uploaded files and has no disk fallback. Keep host body limits at least the application limit (2 MiB file plus multipart overhead), or display/document the lower host limit. Keep request/body and SQL parameter capture disabled for this route. No vector extension, model, embedding dimension, or AI provider credentials are needed for this keyword release.
+
+The additive migration and local production upload were verified against the configured Neon catalogue. Deployed worker support, runtime limits, logging/retention configuration, trusted IP headers, and 100,000-job latency/relevance remain operator checks.
+
+## Nearby discovery setup
+
+Apply the fifth migration (20261026120000_job_locations), then run npm run jobs:backfill-locations once for existing catalogue entries. New/repeated provider syncs maintain city rows automatically. These steps were completed on the configured Neon database. No new environment variables, geocoder credentials, or PostgreSQL extension is needed.
+
+The cities.json dependency and its admin1 dataset must remain in the Node server package for city lookup and ingestion. It is externalized from Next bundling and kept out of client imports. Verify trace contents and city lookup after deployment. Serve /jobs over HTTPS and preserve geolocation=(self) in Permissions-Policy; localhost is suitable for browser testing. Keep origin/body/query-parameter capture disabled on listing/location endpoints.

@@ -2,6 +2,7 @@
 import { Prisma } from "@/generated/prisma/client";
 import { getDb } from "@/lib/db";
 import { listQuery } from "./core";
+import { nearbyQuery } from "./nearby-query";
 
 /** SQL values stay parameterized, including literal LIKE wildcard characters. */
 export function jobListingFilter(query: ReturnType<typeof listQuery.parse>) {
@@ -37,6 +38,28 @@ export async function listJobs(raw: Record<string, string | string[] | undefined
   const db = getDb();
   if (!db) return { jobs: [], total: 0, page: query.page, pages: 0, configured: false };
   const filter = jobListingFilter(query);
+  if (query.nearLat !== undefined && query.nearLng !== undefined) {
+    const nearby = nearbyQuery(filter, query.nearLat, query.nearLng, query.radiusKm ?? 25);
+    const [pageIds, counts] = await db.$transaction(async tx => {
+      await tx.$executeRaw`SET LOCAL statement_timeout = '5000ms'`;
+      const ids = await tx.$queryRaw<{ id: string; distanceKm: number; city: string }[]>(Prisma.sql`${nearby}
+        SELECT id, "distanceKm", city FROM ranked WHERE position = 1
+        ORDER BY "distanceKm", "publishedAt" DESC NULLS LAST, "createdAt" DESC, id
+        LIMIT 12 OFFSET ${(query.page - 1) * 12}`);
+      const totals = await tx.$queryRaw<{ total: number }[]>(Prisma.sql`${nearby} SELECT COUNT(*)::int AS total FROM ranked WHERE position = 1`);
+      return [ids, totals] as const;
+    }, { maxWait: 4000, timeout: 12000 });
+    const records = pageIds.length ? await db.job.findMany({ where: { id: { in: pageIds.map(job => job.id) } }, select: publicJobSelect }) : [];
+    const byId = new Map(records.map(job => [job.id, job]));
+    const jobs = pageIds.flatMap(({ id, distanceKm, city }) => {
+      const record = byId.get(id);
+      if (!record) return [];
+      const { id: internalId, ...job } = record; void internalId;
+      return [{ ...job, distanceKm: Math.round(Number(distanceKm) * 10) / 10, nearbyCity: city }];
+    });
+    const total = counts[0]?.total ?? 0;
+    return { jobs, total, page: query.page, pages: Math.ceil(total / 12), configured: true };
+  }
   // Filter before grouping so a matching source/location/salary variant stays discoverable.
   // Group before LIMIT/OFFSET so counts and page boundaries describe unique listings.
   const [pageIds, counts] = await Promise.all([

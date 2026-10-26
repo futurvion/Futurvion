@@ -65,3 +65,20 @@ This record separates current code choices from historical approval. Dates and a
 - **Reason:** A folder does not create a subdomain, and a shared public layout would mount the studio's persistent consent/analytics behavior in anonymous tool workspaces. Separate layouts preserve static page rendering without a request-time host lookup in every root render.
 - **Trade-offs:** Hosting must map the custom domain to the same deployment. The internal route namespace is intentionally blocked externally. Cron validation covers a documented numeric five-field subset and makes no next-run/calendar feasibility claims. Regex safety uses worker termination rather than restricting legitimate JavaScript pattern syntax.
 - **Status:** Implemented and verified locally; DNS, TLS, custom-domain assignment, and deployed checks remain manual.
+
+
+## Temporary, deterministic resume matching
+
+- Date: 2026-10-26.
+- Decision: Parse PDF/DOCX in a terminated Node worker, extract conservative typed evidence without an LLM, retrieve a bounded PostgreSQL full-text shortlist, and rank deterministically with the requested 30/10/20/20/15/5 skill/role/experience/description/qualification weights.
+- Reason: The repository has a unified job catalogue and no configured AI/embedding provider with reviewed retention settings. This approach works without transmitting resumes to another service or introducing candidate persistence.
+- Trade-offs: Skill vocabulary, role aliases, employment-date interpretation, and explicit requirement parsing have limited coverage. Unknowns remain unknown; estimates are not calibrated hiring probabilities. Semantic matching/pgvector is deferred behind the CandidateRetriever boundary, with no unused vector columns or provider secrets.
+- Status: Implemented; additive migration applied; synthetic parsing/API/browser checks and local production build verified. Deployment controls and large-catalogue quality/load verification remain open.
+
+## Nearby jobs from offline city centres
+
+- Date: 2026-10-26.
+- Decision: Add public JobLocation children and derive unambiguous city centres from the bundled GeoNames/cities.json gazetteer during sync. Use a latitude/longitude B-tree bounding box and exact spherical distance in PostgreSQL, with manual city selection and optional browser location.
+- Reason: Existing feeds primarily contain text locations and multi-city postings; no geocoding provider is configured. Offline resolution needs no API key and avoids transmitting a visitor location to an application geocoder.
+- Trade-offs: This resolves cities, not street addresses. Remote, region/country-only and ambiguous labels remain outside radius results. Distances are estimates, and gazetteer changes require a dependency update and sync/backfill. PostGIS or an external geocoder can be considered if measured needs justify them.
+- Status: Migration/backfill applied; original jobs preserved; automatic sync refresh and PostgreSQL radius/edge cases verified. Device location still depends on deployed HTTPS, permissions policy and user permission.

@@ -38,3 +38,24 @@ There is no relation between the original three tables. The accepted event types
 The connected database migration was applied and verified on 2026-10-25: all 297 source rows and existing fields/deep links were preserved by a JSON row fingerprint check (excluding the new key). They produce 287 active listing groups, removing ten repeated cards across six groups. A transaction preview additionally verified equivalent case/spacing, key correction on update and separate locations, then rolled back without changing stored data.
 
 Public queries filter active source records first, group before pagination, and select the most recently verified matching posting, then publication/creation time and ID for deterministic ties. Listing totals count groups. Every old slug continues to resolve to its own source record, and internal keys are excluded from both listing and detail APIs. Provider identity uniqueness, sync permissions, the 14-day default missing-posting grace period and source retention remain unchanged. Apply the migration before releasing the new backend query code.
+
+
+## Resume matching uses public job data only
+
+Migration 20261026100000_job_full_text was applied to the configured Neon database on 2026-10-26. It adds Job.requiredSkills/preferredSkills/qualifications arrays, nullable experienceMinMonths/experienceMaxMonths, experienceMandatory, and a tsvector searchDocument. No candidate, resume, embedding, or match-result table is added.
+
+A BEFORE INSERT/content-update trigger builds the weighted document: A for title and required skills, B for company/category/preferred skills, D for requirements and description. The migration populates the existing catalogue and creates a GIN searchDocument index, GIN requiredSkills array index, and B-tree status/expiry and status/minimum-experience indexes. Existing listingKey grouping and source/external-ID upserts remain in use. Structured metadata is refreshed by normal ingestion, including unchanged provider records.
+
+Matching uses websearch_to_tsquery and ts_rank_cd with parameterized values, active/nonexpired predicates, optional location/mode filters, canonical grouping before LIMIT, and a 100-job shortlist. No candidate embeddings exist. Only pseudonymous key/kind/time abuse attempts are written by a matching request, using a transaction advisory lock to serialize per-caller rate limits.
+
+Validation found all 297 existing jobs indexed and all four new indexes present. A representative broad full-text query on that small catalogue took 1.873 ms server execution (EXPLAIN ANALYZE BUFFERS); PostgreSQL chose a sequential scan for its broad selectivity. This does not establish performance at 100,000 jobs. Network/cold-start time is separate from database execution.
+
+## Public job city locations (2026-10-26)
+
+Migration 20261026120000_job_locations adds JobLocation, related to Job by a cascading jobId foreign key. It stores a public cityKey, city, region, ISO country, latitude and longitude. A unique (jobId, cityKey) index prevents repeated locations; a B-tree (latitude, longitude) index supports the bounding-box stage before exact great-circle filtering. Coordinate constraints reject out-of-range values. No visitor-origin or location-history table is added.
+
+Sync derives only unambiguous city centres from provider location text and refreshes children within its existing upsert transaction, including unchanged source records. Multiple listed cities receive separate rows. A source location/country/work-mode change invalidates previous derived rows through an AFTER UPDATE trigger, preventing stale coordinates from surviving direct source edits. Ordinary sync recreates the correct rows; the backfill CLI can rebuild existing records.
+
+The migration and backfill were applied to the configured Neon database: all 297 original Job rows were preserved (full-row aggregate fingerprint unchanged), 139 jobs received 224 city entries. Remote-only and unresolved/ambiguous labels remain without city coordinates. They are retained in ordinary discovery.
+
+Nearby SQL uses indexed latitude/longitude bounds (including date-line wrapping and polar handling), clamped Haversine distance, explicit active/expiry checks, grouping before pagination, and stable ordering. Values stay parameterized, with statement/transaction deadlines. This does not require PostGIS. Tests against PostgreSQL covered radius inclusion/exclusion, nearest-first order, duplicates, remote/expired/inactive/unresolved jobs, multiple offices, date-line/polar cases, and a rolled-back nested source-location update.
