@@ -138,3 +138,13 @@ Use Node >=22.13.0, the existing DATABASE_URL, and a server-only ABUSE_HASH_SECR
 Limits and weights live in features/jobs/matching-config.ts: 2 MB files, 30 PDF pages, 100,000 extracted characters, 12-second parsing, 100 shortlisted jobs, 20 results per browser page, and five attempts per pseudonymous caller per hour. The route allows two concurrent searches per process and declares a 45-second host duration. See docs/API.md and docs/SECURITY.md for errors and deployment controls.
 
 Extraction and matching use deterministic skill aliases, role families, dated employment intervals, and PostgreSQL full-text relevance. This release has no semantic embeddings or external AI calls. Unknown or incomplete experience stays unknown; scanned PDFs require a text-based export. Fit scores are estimates, and requirements that appear unmet are labeled as stretch opportunities. Validate relevance and load with representative resumes/jobs before relying on ranking quality at scale.
+
+## Nearby job discovery
+
+On /jobs, use Nearby jobs in the discovery filters. Find and select a city (include its country when needed), or explicitly choose Use my location and approve the browser prompt. Choose a radius from 10–250 km; results sort by nearest city centre and display approximate distance. The API accepts 5–250 km and defaults to 25 km.
+
+City matching uses the bundled cities.json/GeoNames dataset offline. No geocoding API key is required. Device coordinates are rounded to two decimal places before being sent in a no-store POST. The application does not put the search origin in URLs, browser storage, or a candidate profile. Device location requires HTTPS (localhost works) and browser permission; manual city selection works without it.
+
+Apply npm run db:deploy, then npm run jobs:backfill-locations for existing jobs. Both were executed against the configured Neon database for this release. New and repeated provider syncs automatically refresh city locations and their database index. Existing job records/application links are preserved. Remote-only, country/region-only, and ambiguous city labels are excluded from nearby results; they remain available through ordinary discovery. Multi-city jobs use the closest listed city. Distances are straight-line estimates to city centres, not office locations or travel times.
+
+Data attribution: GeoNames (https://www.geonames.org/) through cities.json (https://github.com/lutangar/cities.json), CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/). Dataset city aliases are normalized; unresolved source locations are left unknown rather than guessed.

@@ -4,6 +4,8 @@ Only changes supported by the repository or Git history are listed. Unreleased e
 
 ## Unreleased
 
+- Added nearby job discovery with manual city selection, permission-based device location, configurable radius, nearest-first pagination and approximate distance labels. Added public city-location storage/indexes, automatic sync refresh and invalidation, offline GeoNames lookup, a backfill command, and location privacy controls. Applied the migration and backfilled 139 jobs/224 city entries while preserving all 297 source jobs.
+
 - Added temporary PDF/DOCX resume matching on `/jobs`: bounded in-memory parsing, indexed PostgreSQL retrieval, deterministic weighted recommendations, stretch explanations, and clear/refresh cleanup. Applied a public-job metadata/search migration without candidate persistence; retained ordinary discovery and employer application links. Added synthetic parsing, privacy, ranking, retrieval, and API tests, runtime limits, and deployment/privacy documentation.
 
 - Refined the homepage Process section into a cohesive split layout with numbered stages, clearer hierarchy and a direct project enquiry link.

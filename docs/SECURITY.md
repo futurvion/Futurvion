@@ -44,3 +44,11 @@ Parser stdout/stderr are consumed without forwarding. Route errors log only a fi
 Before production, disable multipart body capture, request replay, query parameter capture, and personal-data sampling for this route in hosting/APM/database logging. Review provider log/retention configuration and the trusted proxy. No claim is made that hosting/database providers retain zero data. Runtime DB privileges should permit public-job reads and pseudonymous abuse writes, with separate migration privileges.
 
 Pseudonymous AbuseAttempt rows contain key/kind/timestamp only, with no candidate identifier derived from a resume, file hash, submitted text, match results, or search history payload. Their retention remains part of the existing operator retention work.
+
+## Nearby location privacy
+
+The device location API is invoked only after Use my location; there is no automatic GPS/IP-location request. Permissions-Policy now allows geolocation from self while camera and microphone remain disabled. HTTPS and browser/user permission are still required. A denied or unavailable device lookup offers city selection; browser location services may contact their own providers.
+
+Device coordinates are rounded to two decimal places before leaving the browser. The origin is component/form memory only, passed to bounded no-store POST requests and parameterized SQL; it is not saved in browser storage, cookies, candidate records, analytics, or application logs. GET rejects nearby-origin fields. Ordinary listing errors now redact exception messages/stacks because driver errors may contain origin parameters. Deployment request replay/body capture/SQL parameter logging must also be disabled for location searches, as for resume matching.
+
+City search runs against local public GeoNames data and makes no external geocoding request. Only public job city centres are persisted. Ambiguous or remote/country-wide provider locations are not guessed as an office. Distances are approximate city-centre distances and do not establish an exact workplace or commute.

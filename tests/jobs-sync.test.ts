@@ -22,6 +22,14 @@ function mockDb() {
 }
 beforeEach(() => { vi.restoreAllMocks(); vi.resetAllMocks(); });
 describe("jobs synchronization", () => {
+  it("refreshes public city locations on inserts and subsequent syncs", async () => {
+    const { db } = mockDb();
+    vi.mocked(fetchProvider).mockResolvedValue({ complete: true, jobs: [{ externalJobId: "geo", title: "Engineer", companyName: "Example", location: "London, England", workMode: "hybrid", applicationUrl: "https://example.test/apply" }] });
+    await syncJobs("manual"); await syncJobs("manual");
+    const { create, update } = db.job.upsert.mock.calls[1][0];
+    expect(create.locations.create[0]).toMatchObject({ city: "London", countryCode: "GB" });
+    expect(update.locations).toMatchObject({ deleteMany: {}, create: [expect.objectContaining({ city: "London" })] });
+  });
   it("upserts a stable provider identity without creating a second job", async () => {
     const { db, jobs } = mockDb();
     vi.mocked(fetchProvider).mockResolvedValue({ complete: true, jobs: [{ externalJobId: "42", title: "Engineer", companyName: "Acme", workMode: "remote", applicationUrl: "https://example.com/apply" }] });

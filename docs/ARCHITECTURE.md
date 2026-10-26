@@ -112,3 +112,11 @@ The route enforces actual streamed byte limits and delegates document extraction
 resume-profile.ts builds temporary deterministic evidence. resume-retrieval.ts exposes a CandidateRetriever boundary and an indexed, parameterized PostgreSQL implementation. resume-ranking.ts scores the bounded shortlist. resume-match.ts orchestrates these steps and releases profile references in finally. A future semantic retriever can use this boundary; none is configured today. Matching never fetches external job feeds.
 
 The existing provider sync now derives conservative required/preferred skills, qualifications, and experience metadata from public job content. A database trigger maintains the weighted search document whenever matching content changes. Existing descriptions remain searchable immediately after migration, and ranking derives fallback metadata for rows not yet resynchronized.
+
+## Nearby job discovery
+
+NearbySearch is a component inside the existing JobsSearch form. It provides explicit city lookup, an optional browser-geolocation action, a radius, cancellation, errors, and live status. The surrounding form owns the selected origin in memory and sends it with the same POST /api/jobs filters/pagination. Manual location text is disabled while a radius is active so it does not accidentally exclude neighboring cities. Nearby origin and city lookup never enter URLs or browser storage.
+
+city-search.ts is a server-only boundary around city-data.mjs, an offline gazetteer shared with the native backfill CLI. The data is loaded/indexed once per process and never imported by client components. Requirement-free manual city selection and permission-based device location use the same radius query. The device origin is rounded before transmission.
+
+Provider sync derives JobLocation children in the same job upsert. nearby-query.ts builds bounded, parameterized PostgreSQL distance/grouping CTEs; geo.ts computes bounding boxes at the date line and poles. Existing ordinary list queries and resume matching remain separate. Nearby discovery does not send resumes or perform live provider crawling.

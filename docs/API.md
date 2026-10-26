@@ -86,3 +86,11 @@ Success: { jobs, total }. At most 100 ranked, deduplicated jobs are returned; to
 Limits: 30 PDF pages, 1,000 DOCX archive entries, 10 MiB declared and streamed archive expansion, 100,000 text characters, 8-second streamed upload deadline, 12-second terminated parser worker, 128 MiB worker old-generation heap limit, and database statement/transaction deadlines. The host duration declaration is 45 seconds; verify support on the selected host. The browser also aborts after 45 seconds.
 
 Existing GET/POST /api/jobs and GET /api/jobs/[slug] remain the ordinary search/detail interfaces; no duplicate search catalogue or detail endpoint was introduced.
+
+## Nearby discovery and city lookup
+
+POST /api/jobs now also accepts nearLat (-90…90), nearLng (-180…180), and optional radiusKm (integer 5…250; default 25). Both origin values must be supplied together; a radius alone is invalid. Numeric values and numeric strings are accepted for these fields. Nearby search combines with existing keyword/company/source/employment/salary filters. workMode=remote with an origin returns 400. GET /api/jobs rejects the new nearby fields with 400: use POST to keep an origin out of application URLs.
+
+Nearby responses retain the existing shape and 12 unique listing groups per page. Jobs additionally include distanceKm (rounded to one decimal km) and nearbyCity. Grouping happens after active/nonexpired/radius filters and chooses the closest matching city/source. Sorting is distance ascending, then publication/creation timestamps and ID. Origins are not echoed or stored. POST responses are no-store; application errors log only a fixed label and error class.
+
+POST /api/jobs/locations accepts { query: string } (trimmed 2–80 characters; body <=512 bytes). It returns { cities } with up to eight distinguishable city/region/country labels, cityKey and public city-centre coordinates. It uses the offline dataset, makes no external geocoding call, and returns no-store responses. Invalid input returns 400, oversized bodies 413, and lookup failure 503. Locations and job application detail endpoints remain separate.

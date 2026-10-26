@@ -40,6 +40,23 @@
 .jobs-layout aside h2 { font-size: 1.8rem; }
 .jobs-layout aside > p { font-size: 14px; margin: 12px 0 26px; }
 .jobs-search { display: grid; gap: 18px; }
+.nearby-search { min-width: 0; display: grid; gap: 12px; margin: 6px 0; padding: 18px 0; border: 0; border-top: 1px solid var(--line-strong); border-bottom: 1px solid var(--line-strong); grid-column: 1/-1; }
+.nearby-search legend { font-size: 16px; font-weight: 700; color: var(--ink); padding-right: 10px; }
+.nearby-search p { font-size: 14px; line-height: 1.55; overflow-wrap: anywhere; }
+.nearby-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.nearby-actions button,.nearby-city-options button { min-height: 44px; padding: 9px 12px; border: 1px solid var(--line-strong); background: white; color: var(--ink); font-size: 14px; text-align: left; }
+.nearby-actions button:disabled { opacity: .6; cursor: wait; }
+.nearby-city-options { list-style: none; display: grid; gap: 6px; margin: 0; padding: 0; }
+.nearby-city-options button { width: 100%; overflow-wrap: anywhere; }
+.nearby-clear { min-height: 44px; text-decoration: underline; color: var(--accent); text-align: left; font-size: 14px; }
+.nearby-error { color: #9b3030; }
+.nearby-selected,.job-distance { color: var(--accent); font-weight: 600; }
+.job-distance { font-size: 14px; margin: 13px 0 0; }
+.nearby-status:empty { display: none; }
+.nearby-search .nearby-credit { font-size: 12px; }
+.nearby-credit a { text-decoration: underline; }
+.nearby-search :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+@media(max-width:620px) { .nearby-search input,.nearby-search select { font-size: 16px; } }
 .jobs-search label, .admin-login label, .admin-provider-form label, .admin-schedule label { display: grid; gap: 7px; font-size: 12px; font-weight: 700; color: var(--ink); }
 .jobs-search input, .jobs-search select, .admin-login input, .admin-provider-form input, .admin-provider-form select, .admin-schedule input { width: 100%; min-height: 45px; border: 1px solid var(--line-strong); border-radius: 3px; padding: 9px 12px; background: #fff; color: var(--ink); font-size: 14px; }
 .jobs-more-filters { border-top: 1px solid var(--line-strong); padding-top: 15px; }
