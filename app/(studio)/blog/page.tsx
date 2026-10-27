@@ -33,7 +33,6 @@ const articles = [
     href: "/blog/ai-agents-vs-assistants-vs-automation",
     category: "AI explained",
     artwork: <>Assistants<br />and automation</>,
-    artworkSize: "compact",
     title: "AI Agents vs AI Assistants vs AI Automation",
     description:
       "Understand how assistants, agents, and traditional automation differ—and how they can work together in a business process.",
@@ -65,15 +64,7 @@ export default function BlogsPage() {
               aria-label={`Read ${article.title}`}
             >
               <div className="blog-card-art" aria-hidden="true">
-                <span
-                  className={
-                    "artworkSize" in article
-                      ? `blog-card-artwork-${article.artworkSize}`
-                      : undefined
-                  }
-                >
-                  {article.artwork}
-                </span>
+                <span>{article.artwork}</span>
               </div>
               <div className="blog-card-copy">
                 <p className="blog-card-category">{article.category}</p>
