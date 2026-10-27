@@ -1,20 +1,26 @@
 import Image from "next/image";
+import Link from "next/link";
+import { BlogPostingJsonLd } from "@/components/shared/blog-posting-json-ld";
 import { PageHero } from "@/components/shared/page-hero";
 import { siteStyles } from "@/config/styles";
 import { pageMetadata } from "@/lib/seo";
 
 const title = "What Are AI Agents? Examples, Benefits and Use Cases in 2026";
+const description =
+  "Learn what AI agents are, how they work, real-world examples, business benefits, risks, and practical use cases in 2026.";
 const path = "/blog/what-are-ai-agents";
 
-export const metadata = pageMetadata(
-  title,
-  "Learn what AI agents are, how they work, real-world examples, business benefits, risks, and practical use cases in 2026.",
-  path,
-);
+export const metadata = pageMetadata(title, description, path);
 
 export default function AiAgentsArticlePage() {
   return (
     <>
+      <BlogPostingJsonLd
+        headline={title}
+        description={description}
+        path={path}
+        articleSection="AI and automation"
+      />
       <div className="blog-article-page">
         <PageHero eyebrow="ARTICLE" title={title} />
       </div>
@@ -475,145 +481,23 @@ export default function AiAgentsArticlePage() {
 
           <h2>Benefits of AI Agents for Businesses</h2>
           <p>
-            AI agents can provide several benefits when they are applied to the
-            right workflows.
+            AI agents can support selected business workflows, but the benefits
+            depend on the task, integrations, and oversight. Read the
+            dedicated guide to the <Link href="/blog/benefits-of-ai-agents">business benefits of AI agents</Link>.
           </p>
-          <h3>1. Automating repetitive tasks</h3>
-          <p>
-            Agents can help automate routine work that otherwise requires
-            employees to move information between applications or perform
-            repeated searches.
-          </p>
-          <p>
-            This gives employees more time for work that requires judgment,
-            creativity, and communication.
-          </p>
-          <h3>2. Improving productivity</h3>
-          <p>
-            Agents can coordinate multiple steps in a workflow, potentially
-            reducing the effort needed to complete certain tasks.
-          </p>
-          <p>
-            Actual productivity gains depend on task complexity, integration
-            quality, and the amount of human review required.
-          </p>
-          <h3>3. Supporting faster decisions</h3>
-          <p>
-            Agents can retrieve information from multiple authorized sources
-            and prepare summaries that help employees understand a situation.
-          </p>
-          <p>
-            People should verify important findings before making consequential
-            decisions.
-          </p>
-          <h3>4. Improving customer experiences</h3>
-          <p>
-            When connected to accurate information and suitable service tools,
-            agents can provide more relevant responses and support customers
-            outside normal working hours.
-          </p>
-          <p>
-            Availability does not guarantee correct answers or successful
-            resolution.
-          </p>
-          <h3>5. Scaling selected workflows</h3>
-          <p>
-            An agent-based system can help handle increasing volumes of certain
-            tasks, provided the underlying infrastructure, integrations, and
-            operating costs are managed appropriately.
-          </p>
-          <h3>6. Reducing manual handoffs</h3>
-          <p>
-            Agents can connect different steps in a process, such as retrieving
-            information, validating records, preparing a response, and sending
-            a task for approval.
-          </p>
-          <p>This can reduce unnecessary movement between applications.</p>
 
           <h2>AI Agents vs AI Chatbots: What Is the Difference?</h2>
           <p>
-            AI chatbots and AI agents overlap, but they are not the same thing
-            in every implementation.
-          </p>
-          <div
-            className="my-8 overflow-x-auto"
-            role="region"
-            aria-label="AI chatbots and AI agents comparison"
-            tabIndex={0}
-          >
-            <table className="min-w-[640px] w-full border-collapse text-left">
-              <caption className="mb-3 text-left font-semibold">
-                A comparison of common chatbot and AI agent capabilities
-              </caption>
-              <thead>
-                <tr>
-                  <th className="border-b p-3" scope="col">Feature</th>
-                  <th className="border-b p-3" scope="col">Traditional chatbot</th>
-                  <th className="border-b p-3" scope="col">AI agent</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <th className="border-b p-3" scope="row">Main purpose</th>
-                  <td className="border-b p-3">Answer questions or follow conversation flows</td>
-                  <td className="border-b p-3">Work toward a defined goal</td>
-                </tr>
-                <tr>
-                  <th className="border-b p-3" scope="row">Task handling</th>
-                  <td className="border-b p-3">Often responds to individual requests</td>
-                  <td className="border-b p-3">Can coordinate multiple steps</td>
-                </tr>
-                <tr>
-                  <th className="border-b p-3" scope="row">Tool usage</th>
-                  <td className="border-b p-3">May have limited integrations</td>
-                  <td className="border-b p-3">Often uses tools to retrieve information or take action</td>
-                </tr>
-                <tr>
-                  <th className="border-b p-3" scope="row">Decision-making</th>
-                  <td className="border-b p-3">Usually follows a defined response pattern</td>
-                  <td className="border-b p-3">May select actions based on context and instructions</td>
-                </tr>
-                <tr>
-                  <th className="border-b p-3" scope="row">Autonomy</th>
-                  <td className="border-b p-3">Usually limited</td>
-                  <td className="border-b p-3">Varies from supervised to more autonomous</td>
-                </tr>
-                <tr>
-                  <th className="border-b p-3" scope="row">Example</th>
-                  <td className="border-b p-3">Answers delivery-policy questions</td>
-                  <td className="border-b p-3">Checks an order and prepares an appropriate response</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <p>
-            An important distinction is that a chatbot can also be an AI agent
-            if it has the ability to plan and execute tasks through tools. The
-            difference is not simply whether the interface uses a chat window.
+            Chatbots and agents can share a conversational interface, while
+            their capabilities vary by implementation. Explore the
+            <Link href="/blog/ai-agents-vs-chatbots">comparison of AI agents and chatbots</Link>.
           </p>
 
           <h2>AI Agents vs AI Assistants vs AI Automation</h2>
           <p>
-            These terms are related but describe different aspects of a system.
-          </p>
-          <p>
-            <strong>AI assistants</strong> help users complete tasks, often
-            through a conversational interface. Some assistants have agent
-            capabilities.
-          </p>
-          <p>
-            <strong>AI agents</strong> pursue goals and may make decisions about
-            which steps or tools to use within their assigned permissions.
-          </p>
-          <p>
-            <strong>Traditional automation</strong> executes predefined rules
-            or workflows. For example, a script might send an alert whenever a
-            server&apos;s CPU usage crosses a threshold.
-          </p>
-          <p>
-            Many business solutions combine all three. A reliable system might
-            use traditional automation for predictable steps and an AI agent
-            for interpreting ambiguous information.
+            Assistants, agents, and automation describe related but different
+            parts of AI-enabled workflows. See the guide to
+            <Link href="/blog/ai-agents-vs-assistants-vs-automation"> AI agents, assistants, and automation</Link>.
           </p>
 
           <h2>Challenges and Risks of AI Agents</h2>

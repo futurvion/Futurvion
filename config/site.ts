@@ -61,6 +61,6 @@ export const site: SiteConfig = {
     title: "Futurvion | AI, Software & Digital Solutions",
     description:
       "Discover Futurvion's AI automation, software development, website development, branding, and digital marketing services.",
-    image: "/og-image.svg",
+    image: "/og-image.png",
   },
 };
