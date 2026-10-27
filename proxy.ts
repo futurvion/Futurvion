@@ -7,7 +7,7 @@ export function proxy(request: NextRequest) {
         return new NextResponse("Not found", { status: 404 });
     if (!isUtilityHost(request.headers.get("host") || "", process.env.NODE_ENV === "development"))
         return NextResponse.next();
-    if (path.startsWith("/_next/static/") || path.startsWith("/_next/webpack-hmr") || (path === "/icon.png" || path === "/logo-mark.png") || path === "/toolbox-regex-worker.js")
+    if (path.startsWith("/_next/static/") || path.startsWith("/_next/webpack-hmr") || (path === "/icon.png" || path === "/logo-mark.png" || path === "/Logo%20with%20Full%20Name.png" || path === "/logo-full-white.png") || path === "/toolbox-regex-worker.js")
         return NextResponse.next();
     if (path === "/robots.txt")
         return new NextResponse(`User-agent: *\nAllow: /\nSitemap: ${utilityOrigin}/sitemap.xml\n`, { headers: { "Content-Type": "text/plain" } });

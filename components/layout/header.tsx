@@ -12,6 +12,8 @@ export function Header() {
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLButtonElement>(null);
   const pathname = usePathname();
+  const isCurrentPage = (href: string) =>
+    pathname === href || (!href.includes("#") && pathname.startsWith(`${href}/`));
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -35,11 +37,11 @@ export function Header() {
   }, [open]);
   return <header className="site-header">
      <div className={`${siteStyles.container} header-inner`}>
-      <Link className="brand" href="/" aria-label="Futurvion home" onClick={() => setOpen(false)}><Image className="brand-full-logo" src="/logo-full.png" alt="Futurvion" width={1600} height={379} sizes="182px" preload /></Link>
-      <nav className="desktop-nav" aria-label="Main navigation">{site.navigation.filter(item => item.href !== "/" && item.href !== "/contact").map(item => <Link key={item.href} href={item.href} aria-current={pathname === item.href ? "page" : undefined} className={pathname === item.href || (!item.href.includes("#") && pathname.startsWith(`${item.href}/`)) ? "active" : ""}>{item.label}</Link>)}</nav>
+      <Link className="brand" href="/" aria-label="Futurvion home" onClick={() => setOpen(false)}><Image className="brand-full-logo" src="/logo-full-white.png" alt="Futurvion — Digital Solutions for Every Business" width={2160} height={728} sizes="182px" preload /></Link>
+      <nav className="desktop-nav" aria-label="Main navigation">{site.navigation.filter(item => item.href !== "/" && item.href !== "/contact").map(item => <Link key={item.href} href={item.href} aria-current={isCurrentPage(item.href) ? "page" : undefined} className={isCurrentPage(item.href) ? "active" : ""}>{item.label}</Link>)}</nav>
       <Link className="header-cta" href={site.bookingUrl || "/contact"} target={site.bookingUrl ? "_blank" : undefined} rel={site.bookingUrl ? "noopener noreferrer" : undefined}>{site.bookingUrl ? "Book a consultation" : "Let's talk"} <ArrowUpRight size={16}  aria-hidden="true"/></Link>
       <button ref={menuRef} className="menu-toggle" type="button" aria-label={open ? "Close menu" : "Open menu"} aria-expanded={open} aria-controls="mobile-navigation" onClick={() => setOpen(!open)}>{open ? <X  aria-hidden="true"/> : <Menu  aria-hidden="true"/>}</button>
     </div>
-    <nav id="mobile-navigation" aria-label="Mobile navigation" className={`mobile-nav ${open ? "is-open" : ""}`} inert={!open}>{site.navigation.map(item => <Link key={item.href} href={item.href} aria-current={pathname === item.href ? "page" : undefined} onClick={() => setOpen(false)}>{item.label}<ArrowUpRight size={16}  aria-hidden="true"/></Link>)}{site.bookingUrl && <Link className="mobile-book" href={site.bookingUrl} target="_blank" rel="noopener noreferrer" onClick={() => setOpen(false)}>Book a consultation <ArrowUpRight size={16}  aria-hidden="true"/></Link>}</nav>
+    <nav id="mobile-navigation" aria-label="Mobile navigation" className={`mobile-nav ${open ? "is-open" : ""}`} inert={!open}>{site.navigation.map(item => <Link key={item.href} href={item.href} aria-current={isCurrentPage(item.href) ? "page" : undefined} onClick={() => setOpen(false)}>{item.label}<ArrowUpRight size={16}  aria-hidden="true"/></Link>)}{site.bookingUrl && <Link className="mobile-book" href={site.bookingUrl} target="_blank" rel="noopener noreferrer" onClick={() => setOpen(false)}>Book a consultation <ArrowUpRight size={16}  aria-hidden="true"/></Link>}</nav>
   </header>;
 }

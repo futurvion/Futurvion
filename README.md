@@ -57,7 +57,7 @@ Local checks: `npm run typecheck`, `npm run lint`, `npm test`, `npm run build`. 
 
 - Company info, navigation, SEO defaults: [config/site.ts](config/site.ts) (no secrets here).
 - Services: [data/services.ts](data/services.ts). Portfolio: [data/portfolio.ts](data/portfolio.ts) — all entries are labelled illustrative concepts; replace with real, approved case studies.
-- Logo: replace [public/logo-mark.png](public/logo-mark.png) and the share image [public/og-image.svg](public/og-image.svg) (use a 1200×630 PNG/JPG for best social previews).
+- Logo: use the supplied transparent [public/Logo with Full Name.png](public/Logo%20with%20Full%20Name.png) on light surfaces and [public/logo-full-white.png](public/logo-full-white.png) on dark surfaces; the homepage animation retains the original emblem. Update [public/og-image.svg](public/og-image.svg) separately (use a 1200×630 PNG/JPG for best social previews).
 - There are deliberately no testimonials, client logos or statistics. Add only verified, approved ones.
 
 ## Database
