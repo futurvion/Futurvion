@@ -29,7 +29,7 @@ export const site: SiteConfig = {
 
   email: process.env.NEXT_PUBLIC_BUSINESS_EMAIL || "futurvion@gmail.com",
 
-  logo: "/logo-mark.png",
+  logo: "/Logo%20with%20Full%20Name.png",
 
   bookingUrl: process.env.NEXT_PUBLIC_BOOKING_URL || undefined,
 
