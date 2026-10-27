@@ -239,6 +239,7 @@ h3 { font-size: 1.45rem; }
 .blog-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 5px; }
 .blog-card-art { min-height: 300px; display: flex; align-items: end; padding: clamp(24px,4vw,44px); background: #175d78; color: #fff; }
 .blog-card-art span { font-family: var(--display); font-size: clamp(3.2rem,7vw,6rem); font-weight: 600; letter-spacing: -.065em; line-height: .82; }
+.blog-card-art span.blog-card-artwork-compact { font-size: clamp(2.7rem,4.4vw,3.8rem); }
 .blog-card-copy { align-self: center; padding: clamp(28px,5vw,56px); }
 .blog-card-category { margin-bottom: 16px; color: var(--accent); font-size: 14px; font-weight: 700; }
 .blog-card-copy h2 { font-size: clamp(1.8rem,3vw,2.7rem); line-height: 1.08; }
