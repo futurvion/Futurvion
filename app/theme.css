@@ -232,7 +232,7 @@ h3 { font-size: 1.45rem; }
 .blog-architecture-figure img { display: block; width: 100%; height: auto; }
 .blog-architecture-figure figcaption { margin-top: 10px; font-size: 14px; }
 .content-prose a, .contact-aside a:not(.button) { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
-.blog-list { max-width: 1000px; }
+.blog-list { display: grid; gap: 28px; max-width: 1000px; }
 .blog-article-page .inner-hero-copy { animation: none; }
 .blog-card { display: grid; grid-template-columns: minmax(220px,.72fr) minmax(0,1fr); background: #eaf0ef; color: var(--ink); transition: background .2s, transform .25s; }
 .blog-card:hover { background: #e1ebea; transform: translateY(-3px); }
@@ -360,6 +360,7 @@ h3 { font-size: 1.45rem; }
   .inner-hero-signature { display: none; }
 }
 @media (max-width: 620px) {
+  .blog-article-page-compact-title .inner-hero h1 { font-size: clamp(2rem, 8.5vw, 2.25rem); }
   .section { padding: 75px 0; }
   .page-section { padding: 66px 0; }
   .brand { font-size: 16px; }
