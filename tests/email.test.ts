@@ -17,7 +17,7 @@ const contact = {
   company: "Example Ltd",
   phone: "+1 555 0100",
   service: "branding",
-  budget: "5k-15k" as const,
+  budget: "10k-25k" as const,
   description: "We need a clearer identity for our growing business.",
   consent: "yes" as const,
   website: "",
@@ -41,15 +41,35 @@ describe("contact notification email", () => {
       from: "notifications@futurvion.in",
       to: "futurvion@gmail.com",
       replyTo: "ada@example.com",
-      subject: "New Futurvion enquiry: branding",
+      subject: "New Futurvion enquiry: Branding & identity",
     });
     expect(message.text).toContain("Name: Ada Lovelace");
     expect(message.text).toContain("Email: ada@example.com");
     expect(message.text).toContain("Company: Example Ltd");
     expect(message.text).toContain("Phone: +1 555 0100");
-    expect(message.text).toContain("Service: branding");
-    expect(message.text).toContain("Budget: 5k-15k");
+    expect(message.text).toContain("Service: Branding & identity");
+    expect(message.text).toContain("Budget: ₹10,000–₹25,000");
     expect(message.text).toContain(contact.description);
+    expect(message.html).toContain("A new project enquiry");
+    expect(message.html).toContain("border-left:3px solid #2e8293");
+    expect(message.html).toContain("Branding &amp; identity");
+  });
+
+  it("escapes submitted HTML in the styled notification and text fallback", async () => {
+    const unsafe = {
+      ...contact,
+      name: "<script>alert(1)</script>",
+      description: "Line one\n<b>Project</b> & details",
+    };
+
+    await notifyContact(unsafe);
+
+    const [message] = sendEmail.mock.calls[0];
+    expect(message.html).not.toContain("<script>");
+    expect(message.html).toContain("&lt;script&gt;alert(1)&lt;/script&gt;");
+    expect(message.html).toContain("&lt;b&gt;Project&lt;/b&gt; &amp; details");
+    expect(message.text).toContain(unsafe.name);
+    expect(message.text).toContain(unsafe.description);
   });
 
   it("reports missing mail configuration without calling Resend", async () => {
