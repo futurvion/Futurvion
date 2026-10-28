@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
 import { site } from "@/config/site";
 import { paletteCss } from "@/config/palette";
+import { websiteJsonLd } from "@/lib/seo";
 import "./globals.css";
 
 const display = Space_Grotesk({
@@ -78,19 +79,11 @@ export const metadata: Metadata = {
 };
 
 function WebsiteStructuredData() {
-  const schema = {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    name: "Futurvion",
-    alternateName: "Futurvion.in",
-    url: site.url,
-  };
-
   return (
     <script
       type="application/ld+json"
       dangerouslySetInnerHTML={{
-        __html: JSON.stringify(schema),
+        __html: JSON.stringify(websiteJsonLd()).replace(/</g, "\\u003c"),
       }}
     />
   );
