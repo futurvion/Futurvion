@@ -22,9 +22,21 @@ concurrency:
 
 jobs:
   validate:
-    name: Validate
+    name: Validate (${{ matrix.check.name }})
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        check:
+          - name: Lint
+            command: npm run lint
+          - name: Tests
+            command: npm test
+          - name: Type-check
+            command: npm run typecheck
+          - name: Production build
+            command: npm run build
 
     steps:
       - name: Check out repository
@@ -37,22 +49,11 @@ jobs:
           cache: npm
           cache-dependency-path: package-lock.json
 
+      - name: Set up pinned npm
+        run: npm install --global npm@10.9.4
+
       - name: Install dependencies
-        id: dependencies
         run: npm ci
 
-      - name: Run lint
-        if: ${{ !cancelled() && steps.dependencies.outcome == 'success' }}
-        run: npm run lint
-
-      - name: Run tests
-        if: ${{ !cancelled() && steps.dependencies.outcome == 'success' }}
-        run: npm test
-
-      - name: Type-check
-        if: ${{ !cancelled() && steps.dependencies.outcome == 'success' }}
-        run: npm run typecheck
-
-      - name: Build for production
-        if: ${{ !cancelled() && steps.dependencies.outcome == 'success' }}
-        run: npm run build
+      - name: Run ${{ matrix.check.name }}
+        run: ${{ matrix.check.command }}

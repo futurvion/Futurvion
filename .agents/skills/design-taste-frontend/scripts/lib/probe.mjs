@@ -429,8 +429,9 @@ export function probe() {
   const bodyText = document.body.innerText || '';
   const emoji = (bodyText.match(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu) || []);
   const doc = document.documentElement; const pageH = Math.max(doc.scrollHeight, document.body.scrollHeight);
-  const headingStats = headings.map(({ _el, ...h }) => h);
-  const heroOut = hero ? (({ _el, ...h }) => h)(hero) : null;
+  const stripElement = (value) => Object.fromEntries(Object.entries(value).filter(([key]) => key !== '_el'));
+  const headingStats = headings.map(stripElement);
+  const heroOut = hero ? stripElement(hero) : null;
   const below = headingStats.filter((h) => !heroOut || h.top !== heroOut.top);
 
   return {
@@ -632,7 +633,6 @@ export function layout() {
     const text = inside.filter((b) => b.kind === 'text');
     const media = inside.filter((b) => b.kind === 'media' && (b.r - b.l) * (b.b - b.t) >= 160 * 120);
     const words = text.reduce((a, b) => a + b.text.split(' ').length + Math.max(0, Math.round((b.chars - 50) / 6)), 0);
-    const headRe = /^H[1-4]$/;
     const heading = text.filter((b) => (b.el.closest('h1,h2,h3,h4,[role="heading"]') || b.size >= Math.max(22, bodySize * 1.35)) && b.t <= top + Math.max(520, (bot - top) * 0.45)).sort((a, b) => b.size - a.size)[0];
     const cs = getComputedStyle(s);
     // the widest stretch across the section's content band that nothing covers, edge to edge excluded
