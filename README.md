@@ -1,8 +1,8 @@
 # Futurvion
 
-Futurvion's public marketing site presents its digital services, business solutions, and illustrative work concepts, and lets visitors send an enquiry. It runs on Next.js 16.4.2 (App Router), React 19, strict TypeScript, Tailwind CSS 4, React Three Fiber/Three.js, Framer Motion, Lucide, Zod, Prisma 7 + PostgreSQL, and Resend. The work examples are concepts, not completed client projects.
+Futurvion's public marketing site presents its digital services, business solutions, and illustrative work concepts, and lets visitors send an enquiry. It runs on Next.js 16.4.3 (App Router), React 19, strict TypeScript, Tailwind CSS 4, React Three Fiber/Three.js, Framer Motion, Lucide, Zod, Prisma 7 + PostgreSQL, and Resend. The work examples are concepts, not completed client projects.
 
-For verified implementation details and current progress, see [TASKS.md](TASKS.md), [the project overview](docs/PROJECT_OVERVIEW.md), [architecture](docs/ARCHITECTURE.md), [API](docs/API.md), [database](docs/DATABASE.md), [security](docs/SECURITY.md), and [deployment](docs/DEPLOYMENT.md). [AGENTS.md](AGENTS.md) defines the documentation maintenance workflow.
+For verified implementation details and current progress, see [TASKS.md](TASKS.md), [the project overview](docs/PROJECT_OVERVIEW.md), [architecture](docs/ARCHITECTURE.md), [API](docs/API.md), [database](docs/DATABASE.md), [security](docs/SECURITY.md), [deployment](docs/DEPLOYMENT.md), and [dependency maintenance](docs/DEPENDENCIES.md). [AGENTS.md](AGENTS.md) defines the documentation maintenance workflow.
 
 ## What works immediately vs. what needs credentials
 
@@ -29,15 +29,17 @@ Set `APP_URL` to the exact public origin, `AUTH_SECRET` to a random value of at 
 
 ## Local setup
 
-Use Node.js 20.9.0 or newer (the installed Next.js package's engine requirement) and npm; this repository does not pin an exact runtime version. PostgreSQL and a Resend account are needed to exercise the contact backend. Configure `DATABASE_URL` and `ABUSE_HASH_SECRET` to exercise analytics.
+Use Node.js 22.13.0 or newer and npm 10.9.4, as pinned in `package.json` and CI. Install the exact dependency tree recorded in the lockfile with `npm ci`; its `postinstall` runs `prisma generate`. PostgreSQL and a Resend account are needed to exercise the contact backend. Configure `DATABASE_URL` and `ABUSE_HASH_SECRET` to exercise analytics.
 
 ```bash
-npm install            # runs `prisma generate` via postinstall
+npm ci                  # reproducible install; runs `prisma generate` via postinstall
 cp .env.example .env   # fill in the values needed for your environment
 npm run dev
 ```
 
 The committed scripts are `npm run dev`, `npm run build`, `npm run start`, `npm run typecheck`, `npm run lint`, `npm test`, `npm run db:deploy`, and `npm run jobs:seed-providers`. `npm run start` serves a production build. `npm run db:deploy` applies committed migrations to the configured database. Run it against the intended database before testing data-backed features.
+
+Use the stable, compatible dependency update policy in [docs/DEPENDENCIES.md](docs/DEPENDENCIES.md) when adding or updating packages. GitHub Dependabot proposes compatible npm updates weekly; each update must pass the pull-request CI checks before merging.
 
 `.env.example` lists every configured variable. `NEXT_PUBLIC_SITE_URL` sets canonical URLs (the code defaults to `https://futurvion.in`); `NEXT_PUBLIC_BUSINESS_EMAIL` supplies public contact links; `NEXT_PUBLIC_BOOKING_URL` adds a booking CTA; `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` supplies an optional verification token. These four names are browser-exposed. Server-only `DATABASE_URL` connects PostgreSQL, `ABUSE_HASH_SECRET` provides HMAC pseudonyms (minimum 32 characters), and `RESEND_API_KEY`, `CONTACT_TO_EMAIL`, and `CONTACT_FROM_EMAIL` configure contact notifications. Keep actual secret values out of Git; `.env*` files are ignored except `.env.example`.
 
