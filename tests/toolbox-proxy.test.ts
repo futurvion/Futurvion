@@ -1,7 +1,16 @@
 import { describe, expect, it } from "vitest";
 import { NextRequest } from "next/server";
 import { proxy } from "@/proxy";
+import { site } from "@/config/site";
 function request(host: string, path: string) { return new NextRequest(`https://${host}${path}`, { headers: { host } }); }
+describe("canonical host redirect", () => {
+    it("redirects www URLs to the canonical host and preserves the path and query", () => {
+        const canonicalUrl = new URL(site.url);
+        const result = proxy(request(`www.${canonicalUrl.host}`, "/blog/what-are-ai-agents?ref=search"));
+        expect(result.status).toBe(308);
+        expect(result.headers.get("location")).toBe(`${site.url}/blog/what-are-ai-agents?ref=search`);
+    });
+});
 describe("toolbox host boundary", () => {
     it("rewrites public tool URLs without adding auth or cookies", () => { for (const path of ["/", "/privacy", "/tools/json-formatter", "/tools/jwt-decoder", "/tools/cron-generator", "/tools/regex-tester", "/tools/base64", "/tools/api-response-formatter"]) {
         const result = proxy(request("utility.futurvion.in", path));
