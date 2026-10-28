@@ -255,13 +255,29 @@ h3 { font-size: 1.45rem; }
 .contact-note { font-size: 13px; margin-top: 26px; }
 .contact-form { background: #fff; border: 1px solid var(--line); padding: clamp(26px,3vw,42px); display: grid; gap: 20px; }
 .form-row { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 20px; }
-.contact-form label { display: block; color: var(--ink); font-size: 13px; font-weight: 700; }
+.contact-form label, .custom-select-label { display: block; color: var(--ink); font-size: 13px; font-weight: 700; }
 .contact-form label > span { color: var(--accent); }
 .contact-form label small { display: inline; margin-left: 6px; font-size: 11px; color: var(--dim); font-weight: 400; }
-.contact-form input:not([type=checkbox]), .contact-form select, .contact-form textarea { display: block; width: 100%; margin-top: 8px; border: 1px solid #b9c9cc; border-radius: 3px; background: #fff; padding: 13px 14px; color: var(--ink); font-size: 14px; font-weight: 400; }
+.contact-form input:not([type=checkbox]):not([type=hidden]), .contact-form textarea { display: block; width: 100%; margin-top: 8px; border: 1px solid #b9c9cc; border-radius: 3px; background: #fff; padding: 13px 14px; color: var(--ink); font-size: 14px; font-weight: 400; }
+.custom-select-field { min-width: 0; }
+.custom-select-label > span { color: var(--accent); }
+.custom-select { position: relative; margin-top: 8px; }
+.custom-select-trigger { display: flex; width: 100%; min-height: 47px; align-items: center; justify-content: space-between; gap: 12px; border: 1px solid #b9c9cc; border-radius: 3px; background: #fff; padding: 12px 14px; color: var(--ink); text-align: left; font-size: 14px; font-weight: 400; }
+.custom-select-trigger > svg { flex: none; color: var(--accent); transition: transform .18s ease; }
+.custom-select.is-open .custom-select-trigger > svg { transform: rotate(180deg); }
+.custom-select-trigger:focus-visible { outline: 2px solid #9bc7d2; outline-offset: 1px; }
+.custom-select-trigger[aria-invalid=true] { border-color: #ad4b40; }
+.custom-select-placeholder { color: #778892; }
+.custom-select-listbox { position: absolute; z-index: 20; top: calc(100% + 5px); left: 0; width: 100%; max-height: 260px; overflow-y: auto; margin: 0; padding: 5px; list-style: none; border: 1px solid var(--line-strong); border-radius: 3px; background: #fff; box-shadow: 0 14px 32px rgba(15,40,55,.16); }
+.custom-select-listbox[hidden] { display: none; }
+.custom-select-option { display: flex; min-height: 42px; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 11px; color: var(--ink); font-size: 14px; font-weight: 400; cursor: pointer; }
+.custom-select-option.is-active, .custom-select-option:hover { background: #edf4f5; }
+.custom-select-option[aria-selected=true] { color: var(--accent); font-weight: 700; }
+.custom-select-option svg { flex: none; }
+.custom-select-error { display: block; margin-top: 6px; color: #963b32; font-size: 12px; font-weight: 500; }
 .contact-form textarea { resize: vertical; min-height: 140px; }
 .contact-form input::placeholder, .contact-form textarea::placeholder { color: #778892; }
-.contact-form input:focus, .contact-form textarea:focus, .contact-form select:focus { outline: 2px solid #9bc7d2; outline-offset: 1px; }
+.contact-form input:focus, .contact-form textarea:focus { outline: 2px solid #9bc7d2; outline-offset: 1px; }
 .consent-line { display: flex !important; align-items: start; gap: 11px !important; color: var(--muted) !important; font-weight: 400 !important; line-height: 1.5; }
 .consent-line input { margin-top: 3px; accent-color: var(--accent); }
 .consent-line span { color: var(--muted) !important; }
@@ -432,6 +448,7 @@ h3 { font-size: 1.45rem; }
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
   .scroll-progress { display: none; }
+  .custom-select-trigger > svg { transition: none; }
   .story { height: auto !important; padding: 146px 0 76px; }
   .story-pin { display: none; }
   .story-static-title { position: static; display: block; width: min(calc(100% - 36px),var(--container)); height: auto; margin: 0 auto 35px; overflow: visible; clip-path: none; white-space: normal; color: #fff; font-size: clamp(2.2rem,5vw,4rem); }
