@@ -274,10 +274,13 @@ h3 { font-size: 1.45rem; }
 .custom-select-option.is-active, .custom-select-option:hover { background: #edf4f5; }
 .custom-select-option[aria-selected=true] { color: var(--accent); font-weight: 700; }
 .custom-select-option svg { flex: none; }
-.custom-select-error { display: block; margin-top: 6px; color: #963b32; font-size: 12px; font-weight: 500; }
+.contact-field { min-width: 0; }
+.field-error { display: block; margin-top: 6px; color: #963b32; font-size: 12px; font-weight: 500; }
 .contact-form textarea { resize: vertical; min-height: 140px; }
 .contact-form input::placeholder, .contact-form textarea::placeholder { color: #778892; }
 .contact-form input:focus, .contact-form textarea:focus { outline: 2px solid #9bc7d2; outline-offset: 1px; }
+.contact-form input[aria-invalid=true]:not([type=checkbox]), .contact-form textarea[aria-invalid=true], .custom-select-trigger[aria-invalid=true] { border-color: #ad4b40; }
+.consent-line input[aria-invalid=true] { outline: 2px solid #ad4b40; outline-offset: 2px; }
 .consent-line { display: flex !important; align-items: start; gap: 11px !important; color: var(--muted) !important; font-weight: 400 !important; line-height: 1.5; }
 .consent-line input { margin-top: 3px; accent-color: var(--accent); }
 .consent-line span { color: var(--muted) !important; }

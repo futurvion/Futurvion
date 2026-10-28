@@ -11,6 +11,46 @@ type SelectOption = {
   value: string;
 };
 
+type ContactField = "name" | "email" | "service" | "description" | "consent";
+type ContactErrors = Partial<Record<ContactField, string>>;
+type ContactTouched = Partial<Record<ContactField, boolean>>;
+
+const contactFields: ContactField[] = ["name", "email", "service", "description", "consent"];
+
+function getFieldError(field: ContactField, form: HTMLFormElement): string | undefined {
+  if (field === "name") {
+    const name = form.elements.namedItem("name");
+    if (!(name instanceof HTMLInputElement) || !name.value.trim()) return "Enter your full name.";
+    if (name.value.trim().length < 2) return "Please enter at least 2 characters.";
+  }
+
+  if (field === "email") {
+    const email = form.elements.namedItem("email");
+    if (!(email instanceof HTMLInputElement) || !email.value.trim()) return "Enter your work email.";
+    if (email.validity.typeMismatch) return "Enter a valid email address.";
+  }
+
+  if (field === "service") {
+    const service = form.elements.namedItem("service");
+    if (!(service instanceof HTMLInputElement) || !service.value) return "Choose a service to continue.";
+  }
+
+  if (field === "description") {
+    const description = form.elements.namedItem("description");
+    if (!(description instanceof HTMLTextAreaElement) || !description.value.trim()) {
+      return "Tell us about your project.";
+    }
+    if (description.value.trim().length < 20) return "Please add at least 20 characters.";
+  }
+
+  if (field === "consent") {
+    const consent = form.elements.namedItem("consent");
+    if (!(consent instanceof HTMLInputElement) || !consent.checked) {
+      return "Please agree before sending your enquiry.";
+    }
+  }
+}
+
 function CustomSelect({
   id,
   labelId,
@@ -22,6 +62,7 @@ function CustomSelect({
   invalid = false,
   errorId,
   buttonRef,
+  onBlur,
   onChange,
 }: {
   id: string;
@@ -34,6 +75,7 @@ function CustomSelect({
   invalid?: boolean;
   errorId?: string;
   buttonRef?: React.RefObject<HTMLButtonElement | null>;
+  onBlur?: (form: HTMLFormElement) => void;
   onChange: (value: string) => void;
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -119,6 +161,10 @@ function CustomSelect({
         aria-describedby={invalid ? errorId : undefined}
         onClick={() => open ? setOpen(false) : openAt(Math.max(0, options.findIndex(option => option.value === value)))}
         onKeyDown={handleKeyDown}
+        onBlur={event => {
+          const form = event.currentTarget.closest("form");
+          if (form) onBlur?.(form);
+        }}
       >
         <span className={selected ? "" : "custom-select-placeholder"}>{selected?.label ?? placeholder}</span>
         <ChevronDown size={17} aria-hidden="true" />
@@ -168,17 +214,46 @@ export function ContactForm({ initialService = "" }: { initialService?: string }
   const [message, setMessage] = useState("");
   const [service, setService] = useState(initialService);
   const [budget, setBudget] = useState("");
-  const [serviceError, setServiceError] = useState(false);
+  const [errors, setErrors] = useState<ContactErrors>({});
+  const [touched, setTouched] = useState<ContactTouched>({});
   const serviceButtonRef = useRef<HTMLButtonElement>(null);
+
+  function validateField(field: ContactField, form: HTMLFormElement | null) {
+    if (!form) return;
+    setErrors(current => ({ ...current, [field]: getFieldError(field, form) }));
+  }
+
+  function handleFieldBlur(field: ContactField, form: HTMLFormElement | null) {
+    if (!form) return;
+    setTouched(current => ({ ...current, [field]: true }));
+    validateField(field, form);
+  }
+
+  function handleFieldChange(field: ContactField, form: HTMLFormElement | null) {
+    if (touched[field]) validateField(field, form);
+  }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = event.currentTarget;
-    if (!service) {
-      setServiceError(true);
-      serviceButtonRef.current?.focus();
+    const nextErrors: ContactErrors = {};
+    for (const field of contactFields) {
+      const error = getFieldError(field, form);
+      if (error) nextErrors[field] = error;
+    }
+    if (Object.keys(nextErrors).length > 0) {
+      const firstInvalidField = contactFields.find(field => nextErrors[field]);
+      if (firstInvalidField) {
+        setTouched(current => ({ ...current, [firstInvalidField]: true }));
+        setErrors(current => ({ ...current, [firstInvalidField]: nextErrors[firstInvalidField] }));
+      }
+      if (firstInvalidField === "service") serviceButtonRef.current?.focus();
+      else if (firstInvalidField) {
+        form.querySelector<HTMLElement>(`[name="${firstInvalidField}"]`)?.focus();
+      }
       return;
     }
+    setErrors({});
 
     const data = Object.fromEntries(new FormData(form).entries());
     setState("sending");
@@ -191,6 +266,8 @@ export function ContactForm({ initialService = "" }: { initialService?: string }
         form.reset();
         setService("");
         setBudget("");
+        setErrors({});
+        setTouched({});
         window.dispatchEvent(new Event("futurvion:conversion"));
         return;
       }
@@ -202,8 +279,19 @@ export function ContactForm({ initialService = "" }: { initialService?: string }
     }
   }
 
-  return <form className="contact-form" data-clarity-mask="True" onSubmit={submit}>
-    <div className="form-row"><label>Full name <span>*</span><input name="name" autoComplete="name" required minLength={2} maxLength={100} placeholder="Your name" /></label><label>Work email <span>*</span><input name="email" type="email" spellCheck={false} autoComplete="email" required placeholder="you@company.com" /></label></div>
+  return <form className="contact-form" data-clarity-mask="True" noValidate onSubmit={submit}>
+    <div className="form-row">
+      <div className="contact-field">
+        <label htmlFor="contact-name">Full name <span>*</span></label>
+        <input id="contact-name" name="name" autoComplete="name" required minLength={2} maxLength={100} placeholder="Your name" aria-invalid={Boolean(errors.name) || undefined} aria-describedby={errors.name ? "contact-name-error" : undefined} onBlur={event => handleFieldBlur("name", event.currentTarget.form)} onChange={event => handleFieldChange("name", event.currentTarget.form)} />
+        {errors.name && <span className="field-error" id="contact-name-error" role="alert">{errors.name}</span>}
+      </div>
+      <div className="contact-field">
+        <label htmlFor="contact-email">Work email <span>*</span></label>
+        <input id="contact-email" name="email" type="email" spellCheck={false} autoComplete="email" required maxLength={254} placeholder="you@company.com" aria-invalid={Boolean(errors.email) || undefined} aria-describedby={errors.email ? "contact-email-error" : undefined} onBlur={event => handleFieldBlur("email", event.currentTarget.form)} onChange={event => handleFieldChange("email", event.currentTarget.form)} />
+        {errors.email && <span className="field-error" id="contact-email-error" role="alert">{errors.email}</span>}
+      </div>
+    </div>
     <div className="form-row"><label>Company <small>Optional</small><input name="company" autoComplete="organization" maxLength={120} placeholder="Company name" /></label><label>Phone <small>Optional</small><input name="phone" type="tel" autoComplete="tel" maxLength={30} placeholder="Phone number" /></label></div>
     <div className="form-row">
       <div className="custom-select-field">
@@ -212,16 +300,20 @@ export function ContactForm({ initialService = "" }: { initialService?: string }
           buttonRef={serviceButtonRef}
           errorId="contact-service-error"
           id="contact-service"
-          invalid={serviceError}
+          invalid={Boolean(errors.service)}
           labelId="contact-service-label"
           name="service"
-          onChange={value => { setService(value); setServiceError(false); }}
+          onBlur={form => handleFieldBlur("service", form)}
+          onChange={value => {
+            setService(value);
+            setErrors(current => ({ ...current, service: undefined }));
+          }}
           options={serviceOptions}
           placeholder="Select a service"
           required
           value={service}
         />
-        {serviceError && <span className="custom-select-error" id="contact-service-error" role="alert">Choose a service to continue.</span>}
+        {errors.service && <span className="field-error" id="contact-service-error" role="alert">{errors.service}</span>}
       </div>
       <div className="custom-select-field">
         <span className="custom-select-label" id="contact-budget-label">Estimated budget <small>Optional</small></span>
@@ -236,8 +328,15 @@ export function ContactForm({ initialService = "" }: { initialService?: string }
         />
       </div>
     </div>
-    <label>Tell us about your project <span>*</span><textarea name="description" required minLength={20} maxLength={5000} rows={5} placeholder="What are you building or trying to improve?" /></label>
-    <label className="consent-line"><input name="consent" type="checkbox" value="yes" required /><span>I agree to be contacted about my enquiry and have read the <a href="/privacy-policy">privacy policy</a>.</span></label>
+    <div className="contact-field">
+      <label htmlFor="contact-description">Tell us about your project <span>*</span></label>
+      <textarea id="contact-description" name="description" required minLength={20} maxLength={5000} rows={5} placeholder="What are you building or trying to improve?" aria-invalid={Boolean(errors.description) || undefined} aria-describedby={errors.description ? "contact-description-error" : undefined} onBlur={event => handleFieldBlur("description", event.currentTarget.form)} onChange={event => handleFieldChange("description", event.currentTarget.form)} />
+      {errors.description && <span className="field-error" id="contact-description-error" role="alert">{errors.description}</span>}
+    </div>
+    <div className="contact-field">
+      <label className="consent-line" htmlFor="contact-consent"><input id="contact-consent" name="consent" type="checkbox" value="yes" required aria-invalid={Boolean(errors.consent) || undefined} aria-describedby={errors.consent ? "contact-consent-error" : undefined} onBlur={event => handleFieldBlur("consent", event.currentTarget.form)} onChange={event => handleFieldChange("consent", event.currentTarget.form)} /><span>I agree to be contacted about my enquiry and have read the <a href="/privacy-policy">privacy policy</a>.</span></label>
+      {errors.consent && <span className="field-error" id="contact-consent-error" role="alert">{errors.consent}</span>}
+    </div>
     <div className="honeypot" aria-hidden="true"><label>Leave this field empty<input name="website" tabIndex={-1} autoComplete="off" /></label></div>
     <div className="form-bottom"><button className={`${siteStyles.button} button button-primary ${siteStyles.buttonPrimary}`} type="submit" disabled={state === "sending"}>{state === "sending" ? "Sending…" : "Send your enquiry"}<ArrowUpRight size={18}/></button><span>We&apos;ll use your details only to respond to this enquiry.</span></div>
     {state === "success" && <p role="status" className="form-status success">Your enquiry was received. Thank you for reaching out.</p>}
