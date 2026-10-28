@@ -17,15 +17,13 @@ const body = Inter({
   display: "swap",
 });
 
-const siteUrl = "https://futurvion.in";
-
 const siteTitle = "Futurvion | AI, Software & Digital Solutions";
 
 const siteDescription =
   "Futurvion helps businesses grow through AI automation, custom software development, website development, branding, and digital marketing.";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
+  metadataBase: new URL(site.url),
 
   title: {
     default: siteTitle,
@@ -42,7 +40,7 @@ export const metadata: Metadata = {
 
   openGraph: {
     type: "website",
-    url: siteUrl,
+    url: site.url,
     siteName: "Futurvion",
     title: siteTitle,
     description: siteDescription,
@@ -85,7 +83,7 @@ function WebsiteStructuredData() {
     "@type": "WebSite",
     name: "Futurvion",
     alternateName: "Futurvion.in",
-    url: `${siteUrl}/`,
+    url: site.url,
   };
 
   return (

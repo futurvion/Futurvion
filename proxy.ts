@@ -1,7 +1,16 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { site } from "@/config/site";
 import { internalPrefix, isUtilityHost, utilityDestination } from "@/features/toolbox/routing";
 import { tools, utilityOrigin } from "@/features/toolbox/catalog";
 export function proxy(request: NextRequest) {
+    const canonicalUrl = new URL(site.url);
+    if (request.nextUrl.hostname === `www.${canonicalUrl.hostname}`) {
+        const destination = request.nextUrl.clone();
+        destination.protocol = canonicalUrl.protocol;
+        destination.hostname = canonicalUrl.hostname;
+        destination.port = canonicalUrl.port;
+        return NextResponse.redirect(destination, 308);
+    }
     const path = request.nextUrl.pathname;
     if (path === internalPrefix || path.startsWith(internalPrefix + "/"))
         return new NextResponse("Not found", { status: 404 });

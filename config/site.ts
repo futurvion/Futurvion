@@ -15,6 +15,10 @@ export interface SiteConfig {
 }
 
 // Match the primary domain configured in Vercel even when the optional env var is unset.
+const configuredSiteUrl = new URL(
+  process.env.NEXT_PUBLIC_SITE_URL || "https://futurvion.in",
+);
+configuredSiteUrl.hostname = configuredSiteUrl.hostname.replace(/^www\./, "");
 
 export const site: SiteConfig = {
   name: "Futurvion",
@@ -22,10 +26,7 @@ export const site: SiteConfig = {
   description:
     "Futurvion helps businesses grow through AI automation, custom software development, website development, branding, and digital marketing.",
 
-  url: (process.env.NEXT_PUBLIC_SITE_URL || "https://futurvion.in").replace(
-    /\/+$/,
-    "",
-  ),
+  url: configuredSiteUrl.origin,
 
   email: process.env.NEXT_PUBLIC_BUSINESS_EMAIL || "futurvion@gmail.com",
 
