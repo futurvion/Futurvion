@@ -35,7 +35,7 @@ export function ContactForm({ initialService = "" }: { initialService?: string }
     }
   }
 
-  return <form className="contact-form" onSubmit={submit}>
+  return <form className="contact-form" data-clarity-mask="True" onSubmit={submit}>
     <div className="form-row"><label>Full name <span>*</span><input name="name" autoComplete="name" required minLength={2} maxLength={100} placeholder="Your name" /></label><label>Work email <span>*</span><input name="email" type="email" spellCheck={false} autoComplete="email" required placeholder="you@company.com" /></label></div>
     <div className="form-row"><label>Company <small>Optional</small><input name="company" autoComplete="organization" maxLength={120} placeholder="Company name" /></label><label>Phone <small>Optional</small><input name="phone" type="tel" autoComplete="tel" maxLength={30} placeholder="Phone number" /></label></div>
     <div className="form-row"><label>I&apos;m interested in <span>*</span><select name="service" required value={selectedService ?? initialService} onChange={event => setSelectedService(event.target.value)}><option value="" disabled>Select a service</option>{services.map(service => <option key={service.slug} value={service.slug}>{service.title}</option>)}<option value="not-sure">Not sure yet</option></select></label><label>Estimated budget <small>Optional</small><select name="budget" defaultValue=""><option value="">Prefer to discuss</option><option value="under-5k">Under $5,000</option><option value="5k-15k">$5,000–$15,000</option><option value="15k-50k">$15,000–$50,000</option><option value="50k-plus">$50,000+</option></select></label></div>
