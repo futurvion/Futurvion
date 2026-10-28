@@ -6,11 +6,15 @@
 
 ## Build and release procedure
 
-1. Install dependencies with `npm install`; its `postinstall` runs `prisma generate`. Use a Node.js/npm version supported by the installed Next.js release; no exact version is pinned in this repo.
+1. Use Node.js 22.13.0 or newer with npm 10.9.4, pinned in `package.json` and CI. Install dependencies with `npm ci` from the committed lockfile; its `postinstall` runs `prisma generate`. CI validates the lockfile with the same reproducible install command.
 2. Provision PostgreSQL and a Resend sending domain/inbox for the contact flow. Set production environment variables in the host, keeping server-only values private.
 3. Apply the committed migration with `npm run db:deploy` against the intended database using migration privileges. Prefer a separate, limited runtime DB role.
 4. Run `npm run typecheck`, `npm run lint`, `npm test`, and `npm run build`; deploy the build. `npm run start` serves the production build for a self-hosted process.
 5. Set/verify the primary domain and canonical URL. `config/site.ts` defaults to `https://futurvion.in`; `NEXT_PUBLIC_SITE_URL` overrides it. `app/layout.tsx` emits `noindex` only when the configured URL ends in `.example`. Confirm sitemap, robots, canonical tags, and domain redirects on the live host.
+
+Maintain packages according to [Dependency maintenance](./DEPENDENCIES.md): Dependabot proposes stable compatible patch/minor updates weekly, and dependency changes must pass the pull-request CI checks before merging.
+
+The PR checks workflow runs lint, tests, type-checking, and the production build as separate parallel jobs. Each job installs dependencies independently; `fail-fast` is disabled so all four results are reported.
 
 ## Environment variable contract
 
