@@ -2,7 +2,7 @@
 
 Status is based on the current repository and local checks on 2026-10-28. `DONE` means implementation plus relevant local verification; `NEEDS_VERIFICATION` means code is present but a live integration or browser behavior has not been confirmed. The source files named below are the acceptance evidence, not proof of production operation.
 
-- 2026-10-30: Added a root `favicon.ico` from the existing site mark after confirming production `/favicon.ico` returned 404; local build and icon-route verification pending.
+- 2026-10-30: Investigated the missing browser/search icon. The current branch already contains a multi-size root `app/favicon.ico` (commit `ac34381`), and the production build serves it successfully. The live site still returns 404 for `/favicon.ico` and publishes only `/icon.png`; the favicon fix has not reached the deployed version. Production deployment and Bing refresh remain unverified.
 
 ## Project status summary
 
