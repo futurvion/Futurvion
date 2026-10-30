@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { InContentAd, SidebarAd } from "@/components/ads/ad-unit";
 import { BlogPostingJsonLd } from "@/components/shared/blog-posting-json-ld";
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import { PageHero } from "@/components/shared/page-hero";
@@ -33,7 +34,8 @@ export default function AiAgentsVsChatbotsPage() {
         <PageHero eyebrow="Choosing an approach" title={heading} />
       </div>
       <section className={`${siteStyles.pageSection} page-section`}>
-        <article className={`${siteStyles.container} content-prose blog-article`}>
+        <div className={`${siteStyles.container} blog-article-layout`}>
+        <article className="content-prose blog-article">
           <p>
             <strong>
               A chatbot is usually built to answer or guide a conversation; an
@@ -131,6 +133,7 @@ export default function AiAgentsVsChatbotsPage() {
             information current.
           </p>
 
+          <InContentAd completedSections={2} totalSections={6} />
           <h2>When might agent capabilities be useful?</h2>
           <p>
             Agent capabilities may help when a customer request requires
@@ -205,6 +208,7 @@ export default function AiAgentsVsChatbotsPage() {
             {" "}include a practical evaluation plan.
           </p>
 
+          <InContentAd completedSections={5} totalSections={6} />
           <h2>How can chatbots and agents work together?</h2>
           <p>
             A chatbot can be the customer-facing interface while an agent
@@ -229,6 +233,10 @@ export default function AiAgentsVsChatbotsPage() {
             <Link href="/blog">Browse all articles</Link>
           </p>
         </article>
+        <div className="blog-article-sidebar">
+          <SidebarAd />
+        </div>
+        </div>
       </section>
     </>
   );

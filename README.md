@@ -2,7 +2,7 @@
 
 Futurvion's public marketing site presents its digital services, business solutions, and illustrative work concepts, and lets visitors send an enquiry. It runs on Next.js 16.4.3 (App Router), React 19, strict TypeScript, Tailwind CSS 4, React Three Fiber/Three.js, Framer Motion, Lucide, Zod, Prisma 7 + PostgreSQL, and Resend. The work examples are concepts, not completed client projects.
 
-For verified implementation details and current progress, see [TASKS.md](TASKS.md), [the project overview](docs/PROJECT_OVERVIEW.md), [architecture](docs/ARCHITECTURE.md), [API](docs/API.md), [database](docs/DATABASE.md), [security](docs/SECURITY.md), [deployment](docs/DEPLOYMENT.md), and [dependency maintenance](docs/DEPENDENCIES.md). [AGENTS.md](AGENTS.md) defines the documentation maintenance workflow.
+For verified implementation details and current progress, see [TASKS.md](TASKS.md), [the project overview](docs/PROJECT_OVERVIEW.md), [architecture](docs/ARCHITECTURE.md), [API](docs/API.md), [database](docs/DATABASE.md), [security](docs/SECURITY.md), [deployment](docs/DEPLOYMENT.md), [AdSense setup](docs/ADSENSE.md), and [dependency maintenance](docs/DEPENDENCIES.md). [AGENTS.md](AGENTS.md) defines the documentation maintenance workflow.
 
 ## What works immediately vs. what needs credentials
 
@@ -11,7 +11,7 @@ For verified implementation details and current progress, see [TASKS.md](TASKS.m
 | All pages, animated hero emblem with a static reduced-motion/WebGL fallback, scroll-controlled capability story, scroll reveals for text and cards, scroll progress, responsive navigation, FAQ, sitemap, robots, JSON-LD, security headers | Contact form backend (`DATABASE_URL`, `ABUSE_HASH_SECRET`, `RESEND_API_KEY`, `CONTACT_TO_EMAIL`, `CONTACT_FROM_EMAIL`) |
 | `mailto:` fallback shown on the contact page | Analytics (`DATABASE_URL`, `ABUSE_HASH_SECRET`) — silently disabled otherwise, and the consent banner is hidden |
 | `/jobs` setup/empty state and `/admin/login` sign-in screen | Jobs data and admin operations (`DATABASE_URL`, jobs migration, `AUTH_SECRET`, `APP_URL`, admin bootstrap); cron also needs `JOB_SYNC_SECRET` |
-| | Booking CTA (`NEXT_PUBLIC_BOOKING_URL`), Search Console (`NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION`) |
+| | Booking CTA (`NEXT_PUBLIC_BOOKING_URL`), Search Console (`NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION`), optional AdSense (disabled until publisher, slots, and certified consent setup are configured; see [AdSense setup](docs/ADSENSE.md)) |
 
 The form reports success only after the lead is stored **and** the notification email is accepted by Resend. Set `CONTACT_TO_EMAIL` to the inbox that should receive leads and `CONTACT_FROM_EMAIL` to an address on a domain verified in Resend. The included production example uses `notifications@futurvion.in`; verify that domain in Resend and configure the DNS records Resend provides before expecting delivery. Replies go directly to the submitter through `replyTo`. The notification contains the name, email, company, phone, selected service, budget, and project description in a responsive, branded HTML email, with a plain-text fallback. If the backend is not configured it returns 503 and the UI points visitors to the email link.
 
