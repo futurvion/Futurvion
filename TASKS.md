@@ -2,6 +2,8 @@
 
 Status is based on the current repository and local checks on 2026-10-28. `DONE` means implementation plus relevant local verification; `NEEDS_VERIFICATION` means code is present but a live integration or browser behavior has not been confirmed. The source files named below are the acceptance evidence, not proof of production operation.
 
+- 2026-10-30: Added a root `favicon.ico` from the existing site mark after confirming production `/favicon.ico` returned 404; local build and icon-route verification pending.
+
 ## Project status summary
 
 - 2026-10-28: Reworked the blog landing page and four AI-agent articles with audience-specific summaries, practical business examples, measurement and pilot guidance, trade-offs, contextual service links, and cross-links between all articles. Added visible breadcrumbs with matching `BreadcrumbList` JSON-LD, article-specific Open Graph types, unique metadata, and tests for canonical URLs, crawlable links, robots, and JSON-LD escaping. Consolidated duplicate `WebSite` structured data into one entity linked to the `Organization`; left the existing routes, sitemap entries, canonical origin, and publication-date policy intact. Production build and full lint/typecheck passed; all 100 tests passed with one Vitest worker. Production HTML/browser checks confirmed HTTP 200, canonical/social metadata, one `WebSite` and `Organization` entity per page, appropriate article/breadcrumb schema, valid sitemap/robots behavior, one H1 per page, all listing/cross-links, and no horizontal overflow at 1440px or 390px. Google indexing and live production results remain unverified.
