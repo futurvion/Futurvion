@@ -3,6 +3,7 @@ import { PageHero } from "@/components/shared/page-hero";
 import { pageMetadata } from "@/lib/seo";
 import { siteStyles } from "@/config/styles";
 import { AnalyticsPreferencesButton } from "@/features/analytics/components/analytics-consent";
+import { adsConfig } from "@/config/ads";
 
 export const metadata = pageMetadata(
   "Privacy policy",
@@ -60,33 +61,37 @@ export default function PrivacyPage() {
             reporting period. No public traffic counter is displayed. You can
             change your choice here at any time using the button below.
           </p>
-          <AnalyticsPreferencesButton
-            enabled={Boolean(
-              (process.env.DATABASE_URL && process.env.ABUSE_HASH_SECRET) ||
-                process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID ||
-                process.env.NEXT_PUBLIC_CLARITY_PROJECT_ID,
-            )}
-          />
           <h2>Advertising</h2>
           <p>
             Google AdSense is disabled by default. If Futurvion enables it,
-            manually placed display advertisements may appear on selected blog
-            pages. Google and its advertising partners may use cookies or
+            manually placed display advertisements may appear on blog pages
+            and between jobs-listing cards. Google and its advertising partners may use cookies or
             similar technologies to serve, measure, and personalize
             advertisements, subject to your choices and applicable settings.
-            Advertising is not used on contact, job, or about pages.
+            Advertising is not used on the homepage, contact forms, application
+            controls, or any section outside the blog and jobs pages.
           </p>
           <p>
             The analytics choice on this website is not a Google-certified
-            advertising consent mechanism. Before enabling AdSense, the site
-            operator must configure an applicable Google-certified CMP and
-            verify that it communicates the required consent signals,
-            including for visitors in the EEA, UK, and Switzerland. Do not
-            enable advertising or personalized ads before required consent is
-            obtained. Review Google’s current advertising and consent
-            requirements and obtain jurisdiction-specific legal advice where
-            appropriate.
+            advertising consent mechanism. A separate advertising choice is
+            required before the AdSense script is loaded; that choice is an
+            additional safeguard, not a certified CMP. Google currently
+            requires a Google-certified CMP integrated with the IAB TCF when
+            serving personalized ads to users in the EEA, UK, and Switzerland.
+            Do not enable personalized ads before required consent is obtained.
+            Review Google’s current advertising and consent requirements and
+            obtain jurisdiction-specific legal advice where appropriate.
           </p>
+          <AnalyticsPreferencesButton
+            enabled={
+              adsConfig.enabled ||
+              Boolean(
+                (process.env.DATABASE_URL && process.env.ABUSE_HASH_SECRET) ||
+                  process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID ||
+                  process.env.NEXT_PUBLIC_CLARITY_PROJECT_ID,
+              )
+            }
+          />
           <h2>Resume job matching</h2>
           <p>
             If you start a resume search, Futurvion processes the PDF or DOCX

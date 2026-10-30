@@ -9,7 +9,7 @@ For verified implementation details and current progress, see [TASKS.md](TASKS.m
 | Works with no setup | Needs setup |
 |---|---|
 | All pages, animated hero emblem with a static reduced-motion/WebGL fallback, scroll-controlled capability story, scroll reveals for text and cards, scroll progress, responsive navigation, FAQ, sitemap, robots, JSON-LD, security headers | Contact form backend (`DATABASE_URL`, `ABUSE_HASH_SECRET`, `RESEND_API_KEY`, `CONTACT_TO_EMAIL`, `CONTACT_FROM_EMAIL`) |
-| `mailto:` fallback shown on the contact page | Analytics (`DATABASE_URL`, `ABUSE_HASH_SECRET`) — silently disabled otherwise, and the consent banner is hidden |
+| `mailto:` fallback shown on the contact page | Analytics (`DATABASE_URL`, `ABUSE_HASH_SECRET`) — disabled otherwise; analytics and advertising use separate opt-ins |
 | `/jobs` setup/empty state and `/admin/login` sign-in screen | Jobs data and admin operations (`DATABASE_URL`, jobs migration, `AUTH_SECRET`, `APP_URL`, admin bootstrap); cron also needs `JOB_SYNC_SECRET` |
 | | Booking CTA (`NEXT_PUBLIC_BOOKING_URL`), Search Console (`NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION`), optional AdSense (disabled until publisher, slots, and certified consent setup are configured; see [AdSense setup](docs/ADSENSE.md)) |
 

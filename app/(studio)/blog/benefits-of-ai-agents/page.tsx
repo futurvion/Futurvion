@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { InContentAd, SidebarAd } from "@/components/ads/ad-unit";
+import { canRenderAd } from "@/config/ads";
 import { BlogPostingJsonLd } from "@/components/shared/blog-posting-json-ld";
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import { PageHero } from "@/components/shared/page-hero";
@@ -34,7 +35,7 @@ export default function AiAgentBusinessBenefitsPage() {
         <PageHero eyebrow="AI and business" title={heading} />
       </div>
       <section className={`${siteStyles.pageSection} page-section`}>
-        <div className={`${siteStyles.container} blog-article-layout`}>
+        <div className={`${siteStyles.container} blog-article-layout${canRenderAd("blogSidebar") ? " blog-article-layout--with-sidebar" : ""}`}>
         <article className="content-prose blog-article">
           <p>
             AI agents may help with work that involves interpreting information,

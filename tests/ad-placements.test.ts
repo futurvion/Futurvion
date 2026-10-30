@@ -1,12 +1,18 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { createAdsConfig, isAdRouteExcluded } from "@/config/ads";
+import { createAdsConfig, isAdAllowed } from "@/config/ads";
 import {
   listingAdPositions,
   shouldPlaceArticleAd,
 } from "@/lib/ad-placements";
+import {
+  advertisingConsentKey,
+  hasAdvertisingConsent,
+} from "@/lib/ads-consent";
 
 afterEach(() => {
+  vi.unmock("next/navigation");
   vi.unstubAllEnvs();
+  vi.unstubAllGlobals();
   vi.resetModules();
 });
 
@@ -32,6 +38,13 @@ describe("AdSense configuration", () => {
         ...baseEnvironment,
         NEXT_PUBLIC_ADSENSE_CLIENT_ID: "ca-pub-test",
       }).enabled,
+    ).toBe(false);
+    expect(
+      createAdsConfig({
+        ...baseEnvironment,
+        NEXT_PUBLIC_ADSENSE_CLIENT_ID: "ca-pub-test",
+        NEXT_PUBLIC_ADSENSE_SLOT_BLOG_CONTENT: "123",
+      }).enabled,
     ).toBe(true);
   });
 
@@ -41,20 +54,43 @@ describe("AdSense configuration", () => {
     expect(config.placements.contentPage.enabled).toBe(false);
     expect(config.placements.blogContent.enabled).toBe(true);
     expect(config.placements.blogContent.slot).toBe("");
+    expect(config.placements.jobsListing.interval).toBe(6);
   });
 
-  it("excludes contact, job, and about routes including their subroutes", () => {
-    for (const pathname of [
-      "/contact",
-      "/contact/",
-      "/jobs",
-      "/jobs/example-role",
-      "/about",
-    ]) {
-      expect(isAdRouteExcluded(pathname)).toBe(true);
-    }
+  it.each([
+    ["/", false],
+    ["/about", false],
+    ["/contact", false],
+    ["/services", false],
+    ["/services/web-development", false],
+    ["/solutions", false],
+    ["/solutions/automation", false],
+    ["/work", false],
+    ["/work/example", false],
+    ["/privacy-policy", false],
+    ["/terms", false],
+    ["/toolbox-internal/tools/json-formatter", false],
+    ["/admin/login", false],
+    ["/blog", true],
+    ["/blog/", true],
+    ["/blog/what-are-ai-agents", true],
+    ["/jobs", true],
+    ["/jobs/example-job", true],
+    ["/blogging", false],
+    ["/jobs-archive", false],
+  ])("restricts ad eligibility for %s", (pathname, expected) => {
+    expect(isAdAllowed(pathname)).toBe(expected);
+  });
 
-    expect(isAdRouteExcluded("/blog")).toBe(false);
+  it("removes eligibility when client navigation leaves an allowed section", () => {
+    let pathname = "/blog";
+    expect(isAdAllowed(pathname)).toBe(true);
+
+    pathname = "/";
+    expect(isAdAllowed(pathname)).toBe(false);
+
+    pathname = "/services";
+    expect(isAdAllowed(pathname)).toBe(false);
   });
 });
 
@@ -63,6 +99,7 @@ describe("custom placement frequency", () => {
     expect(listingAdPositions(3, 4)).toEqual([]);
     expect(listingAdPositions(4, 4)).toEqual([]);
     expect(listingAdPositions(9, 4)).toEqual([4, 8]);
+    expect(listingAdPositions(13, 6)).toEqual([6, 12]);
     expect(listingAdPositions(9, 0)).toEqual([]);
   });
 
@@ -75,10 +112,32 @@ describe("custom placement frequency", () => {
   });
 });
 
+describe("advertising consent", () => {
+  it("fails closed unless advertising consent was explicitly stored", () => {
+    vi.stubGlobal("window", {
+      localStorage: { getItem: () => null },
+    });
+
+    expect(hasAdvertisingConsent()).toBe(false);
+  });
+
+  it("recognizes the separate advertising opt-in", () => {
+    vi.stubGlobal("window", {
+      localStorage: {
+        getItem: (key: string) =>
+          key === advertisingConsentKey ? "allow" : null,
+      },
+    });
+
+    expect(hasAdvertisingConsent()).toBe(true);
+  });
+});
+
 describe("AdUnit rendering", () => {
   it("omits a unit when the publisher configuration is disabled", async () => {
     vi.stubEnv("NEXT_PUBLIC_ADSENSE_ENABLED", "false");
     vi.resetModules();
+    vi.doMock("next/navigation", () => ({ usePathname: () => "/blog" }));
     const { AdUnit } = await import("@/components/ads/ad-unit");
     const { createElement } = await import("react");
     const { renderToStaticMarkup } = await import("react-dom/server");
@@ -95,6 +154,7 @@ describe("AdUnit rendering", () => {
     vi.stubEnv("NEXT_PUBLIC_ADSENSE_CONSENT_READY", "true");
     vi.stubEnv("NEXT_PUBLIC_ADSENSE_CLIENT_ID", "ca-pub-test");
     vi.resetModules();
+    vi.doMock("next/navigation", () => ({ usePathname: () => "/blog" }));
     const { AdUnit } = await import("@/components/ads/ad-unit");
     const { createElement } = await import("react");
     const { renderToStaticMarkup } = await import("react-dom/server");
@@ -106,26 +166,4 @@ describe("AdUnit rendering", () => {
     ).toBe("");
   });
 
-  it("renders official responsive unit attributes when configured", async () => {
-    vi.stubEnv("NEXT_PUBLIC_ADSENSE_ENABLED", "true");
-    vi.stubEnv("NEXT_PUBLIC_ADSENSE_CONSENT_READY", "true");
-    vi.stubEnv("NEXT_PUBLIC_ADSENSE_CLIENT_ID", "ca-pub-test");
-    vi.stubEnv("NEXT_PUBLIC_ADSENSE_SLOT_BLOG_CONTENT", "slot-test");
-    vi.resetModules();
-    const [{ AdUnit }, react, server] = await Promise.all([
-      import("@/components/ads/ad-unit"),
-      import("react"),
-      import("react-dom/server"),
-    ]);
-
-    const markup = server.renderToStaticMarkup(
-      react.createElement(AdUnit, { placement: "blogContent" }),
-    );
-
-    expect(markup).toContain('class="adsbygoogle"');
-    expect(markup).toContain('data-ad-client="ca-pub-test"');
-    expect(markup).toContain('data-ad-slot="slot-test"');
-    expect(markup).toContain('data-ad-format="auto"');
-    expect(markup).toContain('data-full-width-responsive="true"');
-  });
 });

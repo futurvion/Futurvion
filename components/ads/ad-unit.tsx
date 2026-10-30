@@ -1,9 +1,19 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
-import { adsConfig, canRenderAd, type AdPlacementName } from "@/config/ads";
+import { usePathname } from "next/navigation";
+import {
+  adsConfig,
+  canRenderAd,
+  isAdAllowed,
+  type AdPlacementName,
+} from "@/config/ads";
 import { adsenseReadyEvent } from "@/components/ads/adsense-script";
+import {
+  advertisingConsentChangedEvent,
+  hasAdvertisingConsent,
+} from "@/lib/ads-consent";
 import { shouldPlaceArticleAd } from "@/lib/ad-placements";
 
 declare global {
@@ -23,12 +33,28 @@ type AdUnitProps = {
 };
 
 export function AdUnit({ placement, className = "", style }: AdUnitProps) {
+  const pathname = usePathname();
   const elementRef = useRef<HTMLModElement>(null);
   const placementConfig = adsConfig.placements[placement];
+  const [consent, setConsent] = useState(false);
+  const routeAllowed = isAdAllowed(pathname);
+
+  useEffect(() => {
+    const updateConsent = () => setConsent(hasAdvertisingConsent());
+    updateConsent();
+    window.addEventListener(advertisingConsentChangedEvent, updateConsent);
+    return () =>
+      window.removeEventListener(
+        advertisingConsentChangedEvent,
+        updateConsent,
+      );
+  }, []);
 
   useEffect(() => {
     const element = elementRef.current;
-    if (!element || !canRenderAd(placement)) return;
+    if (!consent || !routeAllowed || !element || !canRenderAd(placement)) {
+      return;
+    }
 
     const initialize = () => {
       if (
@@ -47,9 +73,16 @@ export function AdUnit({ placement, className = "", style }: AdUnitProps) {
     window.addEventListener(adsenseReadyEvent, initialize);
 
     return () => window.removeEventListener(adsenseReadyEvent, initialize);
-  }, [placement]);
+  }, [consent, pathname, placement, routeAllowed]);
 
-  if (!canRenderAd(placement) || !placementConfig.slot) return null;
+  if (
+    !consent ||
+    !routeAllowed ||
+    !canRenderAd(placement) ||
+    !placementConfig.slot
+  ) {
+    return null;
+  }
 
   return (
     <aside
@@ -97,6 +130,10 @@ export function SidebarAd() {
   return <AdUnit placement="blogSidebar" />;
 }
 
-export function ListingAd() {
-  return <AdUnit placement="blogListing" />;
+export function ListingAd({
+  placement = "blogListing",
+}: {
+  placement?: "blogListing" | "jobsListing";
+}) {
+  return <AdUnit placement={placement} />;
 }

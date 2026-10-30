@@ -3,8 +3,11 @@
 ## Current behavior and safety gates
 
 AdSense is disabled by default. The application loads Google’s official
-AdSense script only within the `/blog` route segment and only when all of the
-following are true:
+AdSense script only within the `/blog` and `/jobs` route segments. A reusable
+ad unit also checks the current pathname against an exact `/blog` or `/jobs`
+route-prefix allowlist on every render, removing the unit during client-side
+navigation to any other route. Ads appear only when all of the following are
+true:
 
 - `NEXT_PUBLIC_ADSENSE_ENABLED=true`
 - A publisher ID is configured
@@ -15,9 +18,20 @@ following are true:
 guard, not a CMP and not proof of consent. Set it to `true` only after a
 Google-certified CMP or another currently approved consent integration is
 configured and tested for the jurisdictions you serve. The existing analytics
-preference does not manage advertising consent. Never treat it as a substitute
-for an applicable CMP, and do not serve personalized ads before required
-consent is obtained.
+preference does not manage advertising consent. A separate advertising
+opt-in is stored in the browser and must be granted before the AdSense script
+is loaded; this is an additional fail-closed safeguard, not a certified CMP.
+Never treat it as a substitute for an applicable CMP, and do not serve
+personalized ads before required consent is obtained.
+
+Google currently requires a Google-certified CMP integrated with the IAB
+Transparency and Consent Framework (TCF) when serving personalized ads to
+users in the EEA, UK, and Switzerland. Google notes that traffic from a
+non-certified CMP may be eligible for non-personalized or limited ads where
+supported; this application does not implement that alternative. Recheck
+Google's current [publisher consent requirements](https://support.google.com/adsense/answer/13554116?hl=en)
+and [CMP setup guidance](https://support.google.com/adsense/answer/7670013?hl=en)
+before activation.
 
 The code renders only explicit display ad units; it does not create pop-ups,
 pop-unders, overlays, sticky ads, forced redirects, or click-triggered ads.
@@ -48,6 +62,7 @@ dashboard settings can inject placements independently of this code.
 | `NEXT_PUBLIC_ADSENSE_SLOT_BLOG_CONTENT` | Responsive in-content display unit |
 | `NEXT_PUBLIC_ADSENSE_SLOT_BLOG_SIDEBAR` | Desktop article sidebar display unit |
 | `NEXT_PUBLIC_ADSENSE_SLOT_BLOG_LISTING` | Blog listing display unit |
+| `NEXT_PUBLIC_ADSENSE_SLOT_JOBS_LISTING` | Jobs listing display unit |
 | `NEXT_PUBLIC_ADSENSE_SLOT_CONTENT_PAGE` | Reserved optional informational-page unit; currently disabled |
 
 Empty slot values safely omit the corresponding unit. These public IDs are
@@ -65,8 +80,14 @@ Restart the development server after changing local environment values.
   lists, tables, images, and code are not split.
 - **Article sidebar:** one responsive display unit, shown only at viewport
   widths above 1100px. It is in normal document flow, not sticky or fixed.
-- **Services, solutions, about, contact, and jobs:** no placements are
-  currently enabled. Contact and job-application routes remain ad-free.
+- **Jobs listing:** an ad may appear after every six job cards, never before
+  the first card or after the final card. It spans the results grid and is
+  separated from each card's details and apply actions.
+- **Job details:** no ad unit is currently placed on detail pages, keeping
+  application actions and job information free of ads.
+- **All other routes:** the homepage, about, contact, services, solutions,
+  work, legal pages, developer tools, admin, and any route outside `/blog` or
+  `/jobs` are excluded by the central route guard.
 
 To adjust listing or article frequency, edit the central settings in
 `config/ads.ts`. To add an article unit, place `InContentAd` between complete
@@ -124,7 +145,8 @@ not claim a CMP certification or legal compliance.
 - [ ] The production build has the intended environment values; the global
       switch is enabled only after all prior steps are complete.
 - [ ] Blog listing, long and short articles, desktop sidebar, mobile layout,
-      contact, jobs, and consent behavior have been checked in production.
+      jobs listing, job details, excluded routes, client-side navigation, and
+      consent behavior have been checked in production.
 - [ ] Check the browser network panel and AdSense dashboard for script,
       policy, consent, or serving errors. Ad blockers, unavailable inventory,
       and account review may prevent an ad from appearing; do not bypass

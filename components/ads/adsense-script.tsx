@@ -1,7 +1,12 @@
 "use client";
 
 import Script from "next/script";
+import { useEffect, useState } from "react";
 import { adsConfig } from "@/config/ads";
+import {
+  advertisingConsentChangedEvent,
+  hasAdvertisingConsent,
+} from "@/lib/ads-consent";
 
 export const adsenseReadyEvent = "futurvion:adsense-ready";
 
@@ -16,9 +21,23 @@ declare global {
 }
 
 export function AdSenseScript() {
+  const [consent, setConsent] = useState(false);
+
+  useEffect(() => {
+    const updateConsent = () => setConsent(hasAdvertisingConsent());
+    updateConsent();
+    window.addEventListener(advertisingConsentChangedEvent, updateConsent);
+    return () =>
+      window.removeEventListener(
+        advertisingConsentChangedEvent,
+        updateConsent,
+      );
+  }, []);
+
   if (!adsConfig.enabled || !adsConfig.publisherId || !hasConfiguredSlot) {
     return null;
   }
+  if (!consent) return null;
 
   return (
     <Script
