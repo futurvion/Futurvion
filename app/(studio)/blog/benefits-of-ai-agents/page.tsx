@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { InContentAd, SidebarAd } from "@/components/ads/ad-unit";
+import { canRenderAd } from "@/config/ads";
 import { BlogPostingJsonLd } from "@/components/shared/blog-posting-json-ld";
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import { PageHero } from "@/components/shared/page-hero";
@@ -33,7 +35,8 @@ export default function AiAgentBusinessBenefitsPage() {
         <PageHero eyebrow="AI and business" title={heading} />
       </div>
       <section className={`${siteStyles.pageSection} page-section`}>
-        <article className={`${siteStyles.container} content-prose blog-article`}>
+        <div className={`${siteStyles.container} blog-article-layout${canRenderAd("blogSidebar") ? " blog-article-layout--with-sidebar" : ""}`}>
+        <article className="content-prose blog-article">
           <p>
             AI agents may help with work that involves interpreting information,
             using approved tools, and coordinating several steps. For a
@@ -126,6 +129,7 @@ export default function AiAgentBusinessBenefitsPage() {
             responsible for monitoring the process.
           </p>
 
+          <InContentAd completedSections={2} totalSections={6} />
           <h2>What determines whether the benefits outweigh the trade-offs?</h2>
           <p>
             Integration quality matters as much as the language model. If the
@@ -231,6 +235,7 @@ export default function AiAgentBusinessBenefitsPage() {
             .
           </p>
 
+          <InContentAd completedSections={5} totalSections={6} />
           <h2>When is a simpler solution preferable?</h2>
           <p>
             Use a rule-based automation when inputs and outcomes are
@@ -264,6 +269,10 @@ export default function AiAgentBusinessBenefitsPage() {
             <Link href="/blog">Browse all articles</Link>
           </p>
         </article>
+        <div className="blog-article-sidebar">
+          <SidebarAd />
+        </div>
+        </div>
       </section>
     </>
   );

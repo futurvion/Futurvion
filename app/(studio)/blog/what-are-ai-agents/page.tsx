@@ -1,5 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
+import { InContentAd, SidebarAd } from "@/components/ads/ad-unit";
+import { canRenderAd } from "@/config/ads";
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import { BlogPostingJsonLd } from "@/components/shared/blog-posting-json-ld";
 import { PageHero } from "@/components/shared/page-hero";
@@ -33,7 +35,8 @@ export default function AiAgentsArticlePage() {
         <PageHero eyebrow="AI fundamentals" title="What Are AI Agents?" />
       </div>
       <section className={`${siteStyles.pageSection} page-section`}>
-        <article className={`${siteStyles.container} content-prose blog-article`}>
+        <div className={`${siteStyles.container} blog-article-layout${canRenderAd("blogSidebar") ? " blog-article-layout--with-sidebar" : ""}`}>
+        <article className="content-prose blog-article">
           <p>
             <strong>
               An AI agent is software that interprets a goal, decides on
@@ -130,6 +133,7 @@ export default function AiAgentsArticlePage() {
             .
           </p>
 
+          <InContentAd completedSections={2} totalSections={14} />
           <h2>How Do AI Agents Work?</h2>
           <p>
             AI agents combine an AI model with instructions, tools, information
@@ -327,6 +331,7 @@ export default function AiAgentsArticlePage() {
             simpler design preferable.
           </p>
 
+          <InContentAd completedSections={5} totalSections={14} />
           <h2>What can AI agents do in practice?</h2>
           <p>
             AI agents can support a wide range of tasks. Here are practical
@@ -533,6 +538,7 @@ export default function AiAgentsArticlePage() {
             <Link href="/blog/ai-agents-vs-chatbots">comparison of AI agents and chatbots</Link>.
           </p>
 
+          <InContentAd completedSections={8} totalSections={14} />
           <h2>AI Agents vs AI Assistants vs AI Automation</h2>
           <p>
             Assistants, agents, and automation describe related but different
@@ -632,6 +638,7 @@ export default function AiAgentsArticlePage() {
             <Link href="/blog/ai-agents-vs-chatbots">how agents compare with chatbots</Link>.
           </p>
 
+          <InContentAd completedSections={11} totalSections={14} />
           <h2>How can a business start using AI agents?</h2>
           <p>
             Businesses do not need to automate every department at once. A
@@ -860,6 +867,10 @@ export default function AiAgentsArticlePage() {
             digital solutions.
           </p>
         </article>
+        <div className="blog-article-sidebar">
+          <SidebarAd />
+        </div>
+        </div>
       </section>
     </>
   );

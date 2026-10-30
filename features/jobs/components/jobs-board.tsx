@@ -1,11 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { HeroAside } from "@/components/shared/hero-aside";
-import { JobsSearch, JobsSearchSkeleton, type JobFilters } from "./jobs-search";
+import { ListingAd } from "@/components/ads/ad-unit";
+import { adsConfig, canRenderAd } from "@/config/ads";
 import { siteStyles } from "@/config/styles";
+import { JobsSearch, JobsSearchSkeleton, type JobFilters } from "./jobs-search";
 import { ResumeMatch } from "./resume-match";
+import { listingAdPositions } from "@/lib/ad-placements";
 
 type Job = {
   slug: string;
@@ -54,6 +57,14 @@ export function JobsBoard() {
   const [result, setResult] = useState<JobsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const adPositions = canRenderAd("jobsListing")
+    ? new Set(
+        listingAdPositions(
+          result?.jobs.length ?? 0,
+          adsConfig.placements.jobsListing.interval,
+        ),
+      )
+    : new Set<number>();
 
   useEffect(() => {
     const controller = new AbortController();
@@ -89,7 +100,7 @@ export function JobsBoard() {
   return <>
     <section className="jobs-hero jobs-hero-with-aside"><div className={`${siteStyles.container} jobs-hero-grid`}><div className="jobs-hero-copy"><span className={`${siteStyles.eyebrow} eyebrow`}>Careers / Opportunities</span><h1>Find your next role.</h1><p>Discover roles across technology, design, marketing, product, and business. Explore real openings from public career boards.</p><div className="jobs-hero-line"><span>Explore what&apos;s next</span>{!loading && !error && result?.configured && <strong>{result.total} matching {result.total === 1 ? "role" : "roles"}</strong>}</div></div><HeroAside variant="jobs"/></div></section>
     <section id="job-openings" className={`${siteStyles.pageSection} page-section jobs-section`}><div className={siteStyles.container}><ResumeMatch/></div><div className={`${siteStyles.container} jobs-layout`}><aside><h2>Discover roles</h2><p>Refine your search. Filters combine to help you find a better fit.</p>{loading && !result ? <JobsSearchSkeleton/> : <JobsSearch onSearch={search}/>}</aside><div className="jobs-results"><div className="jobs-results-heading"><div><span className={`${siteStyles.eyebrow} eyebrow`}>Open positions</span><h2>Latest opportunities</h2></div>{!loading && !error && result?.configured && <span>{result.total} results</span>}</div>
-      {loading ? <JobsResultsSkeleton/> : error ? <div className="jobs-empty" role="alert">{error} <button type="button" onClick={() => search({ ...filters })}>Try again</button></div> : !result?.configured ? <div className="jobs-empty">Job listings will appear here once the database and providers are configured.</div> : result.jobs.length === 0 ? <div className="jobs-empty">{Object.keys(filters).length ? "No roles match these filters. Use Clear filters to explore all openings." : "No roles are available yet. Please check back soon."}</div> : <><div className="jobs-grid">{result.jobs.map(job => <article className="job-card" key={job.slug}><div className="job-card-top"><span>{sourceLabel(job.sourceProvider)}</span>{job.publishedAt && <time dateTime={job.publishedAt}>{new Date(job.publishedAt).toLocaleDateString("en", { month: "short", day: "numeric", year: "numeric" })}</time>}</div><h3><Link href={`/jobs/${job.slug}`}>{job.title}</Link></h3><p className="job-company">{job.companyName}</p><div className="job-tags">{[job.location, job.workMode !== "unknown" ? job.workMode : null, job.employmentType].filter(Boolean).map(value => <span key={value}>{value}</span>)}</div>{job.descriptionText && <p className="job-excerpt">{jobExcerpt(job.descriptionText)}</p>}{job.salaryMin !== null && <p className="job-salary">{job.salaryCurrency} {job.salaryMin.toLocaleString()}{job.salaryMax !== null && `–${job.salaryMax.toLocaleString()}`} {job.salaryPeriod ?? ""}</p>}<div className="job-actions"><Link href={`/jobs/${job.slug}`}>View details →</Link><a href={job.applicationUrl} data-analytics-event="apply_click" data-job-id={job.slug} target="_blank" rel="noopener noreferrer">Apply now ↗</a></div></article>)}</div><nav className="jobs-pagination" aria-label="Job pages">{result.page > 1 && <button type="button" onClick={() => { setLoading(true); setPage(result.page - 1); }}>← Previous</button>}<span>Page {result.page} of {result.pages}</span>{result.page < result.pages && <button type="button" onClick={() => { setLoading(true); setPage(result.page + 1); }}>Next →</button>}</nav></>}
+      {loading ? <JobsResultsSkeleton/> : error ? <div className="jobs-empty" role="alert">{error} <button type="button" onClick={() => search({ ...filters })}>Try again</button></div> : !result?.configured ? <div className="jobs-empty">Job listings will appear here once the database and providers are configured.</div> : result.jobs.length === 0 ? <div className="jobs-empty">{Object.keys(filters).length ? "No roles match these filters. Use Clear filters to explore all openings." : "No roles are available yet. Please check back soon."}</div> : <><div className="jobs-grid">{result.jobs.map((job, index) => <Fragment key={job.slug}><article className="job-card"><div className="job-card-top"><span>{sourceLabel(job.sourceProvider)}</span>{job.publishedAt && <time dateTime={job.publishedAt}>{new Date(job.publishedAt).toLocaleDateString("en", { month: "short", day: "numeric", year: "numeric" })}</time>}</div><h3><Link href={`/jobs/${job.slug}`}>{job.title}</Link></h3><p className="job-company">{job.companyName}</p><div className="job-tags">{[job.location, job.workMode !== "unknown" ? job.workMode : null, job.employmentType].filter(Boolean).map(value => <span key={value}>{value}</span>)}</div>{job.descriptionText && <p className="job-excerpt">{jobExcerpt(job.descriptionText)}</p>}{job.salaryMin !== null && <p className="job-salary">{job.salaryCurrency} {job.salaryMin.toLocaleString()}{job.salaryMax !== null && `–${job.salaryMax.toLocaleString()}`} {job.salaryPeriod ?? ""}</p>}<div className="job-actions"><Link href={`/jobs/${job.slug}`}>View details →</Link><a href={job.applicationUrl} data-analytics-event="apply_click" data-job-id={job.slug} target="_blank" rel="noopener noreferrer">Apply now ↗</a></div></article>{adPositions.has(index + 1) && <ListingAd placement="jobsListing"/>}</Fragment>)}</div><nav className="jobs-pagination" aria-label="Job pages">{result.page > 1 && <button type="button" onClick={() => { setLoading(true); setPage(result.page - 1); }}>← Previous</button>}<span>Page {result.page} of {result.pages}</span>{result.page < result.pages && <button type="button" onClick={() => { setLoading(true); setPage(result.page + 1); }}>Next →</button>}</nav></>}
     </div></div></section>
   </>;
 }

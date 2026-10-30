@@ -1,9 +1,13 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
+import { ListingAd } from "@/components/ads/ad-unit";
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import { PageHero } from "@/components/shared/page-hero";
 import { pageMetadata } from "@/lib/seo";
 import { siteStyles } from "@/config/styles";
+import { adsConfig, canRenderAd } from "@/config/ads";
+import { listingAdPositions } from "@/lib/ad-placements";
+import { Fragment } from "react";
 
 const articles = [
   {
@@ -47,6 +51,15 @@ export const metadata = pageMetadata(
 );
 
 export default function BlogsPage() {
+  const adPositions = canRenderAd("blogListing")
+    ? new Set(
+        listingAdPositions(
+          articles.length,
+          adsConfig.placements.blogListing.interval,
+        ),
+      )
+    : new Set<number>();
+
   return (
     <>
       <Breadcrumbs items={[{ name: "Home", path: "/" }, { name: "Blog", path: "/blog" }]} />
@@ -72,25 +85,27 @@ export default function BlogsPage() {
       </PageHero>
       <section className={`${siteStyles.pageSection} page-section`}>
         <div className={`${siteStyles.container} blog-list`}>
-          {articles.map(article => (
-            <Link
-              className="blog-card"
-              href={article.href}
-              key={article.href}
-              aria-label={`Read ${article.title}`}
-            >
-              <div className="blog-card-art" aria-hidden="true">
-                <span>{article.artwork}</span>
-              </div>
-              <div className="blog-card-copy">
-                <p className="blog-card-category">{article.category}</p>
-                <h2>{article.title}</h2>
-                <p>{article.description}</p>
-                <span className="blog-card-link">
-                  Read article <ArrowUpRight size={18} aria-hidden="true" />
-                </span>
-              </div>
-            </Link>
+          {articles.map((article, index) => (
+            <Fragment key={article.href}>
+              <Link
+                className="blog-card"
+                href={article.href}
+                aria-label={`Read ${article.title}`}
+              >
+                <div className="blog-card-art" aria-hidden="true">
+                  <span>{article.artwork}</span>
+                </div>
+                <div className="blog-card-copy">
+                  <p className="blog-card-category">{article.category}</p>
+                  <h2>{article.title}</h2>
+                  <p>{article.description}</p>
+                  <span className="blog-card-link">
+                    Read article <ArrowUpRight size={18} aria-hidden="true" />
+                  </span>
+                </div>
+              </Link>
+              {adPositions.has(index + 1) && <ListingAd />}
+            </Fragment>
           ))}
         </div>
       </section>

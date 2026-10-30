@@ -9,6 +9,10 @@ import {
   trackPageView,
   updateThirdPartyConsent,
 } from "@/lib/analytics";
+import {
+  advertisingConsentChangedEvent,
+  advertisingConsentKey,
+} from "@/lib/ads-consent";
 
 const consentKey = "futurvion_analytics_consent";
 const visitorKey = "futurvion_visitor_id";
@@ -34,9 +38,16 @@ function send(type: "page_view" | "service_cta" | "contact_conversion", path: st
   void fetch("/api/analytics", { method: "POST", headers: { "Content-Type": "application/json" }, keepalive: true, body: JSON.stringify({ eventId: crypto.randomUUID(), type, path, visitorId, sessionId, consent: true, referrerCategory: referrerCategory(), deviceCategory }) }).catch(() => {});
 }
 
-export function AnalyticsConsent({ enabled }: { enabled: boolean }) {
+export function AnalyticsConsent({
+  enabled,
+  adsEnabled = false,
+}: {
+  enabled: boolean;
+  adsEnabled?: boolean;
+}) {
   const path = usePathname();
   const [choice, setChoice] = useState<"allow" | "deny" | null>(null);
+  const [adsChoice, setAdsChoice] = useState<"allow" | "deny" | null>(null);
   const [preferencesOpen, setPreferencesOpen] = useState(false);
 
   const saveChoice = useCallback((next: "allow" | "deny") => {
@@ -54,15 +65,37 @@ export function AnalyticsConsent({ enabled }: { enabled: boolean }) {
     if (!granted) lastPage = "";
   }, []);
 
+  const saveAdsChoice = useCallback(
+    (next: "allow" | "deny") => {
+      try {
+        localStorage.setItem(advertisingConsentKey, next);
+      } catch {
+        setAdsChoice("deny");
+        window.dispatchEvent(new Event(advertisingConsentChangedEvent));
+        return;
+      }
+
+      setAdsChoice(next);
+      window.dispatchEvent(new Event(advertisingConsentChangedEvent));
+      setPreferencesOpen(false);
+    },
+    [],
+  );
+
   useEffect(() => {
     let stored: "allow" | "deny" | null = null;
+    let storedAds: "allow" | "deny" | null = null;
     try {
       const value = localStorage.getItem(consentKey);
       if (value === "allow" || value === "deny") stored = value;
+      const adsValue = localStorage.getItem(advertisingConsentKey);
+      if (adsValue === "allow" || adsValue === "deny") storedAds = adsValue;
     } catch {
       stored = "deny";
+      storedAds = "deny";
     }
     if (stored) queueMicrotask(() => setChoice(stored));
+    if (storedAds) queueMicrotask(() => setAdsChoice(storedAds));
   }, []);
 
   useEffect(() => {
@@ -128,15 +161,37 @@ export function AnalyticsConsent({ enabled }: { enabled: boolean }) {
     return () => { document.removeEventListener("click", click); window.removeEventListener("futurvion:conversion", conversion); };
   }, [enabled]);
 
-  if (!enabled) return null;
+  if (!enabled && !adsEnabled) return null;
+
+  const needsAnalyticsChoice = enabled && choice === null;
+  const needsAdsChoice = adsEnabled && adsChoice === null;
 
   return <>
-    {(!choice || preferencesOpen) && <div className="consent-banner" role="dialog" aria-label="Analytics preferences">
-      <p>Optional analytics helps us understand site usage. It starts only if you allow it. <a href="/privacy-policy">Learn more</a></p>
+    {(needsAnalyticsChoice || needsAdsChoice || preferencesOpen) && <div className="consent-banner" role="dialog" aria-label="Privacy preferences">
+      <p>
+        {enabled && "Optional analytics runs only if you allow it. "}
+        {adsEnabled && "Google advertising on selected blog and jobs pages runs only if you allow it. "}
+        <a href="/privacy-policy">Read the privacy policy</a>
+      </p>
       <div>
-        <button type="button" onClick={() => saveChoice("deny")}>Reject optional analytics</button>
-        <button className="consent-allow-button" type="button" onClick={() => saveChoice("allow")}>Allow analytics</button>
-        {choice && <button type="button" onClick={() => setPreferencesOpen(false)}>Close</button>}
+        <button
+          type="button"
+          onClick={() => {
+            if (enabled) saveChoice("deny");
+            if (adsEnabled) saveAdsChoice("deny");
+          }}
+        >
+          Reject all optional
+        </button>
+        {enabled && (needsAnalyticsChoice || preferencesOpen) && <>
+          <button type="button" onClick={() => saveChoice("deny")}>Reject analytics</button>
+          <button className="consent-allow-button" type="button" onClick={() => saveChoice("allow")}>Allow analytics</button>
+        </>}
+        {adsEnabled && (needsAdsChoice || preferencesOpen) && <>
+          <button type="button" onClick={() => saveAdsChoice("deny")}>Reject advertising</button>
+          <button className="consent-allow-button" type="button" onClick={() => saveAdsChoice("allow")}>Allow advertising</button>
+        </>}
+        {preferencesOpen && <button type="button" onClick={() => setPreferencesOpen(false)}>Close</button>}
       </div>
     </div>}
   </>;
@@ -150,6 +205,6 @@ export function AnalyticsPreferencesButton({ enabled }: { enabled: boolean }) {
     className="analytics-preferences-button"
     onClick={() => window.dispatchEvent(new Event("futurvion:open-analytics-preferences"))}
   >
-    Change analytics preferences
+    Change privacy preferences
   </button>;
 }

@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { InContentAd, SidebarAd } from "@/components/ads/ad-unit";
+import { canRenderAd } from "@/config/ads";
 import { BlogPostingJsonLd } from "@/components/shared/blog-posting-json-ld";
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import { PageHero } from "@/components/shared/page-hero";
@@ -33,7 +35,8 @@ export default function AiAgentsAssistantsAutomationPage() {
         <PageHero eyebrow="Choosing an approach" title={heading} />
       </div>
       <section className={`${siteStyles.pageSection} page-section`}>
-        <article className={`${siteStyles.container} content-prose blog-article`}>
+        <div className={`${siteStyles.container} blog-article-layout${canRenderAd("blogSidebar") ? " blog-article-layout--with-sidebar" : ""}`}>
+        <article className="content-prose blog-article">
           <p>
             <strong>
               Traditional automation follows defined rules, an AI assistant
@@ -150,6 +153,7 @@ export default function AiAgentsAssistantsAutomationPage() {
             </table>
           </div>
 
+          <InContentAd completedSections={2} totalSections={6} />
           <h2>How would each approach handle the same task?</h2>
           <p>
             Consider a customer asking when an online order will arrive. A
@@ -230,6 +234,7 @@ export default function AiAgentsAssistantsAutomationPage() {
             .
           </p>
 
+          <InContentAd completedSections={5} totalSections={6} />
           <h2>What risks and maintenance should you plan for?</h2>
           <p>
             AI-generated output can be inaccurate or incomplete; an agent can
@@ -264,6 +269,10 @@ export default function AiAgentsAssistantsAutomationPage() {
             <Link href="/blog">Browse all articles</Link>
           </p>
         </article>
+        <div className="blog-article-sidebar">
+          <SidebarAd />
+        </div>
+        </div>
       </section>
     </>
   );

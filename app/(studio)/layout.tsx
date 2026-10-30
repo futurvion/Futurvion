@@ -6,8 +6,34 @@ import { AnalyticsConsent } from "@/features/analytics/components/analytics-cons
 import { JsonLd } from "@/components/shared/json-ld";
 import { organizationJsonLd } from "@/lib/seo";
 import { siteStyles } from "@/config/styles";
-export default function StudioLayout({ children }: {
-    children: React.ReactNode;
+import { adsConfig } from "@/config/ads";
+
+export default function StudioLayout({
+  children,
+}: {
+  children: React.ReactNode;
 }) {
-    return <><a className={`${siteStyles.skipLink} skip-link`} href="#main-content">Skip to content</a><JsonLd data={organizationJsonLd()}/><ScrollProgress /><ScrollReveal /><Header /><main id="main-content">{children}</main><Footer /><AnalyticsConsent enabled={Boolean((process.env.DATABASE_URL && process.env.ABUSE_HASH_SECRET) || process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || process.env.NEXT_PUBLIC_CLARITY_PROJECT_ID)}/></>;
+  const analyticsEnabled = Boolean(
+    (process.env.DATABASE_URL && process.env.ABUSE_HASH_SECRET) ||
+      process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID ||
+      process.env.NEXT_PUBLIC_CLARITY_PROJECT_ID,
+  );
+
+  return (
+    <>
+      <a className={`${siteStyles.skipLink} skip-link`} href="#main-content">
+        Skip to content
+      </a>
+      <JsonLd data={organizationJsonLd()} />
+      <ScrollProgress />
+      <ScrollReveal />
+      <Header />
+      <main id="main-content">{children}</main>
+      <Footer />
+      <AnalyticsConsent
+        enabled={analyticsEnabled}
+        adsEnabled={adsConfig.enabled}
+      />
+    </>
+  );
 }
