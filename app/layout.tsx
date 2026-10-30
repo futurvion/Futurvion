@@ -25,6 +25,15 @@ const siteDescription =
 
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
+  icons: {
+    icon: [
+      {
+        url: new URL("/favicon.ico", site.url),
+        sizes: "64x64",
+        type: "image/x-icon",
+      },
+    ],
+  },
 
   title: {
     default: siteTitle,
