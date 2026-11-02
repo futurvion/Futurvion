@@ -51,6 +51,7 @@
 .jobs-results-heading h2 { font-size: clamp(2rem,3.2vw,3rem); margin-top: 9px; }
 .jobs-results-heading > span { white-space: nowrap; color: var(--muted); font-size: 13px; }
 .jobs-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 15px; }
+.ad-unit--jobsListing { grid-column: 1 / -1; width: 100%; margin: 0; }
 .job-card { display: flex; flex-direction: column; padding: 27px; min-height: 355px; background: #fff; border: 1px solid var(--line); transition: transform .25s var(--ease), border-color .25s, box-shadow .25s; }
 .job-card:hover { transform: translateY(-4px); border-color: var(--accent); box-shadow: 0 16px 35px rgba(17,52,68,.08); }
 .job-card-top { display: flex; justify-content: space-between; gap: 12px; color: var(--accent); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; }

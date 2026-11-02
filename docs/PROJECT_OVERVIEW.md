@@ -10,7 +10,7 @@ Futurvion is a public site for a digital solutions studio. Its stated goal is to
 | --- | --- | --- |
 | Prospective visitor | Browse eight services, sector examples, process, FAQs, and illustrative work; open a service detail page and follow its contact link. | `data/services.ts`, `app/`, `components/home/faq.tsx` |
 | Enquirer | Enter contact details, service and project description, agree to contact, submit the form, or use the public email link. | `features/contact/components/contact-form.tsx`, `app/api/contact/route.ts` |
-| Analytics participant | Allow or decline optional Google Analytics, Microsoft Clarity, and configured first-party analytics; later change the choice from the privacy policy. | `features/analytics/components/analytics-consent.tsx`, `lib/analytics.ts`, `app/api/analytics/route.ts` |
+| Analytics participant | Allow or decline optional Google Analytics, Microsoft Clarity, and configured first-party analytics; where AdSense is enabled, make a separate advertising choice and change preferences from the privacy policy. | `features/analytics/components/analytics-consent.tsx`, `lib/analytics.ts`, `lib/ads-consent.ts`, `app/api/analytics/route.ts` |
 | Site operator | Configure database/email, review leads and analytics in external tools or direct SQL. | `README.md`, `prisma/schema.prisma`; the admin UI currently covers jobs only |
 
 The jobs portal adds a single administrator role. `/admin/login` signs in, `/admin` opens the protected workspace overview, and `/admin/jobs` contains job operations. Public visitors still have no account workflow.
@@ -26,6 +26,7 @@ The jobs portal adds a single administrator role. `/admin/login` signs in, `/adm
 
 - Strict TypeScript, schema validation, server-only database/email modules, responsive styles, reduced-motion handling, and a client-loaded 3D hero with static fallback are present. These indicate intended type safety, data boundaries, and accessibility support; representative desktop/mobile browser checks are recorded in TASKS.md; a comprehensive accessibility audit is **not verified**.
 - The site needs PostgreSQL plus Resend for a complete contact flow. It can render public content without those services. First-party event storage needs database and HMAC configuration; the consent interface and third-party integrations are available when any analytics ID or first-party configuration is set.
+- AdSense is globally disabled by default. If configured, a centralized exact-prefix route guard allows manual placements only on `/blog` and `/jobs`; other routes stay ad-free, including after client-side navigation. Blog and jobs placements require a separate advertising opt-in plus the operator's CMP-readiness gate; the analytics choice does not grant ad consent. Production approval, certified CMP status, actual ad serving, and `ads.txt` availability are not verified.
 - Contact and analytics data retention is **not implemented** as a scheduled process. The privacy page requests a policy before production use.
 
 ## Boundaries and unresolved requirements
