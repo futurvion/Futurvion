@@ -1,12 +1,32 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { trackEvent, trackPageView } from "@/lib/analytics";
+import {
+  hasAnalyticsConsent,
+  trackEvent,
+  trackPageView,
+} from "@/lib/analytics";
 
 afterEach(() => {
+  vi.unmock("next/navigation");
+  vi.resetModules();
   vi.unstubAllGlobals();
 });
 
 describe("analytics helpers", () => {
-  it("does not send events without explicit analytics consent", () => {
+  it("enables analytics by default unless the visitor opted out", () => {
+    vi.stubGlobal("window", {
+      localStorage: { getItem: () => null },
+    });
+
+    expect(hasAnalyticsConsent()).toBe(true);
+
+    vi.stubGlobal("window", {
+      localStorage: { getItem: () => "deny" },
+    });
+
+    expect(hasAnalyticsConsent()).toBe(false);
+  });
+
+  it("does not send events after analytics has been rejected", () => {
     const gtag = vi.fn();
     const clarity = vi.fn();
     vi.stubGlobal("window", {
@@ -19,6 +39,24 @@ describe("analytics helpers", () => {
 
     expect(gtag).not.toHaveBeenCalled();
     expect(clarity).not.toHaveBeenCalled();
+  });
+
+  it("shows advertising controls without an initial analytics allow prompt", async () => {
+    vi.doMock("next/navigation", () => ({ usePathname: () => "/blog" }));
+    const { AnalyticsConsent } = await import(
+      "@/features/analytics/components/analytics-consent"
+    );
+    const { createElement } = await import("react");
+    const { renderToStaticMarkup } = await import("react-dom/server");
+
+    const markup = renderToStaticMarkup(
+      createElement(AnalyticsConsent, { enabled: true, adsEnabled: true }),
+    );
+
+    expect(markup).toContain("Reject advertising");
+    expect(markup).toContain("Allow advertising");
+    expect(markup).not.toContain("Allow analytics");
+    expect(markup).not.toContain("Reject analytics");
   });
 
   it("sends typed event names and only the supplied non-sensitive parameters", () => {

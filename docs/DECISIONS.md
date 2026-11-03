@@ -30,15 +30,15 @@ This record separates current code choices from historical approval. Dates and a
 - **Consequences/trade-offs:** Contact and analytics depend on a configured database. Contact email is outside a DB transaction; rate-limit count/create operations can race. There is no admin read UI or automated retention.
 - **Status:** Accepted (observed).
 
-## Browser opt-in analytics
+## Default-on analytics with browser opt-out
 
 - **Date:** Unknown.
-- **Decision:** Collect a small event set only after a browser allow choice and pseudonymize grouping IDs on the server.
+- **Decision:** Collect a small event set by default when analytics is configured, allow visitors to turn analytics off in privacy preferences, and pseudonymize grouping IDs on the server.
 - **Context/problem:** Measure site usage while limiting directly identifying data.
-- **Chosen approach:** `localStorage` choice and visitor ID, `sessionStorage` session ID, HMAC keys in the analytics handler, coarse referrer/device categories.
+- **Chosen approach:** Default to analytics enabled unless `localStorage` stores `deny`; retain an opt-out control, visitor ID in `localStorage`, session ID in `sessionStorage`, HMAC keys in the analytics handler, and coarse referrer/device categories. Advertising remains governed by a separate explicit choice.
 - **Alternatives considered:** Unknown.
-- **Consequences/trade-offs:** Events are not sent before the browser choice; direct API clients can still self-assert consent. No dashboard is provided.
-- **Status:** Accepted (observed).
+- **Consequences/trade-offs:** Configured analytics starts without an affirmative visitor action; visitors can opt out in the privacy preferences UI. Direct API clients can still self-assert consent. No dashboard is provided. Jurisdiction-specific consent requirements must be reviewed before deployment.
+- **Status:** Implemented; legal review remains operator responsibility.
 
 ## Shared documentation maintenance
 
