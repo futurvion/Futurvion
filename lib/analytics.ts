@@ -39,7 +39,7 @@ const deniedConsent = {
 export function hasAnalyticsConsent(): boolean {
   if (typeof window === "undefined") return false;
   try {
-    return window.localStorage.getItem(consentKey) === "allow";
+    return window.localStorage.getItem(consentKey) !== "deny";
   } catch {
     return false;
   }

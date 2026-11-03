@@ -45,7 +45,7 @@ The route requires `DATABASE_URL`, `ABUSE_HASH_SECRET`, `RESEND_API_KEY`, `CONTA
 
 ## `POST /api/analytics`
 
-Purpose: store opt-in interaction events. Called by `features/analytics/components/analytics-consent.tsx`. No query parameters. Example request:
+Purpose: store configured browser analytics interaction events unless the visitor has opted out. Called by `features/analytics/components/analytics-consent.tsx`. No query parameters. Example request:
 
 ```json
 {
