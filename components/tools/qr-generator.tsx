@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { AlertCircle, Check, Copy, Download, QrCode, RefreshCcw, Sparkles } from "lucide-react";
 import QRCode from "qrcode";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { trackEvent } from "@/lib/analytics";
 import {
   buildQrPayload,
@@ -31,86 +31,87 @@ export function QRGenerator() {
   const [values, setValues] = useState<QrFormValues>(defaultQrFormValues);
   const [customization, setCustomization] = useState<QrCustomization>(defaultQrCustomization);
   const [qrPreview, setQrPreview] = useState<string>("");
+  const [generatedPayload, setGeneratedPayload] = useState("");
   const [copied, setCopied] = useState(false);
   const [downloadMessage, setDownloadMessage] = useState("");
+  const [generationError, setGenerationError] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
-  const [regenerateToken, setRegenerateToken] = useState(0);
-  const lastTrackedPayload = useRef<string>("");
-
-  const validation = useMemo(() => buildQrPayload(activeType, values), [activeType, values]);
+  const [hasAttemptedGeneration, setHasAttemptedGeneration] = useState(false);
+  const generationRequest = useRef(0);
+  const validation = buildQrPayload(activeType, values);
 
   useEffect(() => {
     trackEvent("qr_generator_open", { tool_id: "qr-generator" });
   }, []);
 
-  useEffect(() => {
-    let cancelled = false;
-
-    if (!validation.valid || !validation.payload) {
-      lastTrackedPayload.current = "";
-      return () => {
-        cancelled = true;
-      };
-    }
-
-    const generate = async () => {
-      setIsGenerating(true);
-
-      try {
-        const imageDataUrl = await QRCode.toDataURL(validation.payload, {
-          margin: customization.margin,
-          width: customization.size,
-          errorCorrectionLevel: customization.errorCorrection,
-          color: {
-            dark: customization.foreground,
-            light: customization.background,
-          },
-        });
-
-        if (!cancelled) {
-          setQrPreview(imageDataUrl);
-          setIsGenerating(false);
-          if (lastTrackedPayload.current !== validation.payload) {
-            trackEvent("qr_generated", { qr_type: activeType });
-            lastTrackedPayload.current = validation.payload;
-          }
-        }
-      } catch {
-        if (!cancelled) {
-          setQrPreview("");
-          setIsGenerating(false);
-        }
-      }
-    };
-
-    void generate();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [activeType, customization, regenerateToken, validation]);
-
-  const updateValue = (field: keyof QrFormValues, value: string | boolean) => {
-    setCopied(false);
+  const invalidateGeneratedQr = () => {
+    generationRequest.current += 1;
+    setQrPreview("");
+    setGeneratedPayload("");
+    setHasAttemptedGeneration(false);
+    setGenerationError("");
     setDownloadMessage("");
-    setValues((current) => {
-      const nextValues = { ...current, [field]: value };
-      if (!buildQrPayload(activeType, nextValues).valid) {
-        setQrPreview("");
-      }
-      return nextValues;
-    });
+    setCopied(false);
+    setIsGenerating(false);
   };
 
-  const generateDownload = async (format: "png" | "svg") => {
+  const updateValue = (field: keyof QrFormValues, value: string | boolean) => {
+    invalidateGeneratedQr();
+    setValues((current) => ({ ...current, [field]: value }));
+  };
+
+  const updateCustomization = (nextCustomization: QrCustomization) => {
+    invalidateGeneratedQr();
+    setCustomization(nextCustomization);
+  };
+
+  const handleGenerate = async () => {
+    setHasAttemptedGeneration(true);
+    setGenerationError("");
+    setDownloadMessage("");
+
     if (!validation.valid || !validation.payload) {
-      setDownloadMessage("Generate a valid QR code before downloading.");
+      setQrPreview("");
+      setGeneratedPayload("");
       return;
     }
 
+    const requestId = ++generationRequest.current;
+    setIsGenerating(true);
+
+    try {
+      const imageDataUrl = await QRCode.toDataURL(validation.payload, {
+        margin: customization.margin,
+        width: customization.size,
+        errorCorrectionLevel: customization.errorCorrection,
+        color: {
+          dark: customization.foreground,
+          light: customization.background,
+        },
+      });
+
+      if (requestId !== generationRequest.current) return;
+
+      setQrPreview(imageDataUrl);
+      setGeneratedPayload(validation.payload);
+      trackEvent("qr_generated", { qr_type: activeType });
+    } catch {
+      if (requestId === generationRequest.current) {
+        setQrPreview("");
+        setGeneratedPayload("");
+        setGenerationError("Could not generate the QR code. Check your details and try again.");
+      }
+    } finally {
+      if (requestId === generationRequest.current) setIsGenerating(false);
+    }
+  };
+
+  const generateDownload = async (format: "png" | "svg") => {
+    if (!generatedPayload || !qrPreview) return;
+
     if (format === "png") {
       const link = document.createElement("a");
-      link.href = qrPreview || "";
+      link.href = qrPreview;
       link.download = "futurvion-qr-code.png";
       document.body.appendChild(link);
       link.click();
@@ -121,7 +122,7 @@ export function QRGenerator() {
     }
 
     try {
-      const svgMarkup = await QRCode.toString(validation.payload, {
+      const svgMarkup = await QRCode.toString(generatedPayload, {
         type: "svg",
         margin: customization.margin,
         width: customization.size,
@@ -148,13 +149,10 @@ export function QRGenerator() {
   };
 
   const handleCopyPayload = async () => {
-    if (!validation.valid || !validation.payload) {
-      setDownloadMessage("Generate a valid QR first.");
-      return;
-    }
+    if (!generatedPayload) return;
 
     try {
-      await navigator.clipboard.writeText(validation.payload);
+      await navigator.clipboard.writeText(generatedPayload);
       setCopied(true);
       trackEvent("qr_payload_copied", { qr_type: activeType });
     } catch {
@@ -163,13 +161,9 @@ export function QRGenerator() {
   };
 
   const resetAll = () => {
+    invalidateGeneratedQr();
     setValues(defaultQrFormValues);
-    setQrPreview("");
     setCustomization(defaultQrCustomization);
-    setCopied(false);
-    setDownloadMessage("");
-    setRegenerateToken((current) => current + 1);
-    lastTrackedPayload.current = "";
   };
 
   return (
@@ -183,7 +177,6 @@ export function QRGenerator() {
       </div>
 
       <header className="qr-header">
-        <span className="eyebrow">Free QR Code Generator</span>
         <h1>Free QR Code Generator</h1>
         <p>
           Create beautiful, customizable QR codes in seconds. Generate QR codes for
@@ -209,8 +202,7 @@ export function QRGenerator() {
                 aria-selected={activeType === option.value}
                 className={activeType === option.value ? "segment active" : "segment"}
                 onClick={() => {
-                  setCopied(false);
-                  setDownloadMessage("");
+                  invalidateGeneratedQr();
                   setActiveType(option.value);
                   trackEvent("qr_type_selected", { qr_type: option.value });
                 }}
@@ -412,11 +404,25 @@ export function QRGenerator() {
               </>
             )}
 
-            {validation.error && (
-              <p className="field-error" aria-live="polite">
+            {hasAttemptedGeneration && validation.error && (
+              <p className="field-error" role="alert">
                 <AlertCircle size={16} aria-hidden="true" /> {validation.error}
               </p>
             )}
+            {generationError && (
+              <p className="field-error" role="alert">
+                <AlertCircle size={16} aria-hidden="true" /> {generationError}
+              </p>
+            )}
+            <button
+              type="button"
+              className="primary-button qr-generate-button"
+              onClick={handleGenerate}
+              disabled={isGenerating}
+            >
+              <QrCode size={17} aria-hidden="true" />
+              {isGenerating ? "Generating…" : "Generate QR code"}
+            </button>
           </div>
         </section>
 
@@ -439,26 +445,26 @@ export function QRGenerator() {
             ) : (
               <div className="qr-placeholder">
                 <QrCode size={34} aria-hidden="true" />
-                <span>Enter valid details to preview your QR code.</span>
+                <span>Your QR code will appear here after you generate it.</span>
               </div>
             )}
           </div>
 
           <div className="qr-action-row">
-            <button type="button" className="primary-button" onClick={() => generateDownload("png")}>
+            <button type="button" className="primary-button" onClick={() => generateDownload("png")} disabled={!generatedPayload}>
               <Download size={16} aria-hidden="true" /> PNG
             </button>
-            <button type="button" className="secondary-button" onClick={() => generateDownload("svg")}>
+            <button type="button" className="secondary-button" onClick={() => generateDownload("svg")} disabled={!generatedPayload}>
               <Download size={16} aria-hidden="true" /> SVG
             </button>
           </div>
 
           <div className="qr-action-row compact">
-            <button type="button" className="secondary-button" onClick={handleCopyPayload}>
+            <button type="button" className="secondary-button" onClick={handleCopyPayload} disabled={!generatedPayload}>
               {copied ? <Check size={16} aria-hidden="true" /> : <Copy size={16} aria-hidden="true" />}
               {copied ? "Copied" : "Copy payload"}
             </button>
-            <button type="button" className="secondary-button" onClick={() => setRegenerateToken((current) => current + 1)}>
+            <button type="button" className="secondary-button" onClick={handleGenerate} disabled={isGenerating || !validation.valid}>
               <RefreshCcw size={16} aria-hidden="true" /> Regenerate
             </button>
           </div>
@@ -469,7 +475,7 @@ export function QRGenerator() {
               <button
                 type="button"
                 className="inline-button"
-                onClick={() => setCustomization(defaultQrCustomization)}
+                onClick={() => updateCustomization(defaultQrCustomization)}
               >
                 Reset
               </button>
@@ -482,7 +488,7 @@ export function QRGenerator() {
                   type="color"
                   value={customization.foreground}
                   onChange={(event) =>
-                    setCustomization((current) => ({ ...current, foreground: event.target.value }))
+                    updateCustomization({ ...customization, foreground: event.target.value })
                   }
                 />
               </label>
@@ -492,7 +498,7 @@ export function QRGenerator() {
                   type="color"
                   value={customization.background}
                   onChange={(event) =>
-                    setCustomization((current) => ({ ...current, background: event.target.value }))
+                    updateCustomization({ ...customization, background: event.target.value })
                   }
                 />
               </label>
@@ -504,10 +510,10 @@ export function QRGenerator() {
                 <select
                   value={customization.size}
                   onChange={(event) =>
-                    setCustomization((current) => ({
-                      ...current,
+                    updateCustomization({
+                      ...customization,
                       size: Number(event.target.value) as QrCustomization["size"],
-                    }))
+                    })
                   }
                 >
                   <option value={256}>256px</option>
@@ -521,10 +527,10 @@ export function QRGenerator() {
                 <select
                   value={customization.errorCorrection}
                   onChange={(event) =>
-                    setCustomization((current) => ({
-                      ...current,
+                    updateCustomization({
+                      ...customization,
                       errorCorrection: event.target.value as QrCustomization["errorCorrection"],
-                    }))
+                    })
                   }
                 >
                   <option value="L">Low (L)</option>
@@ -543,7 +549,7 @@ export function QRGenerator() {
                 max={10}
                 value={customization.margin}
                 onChange={(event) =>
-                  setCustomization((current) => ({ ...current, margin: Number(event.target.value) }))
+                  updateCustomization({ ...customization, margin: Number(event.target.value) })
                 }
               />
             </label>

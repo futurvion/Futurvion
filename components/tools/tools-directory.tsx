@@ -1,12 +1,30 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowUpRight, QrCode, Search } from "lucide-react";
+import {
+  ArrowUpRight,
+  Braces,
+  FileText,
+  Image as ImageIcon,
+  QrCode,
+  Search,
+  Type,
+  Wrench,
+  type LucideIcon,
+} from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { availableTools } from "@/config/tools";
+import { availableTools, type ToolIcon } from "@/config/tools";
 import { trackEvent } from "@/lib/analytics";
 
 const categories = ["All", ...new Set(availableTools.map((tool) => tool.category))];
+const toolIcons: Record<ToolIcon, LucideIcon> = {
+  qr: QrCode,
+  image: ImageIcon,
+  file: FileText,
+  text: Type,
+  code: Braces,
+  tools: Wrench,
+};
 
 export function ToolsDirectory() {
   const [query, setQuery] = useState("");
@@ -40,8 +58,7 @@ export function ToolsDirectory() {
           </p>
         </div>
         <div className="tools-hero-visual" aria-hidden="true">
-          <div className="tools-glow" />
-          <QrCode size={90} />
+          <Wrench size={74} strokeWidth={1.35} />
         </div>
       </section>
 
@@ -62,7 +79,7 @@ export function ToolsDirectory() {
           />
         </label>
 
-        <div className="tool-category-filters" role="tablist" aria-label="Tool categories">
+        <div className="tool-category-filters" role="group" aria-label="Tool categories">
           {categories.map((item) => (
             <button
               key={item}
@@ -86,27 +103,36 @@ export function ToolsDirectory() {
 
         {filteredTools.length > 0 ? (
           <div className="tool-grid">
-            {filteredTools.map((tool) => (
-              <Link className="tool-card" href={tool.route} key={tool.id} onClick={() => trackEvent("tool_card_click", { tool_id: tool.id })}>
-                <div className="tool-card-header">
-                  <span className="tool-icon" aria-hidden="true">
-                    <QrCode size={22} />
-                  </span>
-                  <span className="tool-badge">{tool.category}</span>
-                  <span className="tool-free-badge">Free</span>
-                </div>
+            {filteredTools.map((tool) => {
+              const Icon = toolIcons[tool.icon];
 
-                <div className="tool-card-body">
-                  <h3>{tool.name}</h3>
-                  <p>{tool.description}</p>
-                </div>
+              return (
+                <Link
+                  className="tool-card"
+                  href={tool.route}
+                  key={tool.id}
+                  onClick={() => trackEvent("tool_card_click", { tool_id: tool.id })}
+                >
+                  <div className="tool-card-header">
+                    <span className="tool-icon" aria-hidden="true">
+                      <Icon size={22} />
+                    </span>
+                    <span className="tool-badge">{tool.category}</span>
+                    <span className="tool-free-badge">Free</span>
+                  </div>
 
-                <div className="tool-card-footer">
-                  <span>Use Tool</span>
-                  <ArrowUpRight size={18} aria-hidden="true" />
-                </div>
-              </Link>
-            ))}
+                  <div className="tool-card-body">
+                    <h3>{tool.name}</h3>
+                    <p>{tool.description}</p>
+                  </div>
+
+                  <div className="tool-card-footer">
+                    <span>Use Tool</span>
+                    <ArrowUpRight size={18} aria-hidden="true" />
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         ) : (
           <div className="tools-empty-state" role="status">

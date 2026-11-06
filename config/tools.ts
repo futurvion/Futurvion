@@ -1,10 +1,12 @@
+export type ToolIcon = "qr" | "image" | "file" | "text" | "code" | "tools";
+
 export type ToolDefinition = {
   id: string;
   name: string;
   slug: string;
   description: string;
   category: string;
-  icon: string;
+  icon: ToolIcon;
   available: boolean;
   featured: boolean;
   route: string;
