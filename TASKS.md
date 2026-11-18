@@ -1,5 +1,7 @@
 # Project tasks and status
 
+- 2026-11-18: Resolved the remaining TASKS.md merge markers while preserving both histories and reviewed AdSense placements and consent gates. The seller declaration now matches the configured publisher; updated docs/ADSENSE.md. Restored missing local dependencies with npm ci. Typecheck, lint (11 existing warnings), all 134 tests, and production build passed. Google account approval, certified CMP configuration, and deployed ad serving remain unverified. No qualifying Next.js feedback candidates arose.
+
 Status is based on the current repository and local checks on 2026-11-18. `DONE` means implementation plus relevant local verification; `NEEDS_VERIFICATION` means code is present but a live integration or browser behavior has not been confirmed. The source files named below are the acceptance evidence, not proof of production operation.
 
 - 2026-11-18: Resolved the `package-lock.json` merge conflict between the dependency-update branch and the Tools/QR changes by regenerating the lockfile from the merged `package.json` with npm 10.9.4. A Linux-targeted `npm ci --dry-run` and a full local `npm ci` with Prisma generation passed. `npm run typecheck`, `npm run lint`, all 134 tests, and `npm run build` passed with Next.js 16.4.6. The merge is resolved locally but still awaits an authorized merge commit and push.
