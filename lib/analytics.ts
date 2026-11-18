@@ -9,6 +9,13 @@ export type AnalyticsEventParameters = {
   apply_click: { job_id: string };
   resume_match_start: Record<string, never>;
   resume_match_complete: { result_count: number };
+  tools_page_view: { tool_id: string };
+  tool_card_click: { tool_id: string };
+  qr_generator_open: { tool_id: string };
+  qr_type_selected: { qr_type: string };
+  qr_generated: { qr_type: string };
+  qr_downloaded: { download_format: "png" | "svg"; qr_type: string };
+  qr_payload_copied: { qr_type: string };
 };
 
 export type AnalyticsEventName = keyof AnalyticsEventParameters;
