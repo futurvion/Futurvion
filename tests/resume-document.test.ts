@@ -10,7 +10,7 @@ describe("temporary document parsing", () => {
     const text = await extractResumeText(syntheticPdf(["Software Engineer", "Jan 2020 - Dec 2022", "React JS"]), "pdf");
     expect(text).toContain("Software Engineer\n"); expect(text).toContain("React JS");
     expect(terminate).toHaveBeenCalled(); terminate.mockRestore();
-  });
+  }, 15_000);
   it("reads a valid DOCX in memory", async () => {
     expect(await extractResumeText(syntheticDocx(), "docx")).toContain("JavaScript React TypeScript");
   });

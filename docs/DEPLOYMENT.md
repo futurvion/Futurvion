@@ -26,8 +26,8 @@ Jobs also needs server-only `DATABASE_URL`, `ADMIN_EMAIL`, `ADMIN_PASSWORD_HASH`
 | `NEXT_PUBLIC_BUSINESS_EMAIL` | Browser-exposed public email link; code has a placeholder fallback. | Usable email fallback. |
 | `NEXT_PUBLIC_BOOKING_URL` | Browser-exposed optional external booking CTA. | Booking link only. |
 | `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` | Browser-exposed optional verification token. | HTML-token Search Console verification only. |
-| `NEXT_PUBLIC_GA_MEASUREMENT_ID` | Browser-exposed optional GA4 measurement ID (`G-...`). | GA4 after analytics consent. |
-| `NEXT_PUBLIC_CLARITY_PROJECT_ID` | Browser-exposed optional Microsoft Clarity project ID. | Clarity after analytics consent. |
+| `NEXT_PUBLIC_GA_MEASUREMENT_ID` | Browser-exposed optional GA4 measurement ID (`G-...`). | GA4 by default when configured; visitors can opt out in privacy preferences. |
+| `NEXT_PUBLIC_CLARITY_PROJECT_ID` | Browser-exposed optional Microsoft Clarity project ID. | Clarity by default when configured; visitors can opt out in privacy preferences. |
 | `DATABASE_URL` | Server-only PostgreSQL connection. | Lead storage, analytics, and rate limiting. |
 | `ABUSE_HASH_SECRET` | Server-only HMAC key of at least 32 characters. | Contact and analytics handlers. |
 | `RESEND_API_KEY` | Server-only email provider key. | Contact notification. |
@@ -37,16 +37,16 @@ Jobs also needs server-only `DATABASE_URL`, `ADMIN_EMAIL`, `ADMIN_PASSWORD_HASH`
 
 ## Google Analytics 4 and Microsoft Clarity
 
-The public App Router loads GA4 and Clarity asynchronously only after the visitor explicitly allows optional analytics. Their IDs are public browser configuration; do not put real IDs in source code or commit `.env.local`.
+The public App Router loads configured GA4 and Clarity asynchronously by default unless the visitor has opted out in privacy preferences. Their IDs are public browser configuration; do not put real IDs in source code or commit `.env.local`. Confirm default-on analytics is permitted in each jurisdiction where the site is available.
 
 1. In Google Analytics, create a GA4 property and web data stream for the production site, then copy its Measurement ID (`G-...`). In Microsoft Clarity, create a project for the production site and copy its Project ID from **Settings > Setup**.
 2. Set `NEXT_PUBLIC_GA_MEASUREMENT_ID` and `NEXT_PUBLIC_CLARITY_PROJECT_ID` in the local `.env.local` file as applicable. Add the same variables to the production hosting provider's environment settings for the correct deployment environment. Leave an unused integration blank.
 3. In GA4, disable automatic page-view collection and the Enhanced Measurement option for page changes based on browser history. The app sends one manual page view per pathname, with query strings removed. This avoids initial and client-navigation duplicate page views.
 4. In Clarity, enable Consent Mode (turn off cookie setting by default under **Settings > Setup**) so the site's Consent V2 signal governs cookie storage. Keep Balanced or stricter masking. Under **Settings > Masking**, mask `.contact-form` and `.resume-match`; the markup also sets `data-clarity-mask="True"` on both regions, which masks their content and descendants. Do not configure these selectors to be unmasked. Review recordings before launch because dashboard changes affect new recordings and are not retroactive.
 5. Redeploy after changing either `NEXT_PUBLIC_*` value: Next.js inlines public environment values into the client build, so changing only the hosting settings does not update an already-built deployment.
-6. To verify, test with a fresh browser profile/storage. Reject consent and confirm no requests go to `googletagmanager.com` or `clarity.ms`; then accept and check GA4 **Realtime/DebugView** plus Clarity **Recordings/Dashboard**. In browser DevTools, verify GA4 collection requests and Clarity POST requests to `https://www.clarity.ms/collect`. Review recordings for masked contact/resume sections and confirm the expected custom events.
+6. To verify, test with a fresh browser profile/storage. Confirm configured analytics initializes by default, then turn analytics off in privacy preferences and verify no further analytics events are sent. Check GA4 **Realtime/DebugView** plus Clarity **Recordings/Dashboard**. In browser DevTools, verify GA4 collection requests and Clarity POST requests to `https://www.clarity.ms/collect`. Review recordings for masked contact/resume sections and confirm the expected custom events.
 
-The implemented event names are `contact_click`, `contact_submit`, `service_view`, `cta_click`, `job_search`, `job_filter`, `job_view`, `apply_click`, `resume_match_start`, and `resume_match_complete`. The event utility sends only fixed event names and limited categories/counts (for example search filter count, service slug, public job slug, and resume-match result count). Search text, resume files/text/filename, contact form values, and application destination URLs are not sent as custom event parameters. Page view tracking removes query strings. The privacy policy includes a control to change consent later. Verify jurisdiction-specific requirements and dashboard settings before launch; code-level checks do not prove that either provider receives live data.
+The implemented event names are `contact_click`, `contact_submit`, `service_view`, `cta_click`, `job_search`, `job_filter`, `job_view`, `apply_click`, `resume_match_start`, and `resume_match_complete`. The event utility sends only fixed event names and limited categories/counts (for example search filter count, service slug, public job slug, and resume-match result count). Search text, resume files/text/filename, contact form values, and application destination URLs are not sent as custom event parameters. Page view tracking removes query strings. The privacy policy includes a control to opt out or change advertising preferences later. Verify jurisdiction-specific requirements and dashboard settings before launch; code-level checks do not prove that either provider receives live data.
 
 ## Checks and operations
 

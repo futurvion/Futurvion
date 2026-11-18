@@ -7,7 +7,7 @@ import { adsConfig } from "@/config/ads";
 
 export const metadata = pageMetadata(
   "Privacy policy",
-  "How Futurvion handles contact enquiries, consent-based analytics, and advertising.",
+  "How Futurvion handles contact enquiries, default analytics, and advertising.",
   "/privacy-policy",
 );
 
@@ -43,23 +43,25 @@ export default function PrivacyPage() {
           </p>
           <h2>Analytics</h2>
           <p>
-            Optional analytics uses Google Analytics 4 and Microsoft Clarity
-            only after you choose “Allow analytics”. If configured, Google
-            Analytics receives page paths and product-usage event names with
-            limited, non-personal counts or categories. Clarity provides
-            heatmaps and session recordings; the contact form and
-            resume-matching interface are marked for masking using Clarity’s{" "}
+            When configured, Google Analytics 4, Microsoft Clarity, and
+            first-party usage analytics run by default. You can turn analytics
+            off at any time using privacy preferences below. Google Analytics
+            receives page paths and product-usage event names with limited,
+            non-personal counts or categories. Clarity provides heatmaps and
+            session recordings; the contact form and resume-matching interface
+            are marked for masking using Clarity’s{" "}
             <code>data-clarity-mask</code> attribute. Neither service receives
             resume file contents, extracted resume text, filenames, contact
             details, search terms, or event parameters containing personal
             information. Analytics page paths omit query strings. With a
             configured database, Futurvion also stores page paths, event types,
             coarse device and referrer categories, a random browser identifier,
-            and a session identifier. The identifier is stored in your browser.
-            A session ends after 30 minutes of inactivity. Unique visitors are
-            estimates based on distinct browser identifiers in the selected
-            reporting period. No public traffic counter is displayed. You can
-            change your choice here at any time using the button below.
+            and a session identifier unless you turn analytics off. The
+            identifier is stored in your browser. A session ends after 30
+            minutes of inactivity. Unique visitors are estimates based on
+            distinct browser identifiers in the selected reporting period. No
+            public traffic counter is displayed. You can change your preference
+            here at any time using the button below.
           </p>
           <h2>Advertising</h2>
           <p>
@@ -72,10 +74,10 @@ export default function PrivacyPage() {
             controls, or any section outside the blog and jobs pages.
           </p>
           <p>
-            The analytics choice on this website is not a Google-certified
-            advertising consent mechanism. A separate advertising choice is
-            required before the AdSense script is loaded; that choice is an
-            additional safeguard, not a certified CMP. Google currently
+            Analytics settings do not control advertising consent. A separate
+            advertising choice is required before the AdSense script is
+            loaded; that choice is an additional safeguard, not a certified
+            CMP. Google currently
             requires a Google-certified CMP integrated with the IAB TCF when
             serving personalized ads to users in the EEA, UK, and Switzerland.
             Do not enable personalized ads before required consent is obtained.
@@ -117,8 +119,9 @@ export default function PrivacyPage() {
           </p>
           <h2>Your choices</h2>
           <p>
-            You can use the email link instead of the form and decline
-            analytics. For access, correction, or deletion requests, email{" "}
+            You can turn analytics off or reject advertising through privacy
+            preferences. You can also use the email link instead of the form.
+            For access, correction, or deletion requests, email{" "}
             <a href={`mailto:${site.email}`}>{site.email}</a>.
           </p>
         </div>

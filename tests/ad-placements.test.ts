@@ -54,6 +54,7 @@ describe("AdSense configuration", () => {
     expect(config.placements.contentPage.enabled).toBe(false);
     expect(config.placements.blogContent.enabled).toBe(true);
     expect(config.placements.blogContent.slot).toBe("");
+    expect(config.placements.blogListing.interval).toBe(2);
     expect(config.placements.jobsListing.interval).toBe(6);
   });
 
@@ -98,6 +99,8 @@ describe("custom placement frequency", () => {
   it("places listing ads at intervals without an initial or trailing ad", () => {
     expect(listingAdPositions(3, 4)).toEqual([]);
     expect(listingAdPositions(4, 4)).toEqual([]);
+    expect(listingAdPositions(4, 2)).toEqual([2]);
+    expect(listingAdPositions(20, 6)).toEqual([6, 12, 18]);
     expect(listingAdPositions(9, 4)).toEqual([4, 8]);
     expect(listingAdPositions(13, 6)).toEqual([6, 12]);
     expect(listingAdPositions(9, 0)).toEqual([]);

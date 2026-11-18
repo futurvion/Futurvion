@@ -54,6 +54,7 @@ export function AnalyticsConsent({
     try {
       localStorage.setItem(consentKey, next);
     } catch {
+      updateThirdPartyConsent(false);
       setChoice("deny");
       return;
     }
@@ -88,14 +89,20 @@ export function AnalyticsConsent({
     try {
       const value = localStorage.getItem(consentKey);
       if (value === "allow" || value === "deny") stored = value;
+      else {
+        localStorage.setItem(consentKey, "allow");
+        stored = "allow";
+      }
       const adsValue = localStorage.getItem(advertisingConsentKey);
       if (adsValue === "allow" || adsValue === "deny") storedAds = adsValue;
     } catch {
       stored = "deny";
       storedAds = "deny";
     }
-    if (stored) queueMicrotask(() => setChoice(stored));
-    if (storedAds) queueMicrotask(() => setAdsChoice(storedAds));
+    queueMicrotask(() => {
+      setChoice(stored);
+      setAdsChoice(storedAds);
+    });
   }, []);
 
   useEffect(() => {
@@ -163,37 +170,59 @@ export function AnalyticsConsent({
 
   if (!enabled && !adsEnabled) return null;
 
-  const needsAnalyticsChoice = enabled && choice === null;
   const needsAdsChoice = adsEnabled && adsChoice === null;
 
   return <>
-    {(needsAnalyticsChoice || needsAdsChoice || preferencesOpen) && <div className="consent-banner" role="dialog" aria-label="Privacy preferences">
-      <p>
-        {enabled && "Optional analytics runs only if you allow it. "}
-        {adsEnabled && "Google advertising on selected blog and jobs pages runs only if you allow it. "}
-        <a href="/privacy-policy">Read the privacy policy</a>
-      </p>
-      <div>
-        <button
-          type="button"
-          onClick={() => {
-            if (enabled) saveChoice("deny");
-            if (adsEnabled) saveAdsChoice("deny");
-          }}
-        >
-          Reject all optional
-        </button>
-        {enabled && (needsAnalyticsChoice || preferencesOpen) && <>
-          <button type="button" onClick={() => saveChoice("deny")}>Reject analytics</button>
-          <button className="consent-allow-button" type="button" onClick={() => saveChoice("allow")}>Allow analytics</button>
-        </>}
-        {adsEnabled && (needsAdsChoice || preferencesOpen) && <>
-          <button type="button" onClick={() => saveAdsChoice("deny")}>Reject advertising</button>
-          <button className="consent-allow-button" type="button" onClick={() => saveAdsChoice("allow")}>Allow advertising</button>
-        </>}
-        {preferencesOpen && <button type="button" onClick={() => setPreferencesOpen(false)}>Close</button>}
-      </div>
-    </div>}
+    {(needsAdsChoice || preferencesOpen) && (
+      <section
+        className="consent-banner"
+        role="dialog"
+        aria-labelledby="privacy-preferences-title"
+        aria-describedby="privacy-preferences-copy"
+      >
+        <div className="consent-banner-copy">
+          <h2 id="privacy-preferences-title">Privacy choices</h2>
+          <p id="privacy-preferences-copy">
+            {enabled &&
+              "Analytics are on by default and can be turned off in privacy preferences. "}
+            {adsEnabled &&
+              "Advertising on blog and jobs pages runs only if you allow it. "}
+            <a href="/privacy-policy">Read the privacy policy</a>
+          </p>
+        </div>
+        <div className="consent-banner-actions">
+          {preferencesOpen && enabled && (
+            <button
+              type="button"
+              onClick={() =>
+                saveChoice(choice === "deny" ? "allow" : "deny")
+              }
+            >
+              {choice === "deny" ? "Turn analytics on" : "Turn analytics off"}
+            </button>
+          )}
+          {adsEnabled && (needsAdsChoice || preferencesOpen) && (
+            <>
+              <button type="button" onClick={() => saveAdsChoice("deny")}>
+                Reject advertising
+              </button>
+              <button
+                className="consent-allow-button"
+                type="button"
+                onClick={() => saveAdsChoice("allow")}
+              >
+                Allow advertising
+              </button>
+            </>
+          )}
+          {preferencesOpen && (
+            <button type="button" onClick={() => setPreferencesOpen(false)}>
+              Close
+            </button>
+          )}
+        </div>
+      </section>
+    )}
   </>;
 }
 
@@ -205,6 +234,6 @@ export function AnalyticsPreferencesButton({ enabled }: { enabled: boolean }) {
     className="analytics-preferences-button"
     onClick={() => window.dispatchEvent(new Event("futurvion:open-analytics-preferences"))}
   >
-    Change privacy preferences
+    Manage privacy preferences
   </button>;
 }

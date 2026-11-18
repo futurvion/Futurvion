@@ -24,7 +24,7 @@ export function createAdsConfig(environment: AdsEnvironment) {
     blogListing: {
       enabled: true,
       slot: environment.NEXT_PUBLIC_ADSENSE_SLOT_BLOG_LISTING?.trim() ?? "",
-      interval: 4,
+      interval: 2,
     },
     jobsListing: {
       enabled: true,
