@@ -542,9 +542,9 @@
     const styles = () => { const neg = css(el, '--negative', '#c4242a'), surface = css(el, '--surface', '#fff'), ink = css(el, '--ink', '#111'); return [{ fill: surface, ink: css(el, '--axis-ink', '#6b6b6b'), stroke: css(el, '--grid', '#e5e5e5') }, { fill: mix(el, neg, surface, 0.1), ink }, { fill: mix(el, neg, surface, 0.26), ink }, { fill: neg, ink: surface }]; };
     const draw = () => {
       const pitch = rowHeight || (rows.some((r) => r.sub) ? 44 : 32), head = 26;
-      const { s, w, h } = frame(el, head + rows.length * pitch);
+      const { s, w } = frame(el, head + rows.length * pitch);
       const lw = labelWidth || Math.round(Math.min(220, Math.max(w < 480 ? 96 : 120, w * 0.22)));
-      const cw = (w - lw) / Math.max(1, cols.length), ST = styles(), muted = css(el, '--axis-ink', '#6b6b6b'), ink = css(el, '--ink', '#111');
+      const cw = (w - lw) / Math.max(1, cols.length), ST = styles(), muted = css(el, '--axis-ink', '#6b6b6b');
       const g = svg('g', {}, s);
       dayHeads(g, s, el, cols, { x0: lw, cw, y: head - 10, today });
       rows.forEach((r, k) => {
@@ -578,7 +578,7 @@
     const draw = () => {
       const narrow = (el.clientWidth || 600) < 560, axisH = 24;
       const pitch = rowHeight || (narrow ? 62 : rows.some((r) => r.sub || r.note) ? 44 : 32);
-      const { s, w, h } = frame(el, rows.length * pitch + axisH);
+      const { s, w } = frame(el, rows.length * pitch + axisH);
       const lw = narrow ? 0 : labelWidth || Math.round(Math.min(200, Math.max(110, w * 0.26)));
       const vw = narrow ? 0 : valueWidth ?? Math.min(w * 0.32, Math.max(0, ...rows.map((r) => Math.max(r.value ? measure(s, r.value, 13, 500) : 0, r.note ? measure(s, r.note, 12) : 0))) + (rows.some((r) => r.value || r.note) ? 16 : 0));
       const x0 = narrow ? 18 : lw + 6, x1 = narrow ? w - 18 : w - vw - 6, tx = (m) => x0 + ((m - o) / Math.max(1, c - o)) * (x1 - x0);

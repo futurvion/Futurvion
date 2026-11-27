@@ -32,7 +32,7 @@ export function AdminSidebar({ email }: { email: string }) {
 
   return <aside className="admin-sidebar">
     <div className="admin-sidebar-brand">
-      <Link className="admin-sidebar-logo" href="/admin" aria-label="Futurvion admin workspace" title="Futurvion admin workspace"><Image className="admin-sidebar-logo-image" src="/logo-full.png" alt="Futurvion" width={1600} height={379} sizes="190px" preload /></Link>
+      <Link className="admin-sidebar-logo" href="/admin" aria-label="Futurvion admin workspace" title="Futurvion admin workspace"><Image className="admin-sidebar-logo-image" src="/logo-full-white.png" alt="Futurvion — Digital Solutions for Every Business" width={2160} height={728} sizes="190px" preload /></Link>
       <span className="admin-sidebar-kicker">Private operations</span>
     </div>
     <div className="admin-sidebar-nav-heading"><span>Workspace</span><span>02 modules</span></div>

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { siteStyles } from "@/config/styles";
 import { NearbySearch, type NearbyOrigin } from "./nearby-search";
+import { trackEvent } from "@/lib/analytics";
 
 export type JobFilters = Record<string, string>;
 
@@ -33,13 +34,27 @@ export function JobsSearch({ onSearch }: { onSearch: (filters: JobFilters) => vo
 
   useEffect(() => {
     if (revision === 0) return;
-    pendingSearch.current = setTimeout(() => { pendingSearch.current = null; onSearch(filtersFromForm()); }, 400);
+    pendingSearch.current = setTimeout(() => {
+      pendingSearch.current = null;
+      const filters = filtersFromForm();
+      trackEvent("job_search", { filter_count: Object.keys(filters).length });
+      onSearch(filters);
+    }, 400);
     return () => { if (pendingSearch.current) clearTimeout(pendingSearch.current); };
     // Keyword and nearby edits apply after the form's rendered values update.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [revision]);
 
-  return <form ref={formRef} className="jobs-search" onSubmit={event => { event.preventDefault(); if (pendingSearch.current) clearTimeout(pendingSearch.current); pendingSearch.current = null; onSearch(filtersFromForm()); }}>
+  return <form ref={formRef} className="jobs-search" onSubmit={event => {
+    event.preventDefault();
+    if (pendingSearch.current) clearTimeout(pendingSearch.current);
+    pendingSearch.current = null;
+    const filters = filtersFromForm();
+    const filterCount = Object.keys(filters).length;
+    if (filters.q) trackEvent("job_search", { filter_count: filterCount });
+    else if (filterCount) trackEvent("job_filter", { filter_count: filterCount });
+    onSearch(filters);
+  }}>
     <label>Role, skill, or keyword<input name="q" value={keyword} onChange={event => { setKeyword(event.target.value); setRevision(value => value + 1); }} placeholder="e.g. Product designer" maxLength={120}/></label>
     <label>Company<input name="company" placeholder="Company" maxLength={100}/></label>
     <label>Location<input name="location" placeholder="City or country" maxLength={100} disabled={Boolean(nearby)}/></label>

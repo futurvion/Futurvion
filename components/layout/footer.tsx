@@ -13,7 +13,7 @@ export function Footer() {
     </div>
     <div className={`${siteStyles.container} footer-top`}>
       <div className="footer-intro">
-        <Link className="footer-brand" href="/" aria-label="Futurvion home"><Image src="/logo-full.png" alt="Futurvion" width={1600} height={379} sizes="220px"/></Link>
+        <Link className="footer-brand" href="/" aria-label="Futurvion home"><Image src="/logo-full-white.png" alt="Futurvion — Digital Solutions for Every Business" width={2160} height={728} sizes="220px"/></Link>
         <p>Brand, digital experiences, and technology.<br/>One connected approach.</p>
         <div className="footer-connect"><a className="footer-email" href={`mailto:${site.email}`}>{site.email}<ArrowUpRight size={16} aria-hidden="true"/></a>{site.socials.map(social => <a key={social.url} href={social.url} target="_blank" rel="noopener noreferrer" aria-label={`${social.label}: @futurvion (opens in a new tab)`}>{social.label}<span>@futurvion</span><ArrowUpRight size={16} aria-hidden="true"/></a>)}</div>
       </div>

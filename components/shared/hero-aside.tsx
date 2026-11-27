@@ -15,7 +15,7 @@ export function HeroAside({ variant }: { variant: HeroAsideVariant }) {
 
   if (variant === "solutions") return <aside className="hero-aside hero-aside-solutions" aria-label="Find a starting point for your business"><p className="hero-aside-note">Your business comes first.</p><div className="hero-business-grid"><Link href="/solutions#retail">Retail<Arrow/></Link><Link href="/solutions#services">Expertise<Arrow/></Link><Link href="/solutions#startups">New ventures<Arrow/></Link><Link href="/solutions#operations">Growing teams<Arrow/></Link></div><p className="hero-aside-caption">Different needs. A considered approach.</p></aside>;
 
-  if (variant === "about") return <aside className="hero-aside hero-aside-about" aria-label="Futurvion studio identity"><Image src="/logo-mark.png" alt="" width={512} height={451} sizes="(max-width: 620px) 110px, 160px"/><p>Brand. Experience.<br/>Technology.</p><span>One connected studio.</span></aside>;
+  if (variant === "about") return <aside className="hero-aside hero-aside-about" aria-label="Futurvion studio identity"><Image src="/logo-full-white.png" alt="" width={2160} height={728} sizes="(max-width: 620px) 110px, 160px"/><p>Brand. Experience.<br/>Technology.</p><span>One connected studio.</span></aside>;
 
   if (variant === "contact") return <aside className="hero-aside hero-aside-contact" aria-label="A starting point for your enquiry"><p className="hero-aside-note">A good place to start.</p><ul><li>What are you building?</li><li>What needs to improve?</li><li>What matters most?</li></ul><a className="hero-aside-link" href="#project-enquiry">Tell us your idea<Arrow/></a></aside>;
 

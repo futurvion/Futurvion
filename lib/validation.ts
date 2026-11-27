@@ -7,7 +7,7 @@ export const contactSchema = z.object({
   company: z.string().trim().max(120).optional().or(z.literal("")),
   phone: z.string().trim().max(30).optional().or(z.literal("")),
   service: z.string().refine(v => serviceSlugs.has(v), "Select a valid service"),
-  budget: z.enum(["", "under-5k", "5k-15k", "15k-50k", "50k-plus"]).optional(),
+  budget: z.enum(["", "under-10k", "10k-25k", "25k-50k", "50k-plus"]).optional(),
   description: z.string().trim().min(20).max(5000),
   consent: z.literal("yes"),
   website: z.string().max(100).optional(),

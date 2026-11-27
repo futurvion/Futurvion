@@ -27,7 +27,7 @@ export default async function JobPage({ params }: { params: Promise<{ slug: stri
       <h1>{job.title}</h1>
       <p className="job-detail-company">{job.companyName}</p>
       <div className="job-tags">{[job.location, job.workMode !== "unknown" ? job.workMode : null, job.employmentType, job.experienceLevel].filter(Boolean).map(value => <span key={value}>{value}</span>)}</div>
-      {apply ? <a className={`${siteStyles.button} button button-light ${siteStyles.buttonLight}`} href={apply} target="_blank" rel="noopener noreferrer">View original posting ↗</a> : <p>This opportunity is no longer accepting applications.</p>}
+      {apply ? <a className={`${siteStyles.button} button button-light ${siteStyles.buttonLight}`} href={apply} data-analytics-event="apply_click" data-job-id={job.slug} target="_blank" rel="noopener noreferrer">View original posting ↗</a> : <p>This opportunity is no longer accepting applications.</p>}
     </div></section>
     <section className={`${siteStyles.pageSection} page-section`}><div className={`${siteStyles.container} job-detail-layout`}>
       <article><span className={`${siteStyles.eyebrow} eyebrow`}>The opportunity</span><h2>About this role</h2>
@@ -43,7 +43,7 @@ export default async function JobPage({ params }: { params: Promise<{ slug: stri
         <dt>Posted</dt><dd>{job.publishedAt?.toLocaleDateString() ?? "Not specified"}</dd>
         <dt>Last verified</dt><dd>{job.lastVerifiedAt?.toLocaleDateString() ?? "Not yet verified"}</dd>
         <dt>Source</dt><dd>{sourceLabel(job.sourceProvider)}</dd>
-      </dl>{apply && <a className={`${siteStyles.button} button button-primary ${siteStyles.buttonPrimary}`} href={apply} target="_blank" rel="noopener noreferrer">Apply now ↗</a>}</aside>
+      </dl>{apply && <a className={`${siteStyles.button} button button-primary ${siteStyles.buttonPrimary}`} href={apply} data-analytics-event="apply_click" data-job-id={job.slug} target="_blank" rel="noopener noreferrer">Apply now ↗</a>}</aside>
     </div></section>
   </>;
 }

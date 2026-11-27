@@ -8,6 +8,7 @@ button, a, input, select, textarea, summary { touch-action: manipulation; }
 :focus-visible { outline-width: 3px; }
 section[id], h2[id] { scroll-margin-top: 105px; }
 .site-header { border: 0; }
+.site-skip-link { color: #ffffff; }
 .desktop-nav a { font-size: 14px; font-weight: 500; }
 .desktop-nav a.active { box-shadow: none; text-decoration: underline; text-underline-offset: 7px; }
 .header-cta { border: 0; font-size: 14px; color: white; }
@@ -211,6 +212,22 @@ a:hover > .concept-art { transform: translateY(-5px); }
 }
 @media (prefers-reduced-motion: reduce) {
   .scroll-reveal-visible { animation: none !important; opacity: 1; translate: none; scale: none; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  #main-content :is(.tools-page-shell, .qr-generator-page) .scroll-reveal-visible {
+    animation-name: tools-scroll-appear !important;
+    animation-duration: 720ms;
+    animation-timing-function: ease-out;
+    animation-delay: var(--reveal-delay, 0ms);
+    animation-fill-mode: both;
+    transition: none !important;
+    translate: none !important;
+  }
+  @keyframes tools-scroll-appear {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
 }
 
 @media print {

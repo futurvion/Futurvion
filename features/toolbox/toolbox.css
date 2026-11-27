@@ -40,6 +40,11 @@
   align-items:center;
   gap:10px
 }
+.tb-brand>img {
+  display:block;
+  width:140px;
+  height:auto
+}
 .tb-brand>span {
   font-family:var(--font-display);
   font-size:36px;

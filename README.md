@@ -1,19 +1,19 @@
 # Futurvion
 
-Futurvion's public marketing site presents its digital services, business solutions, and illustrative work concepts, and lets visitors send an enquiry. It runs on Next.js 16.4.2 (App Router), React 19, strict TypeScript, Tailwind CSS 4, React Three Fiber/Three.js, Framer Motion, Lucide, Zod, Prisma 7 + PostgreSQL, and Resend. The work examples are concepts, not completed client projects.
+Futurvion's public marketing site presents its digital services, business solutions, and illustrative work concepts, and lets visitors send an enquiry. It runs on Next.js 16.4.3 (App Router), React 19, strict TypeScript, Tailwind CSS 4, React Three Fiber/Three.js, Framer Motion, Lucide, Zod, Prisma 7 + PostgreSQL, and Resend. The work examples are concepts, not completed client projects.
 
-For verified implementation details and current progress, see [TASKS.md](TASKS.md), [the project overview](docs/PROJECT_OVERVIEW.md), [architecture](docs/ARCHITECTURE.md), [API](docs/API.md), [database](docs/DATABASE.md), [security](docs/SECURITY.md), and [deployment](docs/DEPLOYMENT.md). [AGENTS.md](AGENTS.md) defines the documentation maintenance workflow.
+For verified implementation details and current progress, see [TASKS.md](TASKS.md), [the project overview](docs/PROJECT_OVERVIEW.md), [architecture](docs/ARCHITECTURE.md), [API](docs/API.md), [database](docs/DATABASE.md), [security](docs/SECURITY.md), [deployment](docs/DEPLOYMENT.md), [AdSense setup](docs/ADSENSE.md), and [dependency maintenance](docs/DEPENDENCIES.md). [AGENTS.md](AGENTS.md) defines the documentation maintenance workflow.
 
 ## What works immediately vs. what needs credentials
 
 | Works with no setup | Needs setup |
 |---|---|
 | All pages, animated hero emblem with a static reduced-motion/WebGL fallback, scroll-controlled capability story, scroll reveals for text and cards, scroll progress, responsive navigation, FAQ, sitemap, robots, JSON-LD, security headers | Contact form backend (`DATABASE_URL`, `ABUSE_HASH_SECRET`, `RESEND_API_KEY`, `CONTACT_TO_EMAIL`, `CONTACT_FROM_EMAIL`) |
-| `mailto:` fallback shown on the contact page | Analytics (`DATABASE_URL`, `ABUSE_HASH_SECRET`) — silently disabled otherwise, and the consent banner is hidden |
+| `mailto:` fallback shown on the contact page | Analytics (`DATABASE_URL`, `ABUSE_HASH_SECRET`) — disabled otherwise; analytics and advertising use separate opt-ins |
 | `/jobs` setup/empty state and `/admin/login` sign-in screen | Jobs data and admin operations (`DATABASE_URL`, jobs migration, `AUTH_SECRET`, `APP_URL`, admin bootstrap); cron also needs `JOB_SYNC_SECRET` |
-| | Booking CTA (`NEXT_PUBLIC_BOOKING_URL`), Search Console (`NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION`) |
+| | Booking CTA (`NEXT_PUBLIC_BOOKING_URL`), Search Console (`NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION`), optional AdSense (disabled until publisher, slots, and certified consent setup are configured; see [AdSense setup](docs/ADSENSE.md)) |
 
-The form reports success only after the lead is stored **and** the notification email is accepted by Resend. If the backend is not configured it returns 503 and the UI points visitors to the email link.
+The form reports success only after the lead is stored **and** the notification email is accepted by Resend. Set `CONTACT_TO_EMAIL` to the inbox that should receive leads and `CONTACT_FROM_EMAIL` to an address on a domain verified in Resend. The included production example uses `notifications@futurvion.in`; verify that domain in Resend and configure the DNS records Resend provides before expecting delivery. Replies go directly to the submitter through `replyTo`. The notification contains the name, email, company, phone, selected service, budget, and project description in a responsive, branded HTML email, with a plain-text fallback. If the backend is not configured it returns 503 and the UI points visitors to the email link.
 
 ## Jobs portal setup
 
@@ -29,15 +29,17 @@ Set `APP_URL` to the exact public origin, `AUTH_SECRET` to a random value of at 
 
 ## Local setup
 
-Use Node.js 20.9.0 or newer (the installed Next.js package's engine requirement) and npm; this repository does not pin an exact runtime version. PostgreSQL and a Resend account are needed to exercise the contact backend. Configure `DATABASE_URL` and `ABUSE_HASH_SECRET` to exercise analytics.
+Use Node.js 22.13.0 or newer and npm 10.9.4, as pinned in `package.json` and CI. Install the exact dependency tree recorded in the lockfile with `npm ci`; its `postinstall` runs `prisma generate`. PostgreSQL and a Resend account are needed to exercise the contact backend. Configure `DATABASE_URL` and `ABUSE_HASH_SECRET` to exercise analytics.
 
 ```bash
-npm install            # runs `prisma generate` via postinstall
+npm ci                  # reproducible install; runs `prisma generate` via postinstall
 cp .env.example .env   # fill in the values needed for your environment
 npm run dev
 ```
 
 The committed scripts are `npm run dev`, `npm run build`, `npm run start`, `npm run typecheck`, `npm run lint`, `npm test`, `npm run db:deploy`, and `npm run jobs:seed-providers`. `npm run start` serves a production build. `npm run db:deploy` applies committed migrations to the configured database. Run it against the intended database before testing data-backed features.
+
+Use the stable, compatible dependency update policy in [docs/DEPENDENCIES.md](docs/DEPENDENCIES.md) when adding or updating packages. GitHub Dependabot proposes compatible npm updates weekly; each update must pass the pull-request CI checks before merging.
 
 `.env.example` lists every configured variable. `NEXT_PUBLIC_SITE_URL` sets canonical URLs (the code defaults to `https://futurvion.in`); `NEXT_PUBLIC_BUSINESS_EMAIL` supplies public contact links; `NEXT_PUBLIC_BOOKING_URL` adds a booking CTA; `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` supplies an optional verification token. These four names are browser-exposed. Server-only `DATABASE_URL` connects PostgreSQL, `ABUSE_HASH_SECRET` provides HMAC pseudonyms (minimum 32 characters), and `RESEND_API_KEY`, `CONTACT_TO_EMAIL`, and `CONTACT_FROM_EMAIL` configure contact notifications. Keep actual secret values out of Git; `.env*` files are ignored except `.env.example`.
 
@@ -57,7 +59,7 @@ Local checks: `npm run typecheck`, `npm run lint`, `npm test`, `npm run build`. 
 
 - Company info, navigation, SEO defaults: [config/site.ts](config/site.ts) (no secrets here).
 - Services: [data/services.ts](data/services.ts). Portfolio: [data/portfolio.ts](data/portfolio.ts) — all entries are labelled illustrative concepts; replace with real, approved case studies.
-- Logo: replace [public/logo-mark.png](public/logo-mark.png) and the share image [public/og-image.svg](public/og-image.svg) (use a 1200×630 PNG/JPG for best social previews).
+- Logo: use the supplied transparent [public/Logo with Full Name.png](public/Logo%20with%20Full%20Name.png) on light surfaces and [public/logo-full-white.png](public/logo-full-white.png) on dark surfaces; the homepage animation retains the original emblem. Update [public/og-image.svg](public/og-image.svg) separately (use a 1200×630 PNG/JPG for best social previews).
 - There are deliberately no testimonials, client logos or statistics. Add only verified, approved ones.
 
 ## Database

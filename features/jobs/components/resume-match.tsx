@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { siteStyles } from "@/config/styles";
 import { MATCH_CONFIG } from "../matching-config";
+import { trackEvent } from "@/lib/analytics";
 
 const MAX_RESUME_BYTES = MATCH_CONFIG.maxFileBytes;
 type Match = {
@@ -74,6 +75,7 @@ export function ResumeMatch() {
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!file) { setError("Select a resume first."); return; }
+    trackEvent("resume_match_start", {});
     const nextController = new AbortController();
     controller.current = nextController;
     setBusy(true); setError(""); setResults(null);
@@ -87,7 +89,11 @@ export function ResumeMatch() {
       const response = await fetch("/api/jobs/match-resume", { method: "POST", body, cache: "no-store", signal: nextController.signal });
       const data = await response.json();
       if (!response.ok) throw new Error(typeof data.error === "string" ? data.error : "Resume matching is temporarily unavailable.");
-      if (!nextController.signal.aborted) { setResults(data as MatchResponse); setPage(1); }
+      if (!nextController.signal.aborted) {
+        setResults(data as MatchResponse);
+        setPage(1);
+        trackEvent("resume_match_complete", { result_count: data.total });
+      }
     } catch (reason) {
       if (!nextController.signal.aborted) setError(reason instanceof Error ? reason.message : "Resume matching is temporarily unavailable.");
     } finally { clearTimeout(timeout); if (!nextController.signal.aborted) setBusy(false); }
@@ -100,7 +106,7 @@ export function ResumeMatch() {
       <div className="resume-match-intro"><h2 id="resume-match-title">Find roles from your resume</h2><p>Upload your resume to see current openings that match your experience.</p></div>
       <button ref={opener} className={`${siteStyles.button} ${siteStyles.buttonPrimary}`} type="button" aria-haspopup="dialog" aria-controls="resume-match-dialog" aria-expanded={isOpen} onClick={() => setIsOpen(true)}>Match jobs with your resume</button>
     </section>
-    <dialog ref={dialog} id="resume-match-dialog" className="resume-match-dialog" aria-labelledby="resume-match-dialog-title" onClose={() => { setIsOpen(false); opener.current?.focus(); }} onClick={event => { if (event.target === dialog.current) closeDialog(); }}>
+    <dialog ref={dialog} data-clarity-mask="True" id="resume-match-dialog" className="resume-match-dialog" aria-labelledby="resume-match-dialog-title" onClose={() => { setIsOpen(false); opener.current?.focus(); }} onClick={event => { if (event.target === dialog.current) closeDialog(); }}>
       <div className="resume-match-dialog-content">
         <div className="resume-match-dialog-heading"><div className="resume-match-intro"><h2 id="resume-match-dialog-title">Find roles from your resume</h2><p>Choose a text-based PDF or DOCX (up to 2 MB). Futurvion processes it temporarily and does not save the file or extracted profile. Refresh, leave this page, or clear the search to remove the selection and results.</p></div><button className="resume-match-close" type="button" onClick={closeDialog}>Close</button></div>
         <form onSubmit={submit} className="resume-match-form"><label htmlFor="resume-upload">Resume (PDF or DOCX)</label><input ref={input} id="resume-upload" type="file" autoComplete="off" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={event => select(event.target.files?.[0])} disabled={busy}/>
