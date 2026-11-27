@@ -143,6 +143,14 @@ TCF signaling, non-personalized/personalized settings, and regional rules
 directly with the providers and qualified legal counsel. This repository does
 not claim a CMP certification or legal compliance.
 
+The public privacy policy (`app/(studio)/privacy-policy/page.tsx`) carries the
+AdSense-required disclosures: third-party vendors including Google use cookies
+to serve ads based on prior visits, Google's advertising cookies enable it and
+its partners to serve ads, and opt-out links to Google Ads Settings and
+aboutads.info, plus a link to Google's partner-sites policy. Update
+`config/legal.ts` (`legalLastUpdated`) whenever the privacy policy or terms
+change.
+
 ## Production checklist and troubleshooting
 
 - [ ] AdSense lists `futurvion.in` as **Ready** under Sites and has no serving

@@ -56,7 +56,7 @@ export const site: SiteConfig = {
 
   footerLinks: [
     { label: "Privacy policy", href: "/privacy-policy" },
-    { label: "Terms", href: "/terms" },
+    { label: "Terms and conditions", href: "/terms" },
   ],
 
   seo: {
