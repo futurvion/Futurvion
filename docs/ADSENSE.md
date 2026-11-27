@@ -1,5 +1,21 @@
 # Google AdSense
 
+## Site verification (`google-adsense-account` meta tag)
+
+The root layout (`app/layout.tsx`) renders a static
+`<meta name="google-adsense-account" content="ca-pub-...">` tag on every page
+whenever `NEXT_PUBLIC_ADSENSE_CLIENT_ID` is set, independent of
+`NEXT_PUBLIC_ADSENSE_ENABLED`, `NEXT_PUBLIC_ADSENSE_CONSENT_READY`, and
+visitor advertising consent. This is the AdSense "Meta tag" verification
+method from the "Connect your site" flow: it lets Google crawl and verify
+`futurvion.in` for site ownership even though the official `adsbygoogle.js`
+loader (`components/ads/adsense-script.tsx`) only loads on `/blog` and `/jobs`
+after a visitor grants advertising consent, which would otherwise make the
+"AdSense code snippet" verification method unreliable (it would be absent
+from the homepage entirely and absent everywhere for an unconsented crawl).
+The meta tag only declares account ownership; it does not request, serve, or
+unblock ads, and does not change any of the consent/placement gates below.
+
 ## Current behavior and safety gates
 
 AdSense is disabled by default. The application loads Google’s official
@@ -127,6 +143,14 @@ TCF signaling, non-personalized/personalized settings, and regional rules
 directly with the providers and qualified legal counsel. This repository does
 not claim a CMP certification or legal compliance.
 
+The public privacy policy (`app/(studio)/privacy-policy/page.tsx`) carries the
+AdSense-required disclosures: third-party vendors including Google use cookies
+to serve ads based on prior visits, Google's advertising cookies enable it and
+its partners to serve ads, and opt-out links to Google Ads Settings and
+aboutads.info, plus a link to Google's partner-sites policy. Update
+`config/legal.ts` (`legalLastUpdated`) whenever the privacy policy or terms
+change.
+
 ## Production checklist and troubleshooting
 
 - [ ] AdSense lists `futurvion.in` as **Ready** under Sites and has no serving
@@ -139,6 +163,9 @@ not claim a CMP certification or legal compliance.
 - [ ] Privacy policy and any required legal disclosures have been reviewed.
 - [ ] `ads.txt` contains Google's exact publisher record and is reachable in
       production.
+- [ ] The `google-adsense-account` meta tag is present on the deployed
+      homepage (`view-source:https://futurvion.in/`) and AdSense's "Connect
+      your site" verification passes.
 - [ ] The production build has the intended environment values; the global
       switch is enabled only after all prior steps are complete.
 - [ ] Blog listing, long and short articles, desktop sidebar, mobile layout,

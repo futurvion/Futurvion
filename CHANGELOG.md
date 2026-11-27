@@ -4,6 +4,8 @@ Only changes supported by the repository or Git history are listed. Unreleased e
 
 ## Unreleased
 
+- Fixed the `www` → apex canonical-host redirect for self-hosted deployments: `proxy.ts` now matches the forwarded `Host` header instead of only `request.nextUrl.hostname`, which `next start` sets to its bind address. Production previously served every `www.futurvion.in` page with HTTP 200, creating duplicate URLs reported by Search Console as "Alternate page with proper canonical tag".
+
 - Refined the homepage Process section into a cohesive split layout with numbered stages, clearer hierarchy and a direct project enquiry link.
 
 - Added page-specific right-side hero visuals for Services, Solutions, Work, About, Contact and Jobs, plus a compact Process stages panel. Included responsive layouts, useful destination links and reduced-motion support while preserving the original homepage 3D scene and simple jobs motion.
