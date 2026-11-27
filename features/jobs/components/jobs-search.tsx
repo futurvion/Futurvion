@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { siteStyles } from "@/config/styles";
+import { NearbySearch, type NearbyOrigin } from "./nearby-search";
 import { trackEvent } from "@/lib/analytics";
 
 export type JobFilters = Record<string, string>;
@@ -19,6 +20,8 @@ export function JobsSearch({ onSearch }: { onSearch: (filters: JobFilters) => vo
   const pendingSearch = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [keyword, setKeyword] = useState("");
   const [revision, setRevision] = useState(0);
+  const [nearby, setNearby] = useState<NearbyOrigin | null>(null);
+  const [resetCount, setResetCount] = useState(0);
 
   function filtersFromForm(): JobFilters {
     const filters: JobFilters = {};
@@ -38,7 +41,7 @@ export function JobsSearch({ onSearch }: { onSearch: (filters: JobFilters) => vo
       onSearch(filters);
     }, 400);
     return () => { if (pendingSearch.current) clearTimeout(pendingSearch.current); };
-    // Only keyword edits trigger the debounced search; other fields apply on submit.
+    // Keyword and nearby edits apply after the form's rendered values update.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [revision]);
 
@@ -54,8 +57,15 @@ export function JobsSearch({ onSearch }: { onSearch: (filters: JobFilters) => vo
   }}>
     <label>Role, skill, or keyword<input name="q" value={keyword} onChange={event => { setKeyword(event.target.value); setRevision(value => value + 1); }} placeholder="e.g. Product designer" maxLength={120}/></label>
     <label>Company<input name="company" placeholder="Company" maxLength={100}/></label>
-    <label>Location<input name="location" placeholder="City or country" maxLength={100}/></label>
-    <label>Work mode<select name="workMode"><option value="">Any mode</option><option value="remote">Remote</option><option value="hybrid">Hybrid</option><option value="onsite">Onsite</option></select></label>
+    <label>Location<input name="location" placeholder="City or country" maxLength={100} disabled={Boolean(nearby)}/></label>
+    <label>Work mode<select name="workMode"><option value="">Any mode</option><option value="remote" disabled={Boolean(nearby)}>Remote</option><option value="hybrid">Hybrid</option><option value="onsite">Onsite</option></select></label>
+    <NearbySearch key={resetCount} value={nearby} onChange={origin => {
+      if (origin && formRef.current) {
+        const mode = formRef.current.elements.namedItem("workMode");
+        if (mode instanceof HTMLSelectElement && mode.value === "remote") mode.value = "";
+      }
+      setNearby(origin); setRevision(value => value + 1);
+    }}/>
     <details className="jobs-more-filters"><summary>More filters</summary><div className="jobs-more-fields">
       <label>Employment<select name="employmentType"><option value="">Any type</option>{["Full-time", "Part-time", "Contract", "Internship", "Temporary"].map(value => <option key={value}>{value}</option>)}</select></label>
       <label>Category<input name="category" placeholder="Department" maxLength={80}/></label>
@@ -66,6 +76,6 @@ export function JobsSearch({ onSearch }: { onSearch: (filters: JobFilters) => vo
       <label>Salary currency<select name="salaryCurrency"><option value="">Choose currency</option>{["USD", "EUR", "GBP", "INR", "CAD", "AUD"].map(value => <option key={value}>{value}</option>)}</select></label>
       <label>Source<select name="source"><option value="">All sources</option><option value="remotive">Remotive</option><option value="greenhouse">Greenhouse</option><option value="lever">Lever</option></select></label>
     </div></details>
-     <div className="jobs-search-actions"><button className={`${siteStyles.button} button button-primary ${siteStyles.buttonPrimary}`} type="submit">Search jobs ↗</button><button className={`${siteStyles.button} button button-ghost ${siteStyles.buttonGhost}`} type="button" onClick={() => { if (pendingSearch.current) clearTimeout(pendingSearch.current); pendingSearch.current = null; formRef.current?.reset(); setKeyword(""); setRevision(0); onSearch({}); }}>Clear filters</button></div>
+     <div className="jobs-search-actions"><button className={`${siteStyles.button} button button-primary ${siteStyles.buttonPrimary}`} type="submit">Search jobs ↗</button><button className={`${siteStyles.button} button button-ghost ${siteStyles.buttonGhost}`} type="button" onClick={() => { if (pendingSearch.current) clearTimeout(pendingSearch.current); pendingSearch.current = null; formRef.current?.reset(); setKeyword(""); setRevision(0); setNearby(null); setResetCount(value => value + 1); onSearch({}); }}>Clear filters</button></div>
   </form>;
 }

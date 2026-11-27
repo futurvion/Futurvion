@@ -155,7 +155,18 @@ export default function PrivacyPage() {
               )
             }
           />
-
+          <h2>Nearby job search</h2>
+          <p>
+            You can select a city or explicitly allow the browser to share an
+            approximate location. Device coordinates are rounded before
+            transmission and used for the current job search. We do not
+            save your search origin to a profile, location history, browser
+            storage, or analytics. City lookup uses a bundled public dataset.
+            Your browser may use its own location provider if you grant
+            permission. Nearby distances are estimates to listed city centres.
+            Hosting and database logging must be configured to avoid capturing
+            search origins.
+          </p>
           <h2>Resume job matching</h2>
           <p>
             If you start a resume search, {site.name} processes the PDF or DOCX

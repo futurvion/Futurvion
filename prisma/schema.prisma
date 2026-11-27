@@ -90,6 +90,7 @@ model Job {
   qualifications String[] @default([])
   // Weighted document maintained by the SQL migration's trigger; never candidate data.
   searchDocument Unsupported("tsvector")?
+  locations JobLocation[]
   responsibilities String?
   benefits String?
   salaryMin Int?
@@ -120,6 +121,20 @@ model Job {
   @@index([companyName])
   @@index([location])
   @@index([workMode, employmentType])
+}
+
+model JobLocation {
+  id String @id @default(uuid()) @db.Uuid
+  jobId String @db.Uuid
+  job Job @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  cityKey String
+  city String
+  region String
+  countryCode String
+  latitude Float
+  longitude Float
+  @@unique([jobId, cityKey])
+  @@index([latitude, longitude])
 }
 
 model JobSyncRun {
