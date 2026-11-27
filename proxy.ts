@@ -2,13 +2,18 @@ import { NextResponse, type NextRequest } from "next/server";
 import { site } from "@/config/site";
 import { internalPrefix, isUtilityHost, utilityDestination } from "@/features/toolbox/routing";
 import { tools, utilityOrigin } from "@/features/toolbox/catalog";
+function requestHostname(request: NextRequest): string {
+    // Self-hosted `next start` builds `nextUrl` from its bind address (e.g. localhost:3000), so the
+    // public hostname is only available in the Host header the reverse proxy forwards. Vercel sets
+    // both. Forwarded-host headers are deliberately not trusted here.
+    const host = request.headers.get("host");
+    return (host || request.nextUrl.host).toLowerCase().replace(/:\d+$/, "");
+}
 export function proxy(request: NextRequest) {
     const canonicalUrl = new URL(site.url);
-    if (request.nextUrl.hostname === `www.${canonicalUrl.hostname}`) {
-        const destination = request.nextUrl.clone();
-        destination.protocol = canonicalUrl.protocol;
-        destination.hostname = canonicalUrl.hostname;
-        destination.port = canonicalUrl.port;
+    const hostname = requestHostname(request);
+    if (hostname === `www.${canonicalUrl.hostname}` || request.nextUrl.hostname === `www.${canonicalUrl.hostname}`) {
+        const destination = new URL(request.nextUrl.pathname + request.nextUrl.search, canonicalUrl);
         return NextResponse.redirect(destination, 308);
     }
     const path = request.nextUrl.pathname;

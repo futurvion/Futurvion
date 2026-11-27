@@ -4,6 +4,7 @@ import { Inter, Space_Grotesk } from "next/font/google";
 import { site } from "@/config/site";
 import { paletteCss } from "@/config/palette";
 import { websiteJsonLd } from "@/lib/seo";
+import { adsConfig } from "@/config/ads";
 import "./globals.css";
 
 const display = Space_Grotesk({
@@ -84,6 +85,13 @@ export const metadata: Metadata = {
     ? {
         google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
       }
+    : undefined,
+
+  // Lets Google verify/crawl the site for AdSense independent of the
+  // consent-gated ad-serving script, which only loads on /blog and /jobs
+  // after a visitor grants advertising consent.
+  other: adsConfig.publisherId
+    ? { "google-adsense-account": adsConfig.publisherId }
     : undefined,
 };
 

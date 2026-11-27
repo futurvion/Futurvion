@@ -1,10 +1,12 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { Worker } from "node:worker_threads";
 vi.mock("server-only", () => ({}));
 import { extractResumeText, resumeFormat, MAX_RESUME_BYTES } from "@/features/jobs/server/resume-document";
 import { syntheticPdf, syntheticDocx, syntheticZip } from "./helpers/resume-documents";
 
-describe("temporary document parsing", () => {
+afterEach(() => vi.restoreAllMocks());
+// Native worker startup shares CI resources; allow the real 12-second parser guard to finish.
+describe("temporary document parsing", { timeout: 15_000 }, () => {
   it("reads a valid PDF while preserving line boundaries and terminates its worker", async () => {
     const terminate = vi.spyOn(Worker.prototype, "terminate");
     const text = await extractResumeText(syntheticPdf(["Software Engineer", "Jan 2020 - Dec 2022", "React JS"]), "pdf");
@@ -30,6 +32,9 @@ describe("temporary document parsing", () => {
     const bomb = syntheticDocx(); const central = bomb.indexOf(Buffer.from([0x50, 0x4b, 0x01, 0x02]));
     bomb.writeUInt32LE(20 * 1024 * 1024, central + 24);
     await expect(extractResumeText(bomb, "docx")).rejects.toThrow();
+    const falseSize = syntheticDocx();
+    falseSize.writeUInt32LE(1, falseSize.indexOf(Buffer.from([0x50, 0x4b, 0x01, 0x02])) + 24);
+    await expect(extractResumeText(falseSize, "docx")).rejects.toThrow();
   });
   it("rejects a PDF that requires a password", async () => {
     await expect(extractResumeText(syntheticPdf(["Encrypted synthetic document"], true), "pdf")).rejects.toThrow("unencrypted");

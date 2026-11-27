@@ -10,6 +10,18 @@ describe("canonical host redirect", () => {
         expect(result.status).toBe(308);
         expect(result.headers.get("location")).toBe(`${site.url}/blog/what-are-ai-agents?ref=search`);
     });
+    it("redirects www behind a self-hosted reverse proxy, where nextUrl only has the bind address", () => {
+        const canonicalUrl = new URL(site.url);
+        const req = new NextRequest("http://localhost:3000/about?x=1", { headers: { host: `www.${canonicalUrl.host}` } });
+        const result = proxy(req);
+        expect(result.status).toBe(308);
+        expect(result.headers.get("location")).toBe(`${site.url}/about?x=1`);
+    });
+    it("does not redirect the canonical host or trust forwarded-host headers", () => {
+        const canonicalUrl = new URL(site.url);
+        const req = new NextRequest("http://localhost:3000/about", { headers: { host: canonicalUrl.host, "x-forwarded-host": `www.${canonicalUrl.host}` } });
+        expect(proxy(req).headers.get("x-middleware-next")).toBe("1");
+    });
 });
 describe("toolbox host boundary", () => {
     it("rewrites public tool URLs without adding auth or cookies", () => { for (const path of ["/", "/privacy", "/tools/json-formatter", "/tools/jwt-decoder", "/tools/cron-generator", "/tools/regex-tester", "/tools/base64", "/tools/api-response-formatter"]) {

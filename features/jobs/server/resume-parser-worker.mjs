@@ -10,14 +10,27 @@ function inspectDocx() {
   return new Promise((resolve, reject) => {
     yauzl.fromBuffer(bytes, { lazyEntries: true, validateEntrySizes: true }, (error, zip) => {
       if (error || !zip) return reject(new Error("Invalid archive"));
-      let entries = 0, expanded = 0, documentFound = false;
+      let entries = 0, expanded = 0, actualExpanded = 0, documentFound = false;
       zip.on("entry", entry => {
         entries++;
         expanded += entry.uncompressedSize;
         if (entry.fileName === "word/document.xml") documentFound = true;
         if (entries > 1000 || expanded > 10 * 1024 * 1024 || entry.fileName.includes("..") || entry.fileName.startsWith("/") || (entry.generalPurposeBitFlag & 1)) {
           zip.close(); reject(new Error("Invalid archive"));
-        } else zip.readEntry();
+        } else {
+          // Validate actual expansion too: archive headers may lie about member sizes.
+          zip.openReadStream(entry, (streamError, stream) => {
+            if (streamError || !stream) { zip.close(); reject(new Error("Invalid archive")); return; }
+            stream.on("data", chunk => {
+              actualExpanded += chunk.length;
+              if (actualExpanded > 10 * 1024 * 1024) {
+                stream.destroy(); zip.close(); reject(new Error("Archive expansion limit"));
+              }
+            });
+            stream.on("error", () => { zip.close(); reject(new Error("Invalid archive")); });
+            stream.on("end", () => zip.readEntry());
+          });
+        }
       });
       zip.on("end", () => documentFound ? resolve() : reject(new Error("Missing document")));
       zip.on("error", () => { zip.close(); reject(new Error("Invalid archive")); });

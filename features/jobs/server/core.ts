@@ -20,6 +20,9 @@ export const scheduleSchema = z.object({
 export const listQuery = z.object({
   q: z.string().trim().max(120).optional(), company: z.string().trim().max(100).optional(),
   location: z.string().trim().max(100).optional(), workMode: z.enum(["remote", "hybrid", "onsite"]).optional(),
+  nearLat: z.coerce.number().min(-90).max(90).optional(),
+  nearLng: z.coerce.number().min(-180).max(180).optional(),
+  radiusKm: z.coerce.number().int().min(5).max(250).optional(),
   employmentType: z.string().trim().max(60).optional(), category: z.string().trim().max(80).optional(),
   experienceLevel: z.string().trim().max(60).optional(), source: z.enum(["remotive", "greenhouse", "lever"]).optional(),
   postedWithin: z.coerce.number().int().min(1).max(365).optional(),
@@ -27,7 +30,10 @@ export const listQuery = z.object({
   salaryMax: z.coerce.number().int().min(0).max(100000000).optional(),
   salaryCurrency: z.enum(["USD", "EUR", "GBP", "INR", "CAD", "AUD"]).optional(),
   page: z.coerce.number().int().min(1).max(10000).default(1),
-}).refine(value => (value.salaryMin === undefined && value.salaryMax === undefined) || Boolean(value.salaryCurrency), { message: "Choose a currency for salary search" })
+}).refine(value => (value.nearLat === undefined) === (value.nearLng === undefined), { message: "Choose a complete nearby location" })
+  .refine(value => value.radiusKm === undefined || value.nearLat !== undefined, { message: "Choose a nearby location before a radius" })
+  .refine(value => value.nearLat === undefined || value.workMode !== "remote", { message: "Remote jobs do not have a nearby office distance" })
+  .refine(value => (value.salaryMin === undefined && value.salaryMax === undefined) || Boolean(value.salaryCurrency), { message: "Choose a currency for salary search" })
   .refine(value => value.salaryMin === undefined || value.salaryMax === undefined || value.salaryMin <= value.salaryMax, { message: "Minimum salary must not exceed maximum salary" });
 export type NormalizedJob = {
   externalJobId: string; title: string; companyName: string; companyLogoUrl?: string;
