@@ -9,6 +9,7 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  output: "standalone",
   serverExternalPackages: ["pdfjs-dist", "mammoth", "yauzl", "cities.json"],
   outputFileTracingIncludes: {
     "/api/jobs/match-resume": ["./features/jobs/server/resume-parser-worker.mjs", "./node_modules/pdfjs-dist/legacy/build/*.mjs", "./node_modules/mammoth/**/*", "./node_modules/yauzl/**/*"],

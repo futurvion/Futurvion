@@ -2,7 +2,13 @@
 
 ## Supported configuration evidenced by the repository
 
-`README.md` describes Vercel deployment with a PostgreSQL provider and Resend. The repo has no `vercel.json`, infrastructure-as-code, CI pipeline, health endpoint, or verified production deployment record. The code itself uses the standard Next.js build/start scripts (`npm run build`, `npm run start`) and Node.js runtime for both POST APIs. Vercel is a documented intended platform, not a live environment verified by this task.
+Production uses an AWS EC2 Linux server with nginx forwarding to a PM2-managed Node.js process. Vercel remains an alternative documented in `README.md`. The repository has no infrastructure-as-code or deployment pipeline; releases are performed over SSH. Production credentials remain on the server and must not be included in source archives.
+
+### AWS SSH releases
+
+`next.config.ts` enables `output: "standalone"`. Build on Linux with the committed lockfile and the existing production environment; do not deploy Windows `node_modules` or an incomplete standalone archive. In an isolated release directory, run `npm ci`, generate Prisma Client through postinstall, and run `npm run build`. Copy `public` and `.next/static` into `.next/standalone/public` and `.next/standalone/.next/static`. Preserve the production environment in the standalone directory with restrictive file permissions.
+
+Before activation, verify Prisma migration status against the intended production database and test the standalone server on a loopback-only alternate port. Check public routes, static assets, canonical redirects, city lookup, and the native resume parser worker. Keep the previous release directory intact. Activate the new release at the existing PM2 script path, restart `futurvion`, verify HTTPS through nginx, then run `pm2 save`. If activation fails, restore the previous directory at that script path and restart the process. This filesystem rollback does not undo database migrations; review any pending migrations separately before applying them.
 
 ## Build and release procedure
 
@@ -52,7 +58,7 @@ The implemented event names are `contact_click`, `contact_submit`, `service_view
 
 After deploy, load the public routes including service/work details and 404, inspect `/robots.txt` and `/sitemap.xml`, check the configured headers, then submit a test enquiry and verify both the lead row and email. Test analytics with consent allowed and declined. Check mobile and reduced-motion rendering. These are deployment checks, not results already obtained.
 
-Errors are currently written with `console.error`; retention, monitoring, alerting, backup/restore, health checks, and rollback steps are **not defined or verified** in code. Vercel's deployment history may provide rollback capability, but this repository does not configure or prove a rollback procedure. Define these operational controls before declaring production readiness.
+Errors are currently written with `console.error`; retention, monitoring, alerting, database backup/restore, and automated health checks remain unverified. The SSH release procedure above retains the previous application directory for filesystem rollback; it does not provide a database rollback or a tested disaster-recovery procedure.
 
 ## Developer toolbox custom domain (manual configuration still required)
 

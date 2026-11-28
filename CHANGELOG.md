@@ -4,6 +4,8 @@ Only changes supported by the repository or Git history are listed. Unreleased e
 
 ## Unreleased
 
+- Enabled standalone Linux builds for AWS SSH releases and documented isolated builds, candidate checks, PM2 activation, and filesystem rollback. Fixed the database DNS fallback to preserve successful all-address lookup results, preventing internal toolbox rewrites from hanging.
+
 - Fixed the `www` → apex canonical-host redirect for self-hosted deployments: `proxy.ts` now matches the forwarded `Host` header instead of only `request.nextUrl.hostname`, which `next start` sets to its bind address. Production previously served every `www.futurvion.in` page with HTTP 200, creating duplicate URLs reported by Search Console as "Alternate page with proper canonical tag".
 
 - Added nearby job discovery with manual city selection, permission-based device location, configurable radius, nearest-first pagination and approximate distance labels. Added public city-location storage/indexes, automatic sync refresh and invalidation, offline GeoNames lookup, a backfill command, and location privacy controls. Applied the migration and backfilled 139 jobs/224 city entries while preserving all 297 source jobs.
