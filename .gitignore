@@ -9,7 +9,7 @@
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
-
+futurvion-deploy*.tar.gz
 # testing
 /coverage
 

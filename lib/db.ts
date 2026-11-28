@@ -28,13 +28,13 @@ resolver.setServers(dns.getServers());
     family?: number,
   ) => void;
   systemLookup(hostname, lookupOptions, (systemError, address, family) => {
-    if (!systemError && typeof address === "string") {
+    if (!systemError) {
       lookupCallback(null, address, family);
       return;
     }
     resolver.resolve4(hostname, (resolverError, addresses) => {
-      if (resolverError || !addresses.length) {
-        lookupCallback(systemError);
+      if (resolverError || !addresses?.length) {
+        lookupCallback(systemError || resolverError || Object.assign(new Error("Database hostname did not resolve"), { code: "ENOTFOUND" }));
         return;
       }
       if (typeof lookupOptions === "object" && lookupOptions.all) {
